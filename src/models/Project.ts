@@ -17,4 +17,4 @@ const projectSchema = new mongoose.Schema<IProject>({
 	members: [{ userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, accreditation: { type: mongoose.Schema.Types.ObjectId, ref: 'Accreditation' } }],
 });
 
-export const Project = mongoose.models.Project || mongoose.model<IProject>('Project', projectSchema);
+export const ProjectModel = mongoose.models.Project || mongoose.model<IProject>('Project', projectSchema);

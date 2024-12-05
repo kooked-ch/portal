@@ -15,4 +15,4 @@ const accreditationSchema = new mongoose.Schema<IAccreditation>({
 	authorizations: { type: Object, required: true },
 });
 
-export const Accreditation = mongoose.models.Accreditation || mongoose.model<IAccreditation>('Accreditation', accreditationSchema);
+export const AccreditationModel = mongoose.models.Accreditation || mongoose.model<IAccreditation>('Accreditation', accreditationSchema);

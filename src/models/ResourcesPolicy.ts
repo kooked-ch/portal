@@ -15,4 +15,4 @@ const resourcesPolicySchema = new mongoose.Schema<IResourcesPolicy>({
 	authorizations: { type: Object, required: true },
 });
 
-export const ResourcesPolicy = mongoose.models.ResourcesPolicy || mongoose.model<IResourcesPolicy>('ResourcesPolicy', resourcesPolicySchema);
+export const ResourcesPolicyModel = mongoose.models.ResourcesPolicy || mongoose.model<IResourcesPolicy>('ResourcesPolicy', resourcesPolicySchema);

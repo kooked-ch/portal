@@ -10,8 +10,8 @@ export interface IUser extends Document {
 	password?: string;
 	twoFactorEnabled: boolean;
 	twoFactorSecret?: string;
-	accreditation: string;
-	resourcesPolicy: string;
+	accreditation: String;
+	resourcesPolicy: String;
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -27,4 +27,4 @@ const userSchema = new mongoose.Schema<IUser>({
 	resourcesPolicy: { type: mongoose.Schema.Types.ObjectId, ref: 'ResourcesPolicy' },
 });
 
-export const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+export const UserModel = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
