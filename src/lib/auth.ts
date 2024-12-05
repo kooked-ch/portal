@@ -1,16 +1,11 @@
-import NextAuth, { AdapterUser, NextAuthOptions, User as AuthUser, Session } from 'next-auth';
+import NextAuth, { NextAuthOptions, User as AuthUser, Session, User } from 'next-auth';
 import GitHubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
 import { v4 as uuid } from 'uuid';
 
-import { IUser, User } from '@/models/User';
+import { IUser, UserModel } from '@/models/User';
 import db from '@/lib/mongo';
 import { JWT } from 'next-auth/jwt';
-
-type EnhancedUser = {
-	role?: string;
-	isTwoFactorComplete?: boolean;
-};
 
 const getProviders = () => [
 	GitHubProvider({
@@ -23,10 +18,10 @@ const getProviders = () => [
 	}),
 ];
 
-const enhanceToken = async (token: any, user: AuthUser | AdapterUser) => {
+const enhanceToken = async ({ token, user }: { token: JWT; user: User }) => {
 	if (user) {
-		token.isTwoFactorComplete = (user as AdapterUser).isTwoFactorComplete || false;
-		token.role = 'role';
+		token.isTwoFactorComplete = (user as User).isTwoFactorComplete || false;
+		token.accreditation = (user as User).accreditation || null;
 	}
 	return token;
 };
@@ -34,19 +29,18 @@ const enhanceToken = async (token: any, user: AuthUser | AdapterUser) => {
 const enhanceSession = async ({ session, token }: { session: Session; token: JWT }) => {
 	try {
 		await db.connect();
-		const user = await User.findOne<IUser>({ email: session.user.email });
+		const user = await UserModel.findOne<IUser>({ email: session?.user?.email });
 
 		if (!user) {
 			return session;
 		}
 
-		const enhancedUser: EnhancedUser = {
+		session.user = {
 			...session.user,
-			role: user.role,
+			accreditation: user.accreditation.toString(),
 			isTwoFactorComplete: (token.isTwoFactorComplete as boolean) || false,
 		};
 
-		session.user = enhancedUser;
 		return session;
 	} catch (error) {
 		console.error('Session enhancement error:', error);
@@ -61,11 +55,11 @@ const handleSignIn = async ({ user, account, profile }: { user: AuthUser; accoun
 		const email = user.email;
 		if (!email) return false;
 
-		const existingUser = await User.findOne<IUser>({ email });
+		const existingUser = await UserModel.findOne<IUser>({ email });
 		if (existingUser) return true;
 
 		const provider = account?.provider || 'credentials';
-		const newUser = new User({
+		const newUser = new UserModel({
 			email,
 			id: uuid().toString().replaceAll('-', ''),
 			username: profile?.name || (profile as any)?.login || null,
@@ -83,11 +77,10 @@ const handleSignIn = async ({ user, account, profile }: { user: AuthUser; accoun
 	}
 };
 
-// NextAuth configuration
 export const authOptions: NextAuthOptions = {
 	pages: {
-		signIn: '/signin',
-		verifyRequest: '/signin',
+		signIn: '/login',
+		verifyRequest: '/login',
 	},
 	providers: getProviders(),
 	session: {
