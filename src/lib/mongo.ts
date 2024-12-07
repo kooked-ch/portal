@@ -116,7 +116,7 @@ async function connect() {
 	];
 
 	accreditations.forEach(async (accreditation) => {
-		await AccreditationModel.findOneAndReplace({ name: accreditation.name }, accreditation, { upsert: true, new: true });
+		await AccreditationModel.findOneAndReplace({ name: accreditation.name, accessLevel: accreditation.accessLevel }, accreditation, { upsert: true, new: true });
 	});
 
 	return cached.conn;
