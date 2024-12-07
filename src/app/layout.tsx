@@ -14,13 +14,10 @@ export const metadata: Metadata = {
 	applicationName: 'Kooked Portal',
 };
 
-export default function RootLayout({
-	children,
-	session,
-}: Readonly<{
-	children: React.ReactNode;
-	session: Session;
-}>) {
+type RootLayoutProps = any;
+
+export default function RootLayout(props: RootLayoutProps) {
+	const { children, session } = props;
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<head />
