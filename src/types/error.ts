@@ -1,4 +1,4 @@
 export interface ErrorType {
-	message: string;
+	message: object | string;
 	status: number;
 }
