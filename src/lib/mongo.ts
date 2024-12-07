@@ -73,6 +73,46 @@ async function connect() {
 				projects: [],
 			},
 		},
+		{
+			name: 'Owner',
+			description: 'Has full control over the project and can manage all aspects.',
+			slug: 'own',
+			accessLevel: 1,
+			authorizations: {
+				level: 0,
+				projects: ['read', 'update', 'delete'],
+			},
+		},
+		{
+			name: 'Administrator',
+			description: 'Can manage most project resources and perform updates.',
+			slug: 'adm',
+			accessLevel: 1,
+			authorizations: {
+				level: 1,
+				projects: ['read', 'update'],
+			},
+		},
+		{
+			name: 'Project Member',
+			description: 'Has permissions to read and collaborate on the project.',
+			slug: 'mem',
+			accessLevel: 1,
+			authorizations: {
+				level: 2,
+				projects: ['read'],
+			},
+		},
+		{
+			name: 'Guest',
+			description: 'Has minimal access for viewing project information only.',
+			slug: 'gst',
+			accessLevel: 1,
+			authorizations: {
+				level: 3,
+				projects: ['read'],
+			},
+		},
 	];
 
 	accreditations.forEach(async (accreditation) => {
