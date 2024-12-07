@@ -26,19 +26,31 @@ const enhanceToken = async ({ token, user }: { token: JWT; user: User }) => {
 	return token;
 };
 
-const enhanceSession = async ({ session, token }: { session: Session; token: JWT }) => {
+const enhanceSession = async ({ session, token }: { session: Session; token: JWT }): Promise<Session> => {
 	try {
 		await db.connect();
-		const user = await UserModel.findOne<IUser>({ email: session?.user?.email });
+
+		const user = await UserModel.findOne<IUser>({ email: session?.user?.email }).populate<{ accreditation: IAccreditation }>('accreditation', '-slug -accessLevel');
 
 		if (!user) {
 			return session;
 		}
 
+		const accreditation = user.accreditation
+			? {
+					...user.accreditation.toObject(),
+					_id: undefined,
+					authorizations: {
+						...user.accreditation.authorizations,
+						level: undefined,
+					},
+			  }
+			: undefined;
+
 		session.user = {
 			...session.user,
-			accreditation: user.accreditation ? user.accreditation.toString() : 'denied',
-			isTwoFactorComplete: (token.isTwoFactorComplete as boolean) || false,
+			accreditation: accreditation || null,
+			isTwoFactorComplete: Boolean(token.isTwoFactorComplete),
 		};
 
 		return session;
