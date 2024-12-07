@@ -61,6 +61,16 @@ async function connect() {
 				projects: ['create'],
 			},
 		},
+		{
+			name: 'Guest User',
+			description: 'Minimal permissions for read-only access.',
+			slug: 'gst',
+			accessLevel: 0,
+			authorizations: {
+				level: 3,
+				projects: [],
+			},
+		},
 	];
 
 	accreditations.forEach(async (accreditation) => {
