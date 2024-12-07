@@ -22,7 +22,6 @@ const getProviders = () => [
 const enhanceToken = async ({ token, user }: { token: JWT; user: User }): Promise<JWT> => {
 	if (user) {
 		token.isTwoFactorComplete = user.isTwoFactorComplete ?? false;
-		token.accreditation = user.accreditation ?? null;
 	}
 	return token;
 };
@@ -47,7 +46,6 @@ const enhanceSession = async ({ session, token }: { session: Session; token: JWT
 
 		session.user = {
 			...session.user,
-			accreditation: accreditation ?? null,
 			isTwoFactorComplete: Boolean(token.isTwoFactorComplete),
 		};
 
@@ -90,29 +88,21 @@ const handleSignIn = async ({ user, account, profile }: { user: User; account: a
 	}
 };
 
-export const getSession = async (): Promise<Session> => {
+export const getUser = async (): Promise<User> => {
 	const session = await getServerSession();
 
 	await db.connect();
 	const user = await UserModel.findOne<IUser>({ email: session?.user?.email }).populate<{ accreditation: IAccreditation }>('accreditation', '-slug -accessLevel').exec();
 
 	return {
-		...session,
-		expires: session?.expires ?? '',
-		user: {
-			email: session?.user?.email ?? '',
-			name: user?.name ?? '',
-			username: user?.username ?? '',
-			image: user?.image ?? '',
-			accreditation: {
-				name: user?.accreditation?.name ?? '',
-				description: user?.accreditation?.description ?? '',
-				authorizations: {
-					...user?.accreditation?.authorizations,
-				},
-			},
-		},
+		email: session?.user?.email ?? '',
+		name: user?.name ?? '',
+		id: user?._id.toString() ?? '',
+		username: user?.username ?? '',
+		image: user?.image ?? '',
 	};
+};
+
 };
 
 export const authOptions: NextAuthOptions = {
