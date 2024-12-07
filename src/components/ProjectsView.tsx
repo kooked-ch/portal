@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/ca
 import { ProjectType } from '@/types/project';
 import CreateProjectForm from './forms/CreateProjectForm';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function ProjectsView({ projects }: { projects: ProjectType[] }) {
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -46,7 +47,9 @@ export default function ProjectsView({ projects }: { projects: ProjectType[] }) 
 					<TableBody>
 						{projects.map((project, index) => (
 							<TableRow key={index}>
-								<TableCell className="font-medium">{project.name}</TableCell>
+								<TableCell className="font-medium">
+									<Link href={project.slug}>{project.name}</Link>
+								</TableCell>
 								<TableCell>{project.description}</TableCell>
 								<TableCell>{new Date(project.createdAt).toLocaleDateString()}</TableCell>
 							</TableRow>
@@ -56,12 +59,14 @@ export default function ProjectsView({ projects }: { projects: ProjectType[] }) 
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{projects.map((project, index) => (
-						<Card key={index} className="hover:shadow-lg transition-shadow">
-							<CardHeader>
-								<CardTitle className="text-xl">{project.name}</CardTitle>
-								<CardDescription className="mt-2">{project.description}</CardDescription>
-							</CardHeader>
-						</Card>
+						<Link href={project.slug} key={index}>
+							<Card className="hover:shadow-lg transition-shadow">
+								<CardHeader>
+									<CardTitle className="text-xl">{project.name}</CardTitle>
+									<CardDescription className="mt-2">{project.description}</CardDescription>
+								</CardHeader>
+							</Card>
+						</Link>
 					))}
 				</div>
 			)}
