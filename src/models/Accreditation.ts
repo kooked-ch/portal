@@ -4,6 +4,7 @@ export interface IAccreditation extends Document {
 	_id: string;
 	name: string;
 	description: string;
+	slug: string;
 	accessLevel: number;
 	authorizations: object;
 }
@@ -12,6 +13,7 @@ const accreditationSchema = new mongoose.Schema<IAccreditation>({
 	name: { type: String, required: true },
 	description: { type: String, required: true },
 	accessLevel: { type: Number, required: true },
+	slug: { type: String, required: true },
 	authorizations: { type: Object, required: true },
 });
 
