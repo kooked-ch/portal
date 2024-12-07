@@ -13,7 +13,6 @@ export interface IProject extends Document {
 const projectSchema = new mongoose.Schema<IProject>({
 	name: { type: String, required: true },
 	description: { type: String, required: true },
-	owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 	members: [{ userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, accreditation: { type: mongoose.Schema.Types.ObjectId, ref: 'Accreditation' } }],
 });
 
