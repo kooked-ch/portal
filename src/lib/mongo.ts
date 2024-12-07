@@ -1,3 +1,4 @@
+import { AccreditationModel } from '@/models/Accreditation';
 import mongoose from 'mongoose';
 
 const MONGO_URI = `mongodb://${process.env.MONGO_USER_USERNAME}:${process.env.MONGO_USER_PASSWORD}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT || 27017}/${process.env.MONGO_DATABASE || 'portalDB'}`;
@@ -26,6 +27,46 @@ async function connect() {
 	}
 
 	cached.conn = await cached.promise;
+
+	const accreditations = [
+		{
+			name: 'Super Administrator',
+			description: 'Has full access to all system features and settings.',
+			slug: 'sadm',
+			accessLevel: 0,
+			authorizations: {
+				level: 0,
+				projects: ['create', 'read', 'update', 'delete'],
+				users: ['read', 'update'],
+			},
+		},
+		{
+			name: 'Administrator',
+			description: 'Has extensive permissions to manage most system resources.',
+			slug: 'adm',
+			accessLevel: 0,
+			authorizations: {
+				level: 1,
+				projects: ['create', 'read', 'update', 'delete'],
+				users: ['read', 'update'],
+			},
+		},
+		{
+			name: 'Standard User',
+			description: 'Limited permissions for basic functionalities.',
+			slug: 'std',
+			accessLevel: 0,
+			authorizations: {
+				level: 2,
+				projects: ['create'],
+			},
+		},
+	];
+
+	accreditations.forEach(async (accreditation) => {
+		await AccreditationModel.findOneAndReplace({ name: accreditation.name }, accreditation, { upsert: true, new: true });
+	});
+
 	return cached.conn;
 }
 
