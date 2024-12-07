@@ -37,6 +37,7 @@ async function connect() {
 			authorizations: {
 				level: 0,
 				projects: ['create', 'read', 'update', 'delete'],
+				apps: ['create', 'read', 'update', 'delete'],
 				users: ['read', 'update'],
 			},
 		},
@@ -48,6 +49,7 @@ async function connect() {
 			authorizations: {
 				level: 1,
 				projects: ['create', 'read', 'update', 'delete'],
+				apps: ['create', 'read', 'update', 'delete'],
 				users: ['read', 'update'],
 			},
 		},
