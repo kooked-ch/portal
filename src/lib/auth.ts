@@ -6,6 +6,7 @@ import { v4 as uuid } from 'uuid';
 import { IUser, UserModel } from '@/models/User';
 import db from '@/lib/mongo';
 import { JWT } from 'next-auth/jwt';
+import { AccreditationModel, IAccreditation } from '@/models/Accreditation';
 
 const getProviders = () => [
 	GitHubProvider({
@@ -18,7 +19,7 @@ const getProviders = () => [
 	}),
 ];
 
-const enhanceToken = async ({ token, user }: { token: JWT; user: User }) => {
+const enhanceToken = async ({ token, user }: { token: JWT; user: User }): Promise<JWT> => {
 	if (user) {
 		token.isTwoFactorComplete = (user as User).isTwoFactorComplete || false;
 		token.accreditation = (user as User).accreditation || null;
