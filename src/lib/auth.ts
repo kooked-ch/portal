@@ -1,12 +1,12 @@
-import NextAuth, { NextAuthOptions, User as AuthUser, Session, User } from 'next-auth';
+import NextAuth, { NextAuthOptions, User, Session } from 'next-auth';
 import GitHubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
 import { v4 as uuid } from 'uuid';
-
-import { IUser, UserModel } from '@/models/User';
 import db from '@/lib/mongo';
-import { JWT } from 'next-auth/jwt';
+import { IUser, UserModel } from '@/models/User';
 import { AccreditationModel, IAccreditation } from '@/models/Accreditation';
+import { JWT } from 'next-auth/jwt';
+import { getServerSession } from 'next-auth/next';
 
 const getProviders = () => [
 	GitHubProvider({
@@ -21,8 +21,8 @@ const getProviders = () => [
 
 const enhanceToken = async ({ token, user }: { token: JWT; user: User }): Promise<JWT> => {
 	if (user) {
-		token.isTwoFactorComplete = (user as User).isTwoFactorComplete || false;
-		token.accreditation = (user as User).accreditation || null;
+		token.isTwoFactorComplete = user.isTwoFactorComplete ?? false;
+		token.accreditation = user.accreditation ?? null;
 	}
 	return token;
 };
@@ -30,12 +30,9 @@ const enhanceToken = async ({ token, user }: { token: JWT; user: User }): Promis
 const enhanceSession = async ({ session, token }: { session: Session; token: JWT }): Promise<Session> => {
 	try {
 		await db.connect();
+		const user = await UserModel.findOne<IUser>({ email: session.user?.email }).populate<{ accreditation: IAccreditation }>('accreditation', '-slug -accessLevel').exec();
 
-		const user = await UserModel.findOne<IUser>({ email: session?.user?.email }).populate<{ accreditation: IAccreditation }>('accreditation', '-slug -accessLevel');
-
-		if (!user) {
-			return session;
-		}
+		if (!user) return session;
 
 		const accreditation = user.accreditation
 			? {
@@ -50,48 +47,72 @@ const enhanceSession = async ({ session, token }: { session: Session; token: JWT
 
 		session.user = {
 			...session.user,
-			accreditation: accreditation || null,
+			accreditation: accreditation ?? null,
 			isTwoFactorComplete: Boolean(token.isTwoFactorComplete),
 		};
 
 		return session;
 	} catch (error) {
-		console.error('Session enhancement error:', error);
+		console.error('Error enhancing session:', error);
 		return session;
 	}
 };
 
-const handleSignIn = async ({ user, account, profile }: { user: AuthUser; account: any; profile?: any }): Promise<boolean> => {
+const handleSignIn = async ({ user, account, profile }: { user: User; account: any; profile?: any }): Promise<boolean> => {
 	try {
 		await db.connect();
-
 		const email = user.email;
 		if (!email) return false;
 
-		const provider = account?.provider || 'credentials';
-		const defaultAccreditation = await AccreditationModel.findOne({ slug: 'std', accessLevel: 0 });
+		const provider = account?.provider ?? 'credentials';
+		const defaultAccreditation = await AccreditationModel.findOne({ slug: 'std', accessLevel: 0 }).exec();
 
 		const updatedUser = await UserModel.findOneAndReplace(
 			{ email },
 			{
 				email,
-				id: uuid().replaceAll('-', ''),
-				username: profile?.name || profile?.login || null,
-				image: user.image || profile?.image || null,
+				id: uuid().replace(/-/g, ''),
+				username: profile?.name ?? profile?.login ?? null,
+				image: user.image ?? profile?.image ?? null,
 				provider,
-				name: profile?.name || user.name || profile?.login || null,
+				name: profile?.name ?? user.name ?? profile?.login ?? null,
 				verified: ['google', 'github'].includes(provider),
-				accreditation: defaultAccreditation?._id || null,
+				accreditation: defaultAccreditation?._id ?? null,
 			},
 			{ upsert: true, new: true }
-		);
+		).exec();
 
-		console.log('User handled successfully:', updatedUser);
+		console.log('User successfully handled:', updatedUser);
 		return true;
 	} catch (error) {
-		console.error('Sign-in error:', error);
+		console.error('Error during sign-in:', error);
 		return false;
 	}
+};
+
+export const getSession = async (): Promise<Session> => {
+	const session = await getServerSession();
+
+	await db.connect();
+	const user = await UserModel.findOne<IUser>({ email: session?.user?.email }).populate<{ accreditation: IAccreditation }>('accreditation', '-slug -accessLevel').exec();
+
+	return {
+		...session,
+		expires: session?.expires ?? '',
+		user: {
+			email: session?.user?.email ?? '',
+			name: user?.name ?? '',
+			username: user?.username ?? '',
+			image: user?.image ?? '',
+			accreditation: {
+				name: user?.accreditation?.name ?? '',
+				description: user?.accreditation?.description ?? '',
+				authorizations: {
+					...user?.accreditation?.authorizations,
+				},
+			},
+		},
+	};
 };
 
 export const authOptions: NextAuthOptions = {
