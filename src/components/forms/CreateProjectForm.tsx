@@ -72,12 +72,12 @@ export default function CreateProjectForm({ onProjectCreated }: { onProjectCreat
 					<Label htmlFor="name" className="mb-2">
 						Name
 					</Label>
-					<Input id="name" />
+					<Input id="name" {...register('name')} />
 					{errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
 					<Label htmlFor="description" className="mt-3 mb-2">
 						Description
 					</Label>
-					<Input id="description" />
+					<Input id="description" {...register('description')} />
 					{errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
 
 					<DialogFooter className="mt-4">
