@@ -37,7 +37,7 @@ const enhanceSession = async ({ session, token }: { session: Session; token: JWT
 
 		session.user = {
 			...session.user,
-			accreditation: user.accreditation.toString(),
+			accreditation: user.accreditation ? user.accreditation.toString() : 'denied',
 			isTwoFactorComplete: (token.isTwoFactorComplete as boolean) || false,
 		};
 
