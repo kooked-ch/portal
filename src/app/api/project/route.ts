@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
 	try {
 		const user = await getUser();
 
-		if (!user || !(await checkAccreditation('project:0:create'))) {
+		if (!user || !(await checkAccreditation('projects:0:create'))) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
 		const project = await createProject(user.id, { name, description });
 
-		return NextResponse.json({ message: project.message }, { status: project.status });
+		return NextResponse.json({ error: project.message }, { status: project.status });
 	} catch (error) {
 		console.error('Error creating project:', error);
 		return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
