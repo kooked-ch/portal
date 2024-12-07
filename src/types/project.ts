@@ -5,6 +5,10 @@ export interface ProjectType {
 	description: string;
 	slug: string;
 	createdAt: Date;
+	members: {
+		username: string;
+		image: string;
+	}[];
 }
 
 export const projectSchema = z.object({

@@ -51,7 +51,7 @@ export async function getProjects(userId: string): Promise<ProjectType[]> {
 			description: project.description,
 			slug: project.slug,
 			createdAt: project.createdAt,
-			users: project.members.map((member) => ({
+			members: project.members.map((member) => ({
 				username: member.userId?.username ?? 'Unknown',
 				image: member.userId?.image ?? 'default-image.png',
 			})),
