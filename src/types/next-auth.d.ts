@@ -7,8 +7,14 @@ declare module 'next-auth' {
 			name?: string | null;
 			email?: string | null;
 			image?: string | null;
-			accreditation: object;
-			isTwoFactorComplete: boolean;
+			accreditation: {
+				name: string;
+				description: string;
+				authorizations: {
+					[key: string]: [];
+				};
+			};
+			isTwoFactorComplete?: boolean;
 		};
 	}
 	interface User {
