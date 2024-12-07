@@ -106,12 +106,10 @@ export const getUser = async (): Promise<User> => {
 
 export const checkAccreditation = async (request: string, id?: string): Promise<Boolean> => {
 	const session = await getServerSession();
-
 	if (!session) return false;
 
 	await db.connect();
 	const user = await UserModel.findOne<IUser>({ email: session?.user?.email }).populate<{ accreditation: IAccreditation }>('accreditation', '-slug -accessLevel').exec();
-
 	if (!user) return false;
 
 	const [access, accessLevel, action]: [string, number, string] = request.split(':') as [string, number, string];

@@ -34,6 +34,7 @@ export default function ProjectsView({ projects }: { projects: ProjectType[] }) 
 					<CreateProjectForm onProjectCreated={handleProjectCreated} />
 				</div>
 			</div>
+			{JSON.stringify(projects)}
 
 			{viewMode === 'list' ? (
 				<Table>
