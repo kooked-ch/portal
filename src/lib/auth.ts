@@ -60,28 +60,32 @@ const enhanceSession = async ({ session, token }: { session: Session; token: JWT
 	}
 };
 
-const handleSignIn = async ({ user, account, profile }: { user: AuthUser; account: any; profile?: any }) => {
+const handleSignIn = async ({ user, account, profile }: { user: AuthUser; account: any; profile?: any }): Promise<boolean> => {
 	try {
 		await db.connect();
 
 		const email = user.email;
 		if (!email) return false;
 
-		const existingUser = await UserModel.findOne<IUser>({ email });
-		if (existingUser) return true;
-
 		const provider = account?.provider || 'credentials';
-		const newUser = new UserModel({
-			email,
-			id: uuid().toString().replaceAll('-', ''),
-			username: profile?.name || (profile as any)?.login || null,
-			image: user.image || profile?.image || null,
-			provider,
-			name: profile?.name || user.name || (profile as any)?.login || null,
-			verified: ['google', 'github'].includes(provider),
-		});
+		const defaultAccreditation = await AccreditationModel.findOne({ slug: 'std', accessLevel: 0 });
 
-		await newUser.save();
+		const updatedUser = await UserModel.findOneAndReplace(
+			{ email },
+			{
+				email,
+				id: uuid().replaceAll('-', ''),
+				username: profile?.name || profile?.login || null,
+				image: user.image || profile?.image || null,
+				provider,
+				name: profile?.name || user.name || profile?.login || null,
+				verified: ['google', 'github'].includes(provider),
+				accreditation: defaultAccreditation?._id || null,
+			},
+			{ upsert: true, new: true }
+		);
+
+		console.log('User handled successfully:', updatedUser);
 		return true;
 	} catch (error) {
 		console.error('Sign-in error:', error);
