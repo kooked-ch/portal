@@ -35,6 +35,9 @@ export async function createProject(userId: string, project: { name: string; des
 		return { message: 'Project created successfully', status: 201 };
 	} catch (error) {
 		console.error('Error creating project:', error);
-		return { message: 'An unexpected error occurred', status: 500 };
+		return { message: { name: { message: 'An unexpected error occurred' } }, status: 500 };
+	}
+}
+
 	}
 }
