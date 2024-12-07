@@ -10,7 +10,7 @@ import type { User } from 'next-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
-export function UserDropdown({ session }: { session: Session | null }) {
+export function UserDropdown({ user }: { user: User }) {
 	async function signOutHandler() {
 		signOut();
 	}
@@ -19,9 +19,9 @@ export function UserDropdown({ session }: { session: Session | null }) {
 		<DropdownMenu>
 			<DropdownMenuTrigger className="rounded-full ring-offset-background focus-visible:outline-none">
 				<Avatar className="border shadow-sm w-8 h-8 lg:w-10 lg:h-10">
-					<AvatarImage src={session?.user?.image ?? undefined} alt={session?.user?.name ?? 'Guest User'} />
+					<AvatarImage src={user.image} alt={user.name} />
 					<AvatarFallback>
-						{session?.user?.name
+						{user.name
 							?.split(' ')
 							.map((word) => word.charAt(0).toUpperCase())
 							.join('')}
@@ -31,17 +31,17 @@ export function UserDropdown({ session }: { session: Session | null }) {
 
 			<DropdownMenuContent side="bottom" align="end" className="w-[200px] *:cursor-pointer">
 				<DropdownMenuLabel className="flex flex-col">
-					<span title={session?.user?.name ?? undefined} className="truncate capitalize">
-						{session?.user.name || session?.user.username}
+					<span title={user.name} className="truncate capitalize">
+						{user.name || user.username}
 					</span>
-					<span title={session?.user.accreditation.name ?? undefined} className="truncate text-sm font-normal text-muted-foreground">
-						{session?.user.accreditation.name}
+					<span title={user.email} className="truncate text-sm font-normal text-muted-foreground">
+						{user.email}
 					</span>
 				</DropdownMenuLabel>
 
 				<DropdownMenuSeparator />
 
-				<DropdownMenuItem disabled={session === null} asChild>
+				<DropdownMenuItem asChild>
 					<Link href="/me">
 						<User2 size={16} className="mr-2" />
 						My Profile
@@ -81,15 +81,11 @@ export function UserDropdown({ session }: { session: Session | null }) {
 					</DropdownMenuPortal>
 				</DropdownMenuSub> */}
 
-				{session != null && (
-					<>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem onClick={signOutHandler}>
-							<LogOut size={16} className="mr-2" />
-							Log Out
-						</DropdownMenuItem>
-					</>
-				)}
+				<DropdownMenuSeparator />
+				<DropdownMenuItem onClick={signOutHandler}>
+					<LogOut size={16} className="mr-2" />
+					Log Out
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
