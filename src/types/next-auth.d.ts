@@ -7,13 +7,7 @@ declare module 'next-auth' {
 			name?: string | null;
 			email?: string | null;
 			image?: string | null;
-			accreditation: {
-				name: string;
-				description: string;
-				authorizations: {
-					[key: string]: [];
-				};
-			};
+			id: string;
 			isTwoFactorComplete?: boolean;
 		};
 	}
@@ -22,7 +16,6 @@ declare module 'next-auth' {
 		name: string;
 		email: string;
 		image?: string;
-		accreditation?: string;
-		isTwoFactorComplete: boolean;
+		isTwoFactorComplete?: boolean;
 	}
 }
