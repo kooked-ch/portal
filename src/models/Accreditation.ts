@@ -6,7 +6,9 @@ export interface IAccreditation extends Document {
 	description: string;
 	slug: string;
 	accessLevel: number;
-	authorizations: object;
+	authorizations: {
+		[key: string]: string[];
+	};
 }
 
 const accreditationSchema = new mongoose.Schema<IAccreditation>({
