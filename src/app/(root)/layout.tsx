@@ -1,15 +1,19 @@
 import { ReactNode } from 'react';
 import React from 'react';
-import { Session } from 'next-auth';
+import { User } from 'next-auth';
 import { Header } from '@/components/header';
-import { getSession } from '@/lib/auth';
+import { getUser } from '@/lib/auth';
+import { ProjectsType } from '@/types/project';
+import { getProjects } from '@/lib/project';
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-	const session: Session = await getSession();
+	const user: User = await getUser();
+	const projects: ProjectsType[] | null = await getProjects(user.id);
+
 
 	return (
 		<main>
-			<Header session={session} />
+			<Header user={user} projects={projects} />
 			{children}
 		</main>
 	);
