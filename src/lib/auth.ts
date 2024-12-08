@@ -112,15 +112,15 @@ export const checkAccreditation = async (request: string, id?: string): Promise<
 	const user = await UserModel.findOne<IUser>({ email: session?.user?.email }).populate<{ accreditation: IAccreditation }>('accreditation', '-slug -accessLevel').exec();
 	if (!user) return false;
 
-	const [access, accessLevel, action]: [string, number, string] = request.split(':') as [string, number, string];
+	const [access, accessLevel, action]: string[] = request.split(':');
 
 	const { authorizations } = user.accreditation;
 	if (authorizations && authorizations[access] && authorizations[access].includes(action)) {
 		return true;
 	}
 
-	if (accessLevel === 1) {
-		const project = await ProjectModel.findOne<IProject>({ _id: id }).exec();
+	if (accessLevel === '1') {
+		const project = await ProjectModel.findOne<IProject>({ slug: id }).exec();
 		if (!project) return false;
 
 		const member = project.members.find((member) => member.userId.toString() === user._id.toString());
