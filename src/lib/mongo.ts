@@ -91,6 +91,7 @@ async function connect() {
 			authorizations: {
 				level: 1,
 				projects: ['read', 'update'],
+				
 			},
 		},
 		{

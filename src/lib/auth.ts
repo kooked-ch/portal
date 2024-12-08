@@ -81,7 +81,6 @@ const handleSignIn = async ({ user, account, profile }: { user: User; account: a
 			{ upsert: true, new: true }
 		).exec();
 
-		console.log('User successfully handled:', updatedUser);
 		return true;
 	} catch (error) {
 		console.error('Error during sign-in:', error);

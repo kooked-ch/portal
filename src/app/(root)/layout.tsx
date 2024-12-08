@@ -10,7 +10,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 	const user: User = await getUser();
 	const projects: ProjectsType[] | null = await getProjects(user.id);
 
-
 	return (
 		<main>
 			<Header user={user} projects={projects} />
