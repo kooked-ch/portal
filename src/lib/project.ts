@@ -2,7 +2,7 @@ import { AccreditationModel } from '@/models/Accreditation';
 import { IProject, ProjectModel } from '@/models/Project';
 import { ErrorType } from '@/types/error';
 import { k3sApi } from './api';
-import { ProjectType } from '@/types/project';
+import { ProjectsType } from '@/types/project';
 import { checkAccreditation } from './auth';
 
 export async function createProject(userId: string, project: { name: string; description: string }): Promise<ErrorType> {
@@ -40,7 +40,7 @@ export async function createProject(userId: string, project: { name: string; des
 	}
 }
 
-export async function getProjects(userId: string): Promise<ProjectType[]> {
+export async function getProjects(userId: string): Promise<ProjectsType[]> {
 	try {
 		const hasAccessAll = await checkAccreditation('projects:0:read');
 		const filter = hasAccessAll ? {} : { 'members.userId': userId };

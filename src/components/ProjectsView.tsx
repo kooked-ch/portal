@@ -5,13 +5,13 @@ import { Ellipsis, LayoutGrid, List, UserRound } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ProjectType } from '@/types/project';
+import { ProjectsType } from '@/types/project';
 import CreateProjectForm from './forms/CreateProjectForm';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export default function ProjectsView({ projects }: { projects: ProjectType[] }) {
+export default function ProjectsView({ projects }: { projects: ProjectsType[] }) {
 	const router = useRouter();
 
 	const handleProjectCreated = () => {

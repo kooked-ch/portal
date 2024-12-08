@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export interface ProjectType {
+export interface ProjectsType {
 	name: string;
 	description: string;
 	slug: string;
