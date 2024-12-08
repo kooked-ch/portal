@@ -17,7 +17,7 @@ export interface AppType {
 		url: string;
 		image: string;
 		version: string;
-	};
+	} | null;
 	replicas: number;
 	domains: {
 		url: string;
@@ -37,9 +37,5 @@ export interface AppType {
 			key: string;
 			value: string;
 		}[];
-	}[];
-	members: {
-		username: string;
-		image: string;
 	}[];
 }
