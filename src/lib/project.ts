@@ -1,8 +1,8 @@
 import { AccreditationModel } from '@/models/Accreditation';
 import { IProject, ProjectModel } from '@/models/Project';
 import { ErrorType } from '@/types/error';
-import { k3sApi } from './api';
-import { ProjectsType } from '@/types/project';
+import { customObjectsApi, k3sApi } from './api';
+import { ProjectsType, ProjectType } from '@/types/project';
 import { checkAccreditation } from './auth';
 
 export async function createProject(userId: string, project: { name: string; description: string }): Promise<ErrorType> {
@@ -61,5 +61,67 @@ export async function getProjects(userId: string): Promise<ProjectsType[] | null
 		return null;
 	}
 }
+
+export async function getProject(slug: string): Promise<ProjectType | null> {
+	try {
+		const hasAccess = await checkAccreditation('projects:1:read', slug);
+		if (!hasAccess) {
+			return null;
+		}
+
+		const project = await ProjectModel.findOne<IProject>({ slug });
+		if (!project) {
+			return null;
+		}
+
+		const apps = await customObjectsApi.listNamespacedCustomObject('kooked.ch', 'v1', project.slug, 'kookedapps');
+
+		const getRepository = async (url: string) => {
+			if (!url) return null;
+
+			try {
+				const repoPath = url.replace('https://github.com/', '').replace(/\/$/, '');
+				const headers = { Authorization: `token ${process.env.GITHUB_TOKEN}` };
+
+				const [repo, release] = await Promise.all([
+					fetch(`https://api.github.com/repos/${repoPath}`, { headers }).then((res) => (res.ok ? res.json() : null)),
+					fetch(`https://api.github.com/repos/${repoPath}/releases/latest`, { headers })
+						.then((res) => (res.ok ? res.json() : null))
+						.catch(() => null),
+				]);
+
+				if (!repo || !repo.html_url || !repo.owner?.avatar_url) {
+					console.warn(`Repository not found or incomplete: ${url}`);
+					return null;
+				}
+
+				return {
+					url: repo.html_url,
+					image: repo.owner.avatar_url,
+					version: release?.name || repo.default_branch,
+				};
+			} catch (error: any) {
+				console.error(`Error fetching repository [${url}]:`, error.message);
+				return null;
+			}
+		};
+
+		return {
+			name: project.name,
+			description: project.description,
+			slug: project.slug,
+			createdAt: project.createdAt,
+			apps: await Promise.all(
+				apps.body.items.map(async (app: any) => ({
+					name: app.metadata.name,
+					description: app.metadata.annotations?.description || '',
+					repository: await getRepository(app.metadata.annotations?.repository || ''),
+					createdAt: app.metadata.creationTimestamp,
+				}))
+			),
+		};
+	} catch (error: unknown) {
+		console.error('Error fetching project:', (error as Error).message);
+		return null;
 	}
 }
