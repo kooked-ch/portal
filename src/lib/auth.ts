@@ -133,6 +133,22 @@ export const checkAccreditation = async (request: string, id?: string): Promise<
 		if (projectAuthorizations && projectAuthorizations[access] && projectAuthorizations[access].includes(action)) {
 			return true;
 		}
+	} else if (accessLevel === '2') {
+		if (!id) return false;
+		const [projectName, appName] = id.split('/');
+		const project = await ProjectModel.findOne<IProject>({ slug: projectName }).exec();
+		if (!project) return false;
+
+		const member = project.members.find((member) => member.userId.toString() === user._id.toString());
+		if (!member) return false;
+
+		const projectAccreditation = await AccreditationModel.findOne({ _id: member.accreditation }).exec();
+		if (!projectAccreditation) return false;
+
+		const { authorizations: projectAuthorizations } = projectAccreditation;
+		if (projectAuthorizations && projectAuthorizations[access] && projectAuthorizations[access].includes(action)) {
+			return true;
+		}
 	}
 
 	return false;
