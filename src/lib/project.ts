@@ -40,7 +40,7 @@ export async function createProject(userId: string, project: { name: string; des
 	}
 }
 
-export async function getProjects(userId: string): Promise<ProjectsType[]> {
+export async function getProjects(userId: string): Promise<ProjectsType[] | null> {
 	try {
 		const hasAccessAll = await checkAccreditation('projects:0:read');
 		const filter = hasAccessAll ? {} : { 'members.userId': userId };
@@ -58,6 +58,8 @@ export async function getProjects(userId: string): Promise<ProjectsType[]> {
 		}));
 	} catch (error: unknown) {
 		console.error('Error fetching projects:', (error as Error).message);
-		throw new Error('Failed to fetch projects. Please try again later.');
+		return null;
+	}
+}
 	}
 }

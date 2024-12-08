@@ -11,12 +11,24 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export default function ProjectsView({ projects }: { projects: ProjectsType[] }) {
+export default function ProjectsView({ projects }: { projects: ProjectsType[] | null }) {
 	const router = useRouter();
 
 	const handleProjectCreated = () => {
 		router.refresh();
 	};
+
+	if (!projects) {
+		return (
+			<div>
+				<div className="flex justify-between items-center mb-8">
+					<h1 className="text-3xl font-bold">Projects</h1>
+					<CreateProjectForm onProjectCreated={handleProjectCreated} />
+				</div>
+				<p className="text-lg text-center text-muted-foreground mt-[calc(30vh)]">No project</p>
+			</div>
+		);
+	}
 
 	return (
 		<div>
