@@ -21,11 +21,10 @@ export function CreateAppForm({ project, onAppCreated }: { project: ProjectType;
 		formState: { errors },
 	} = useForm({
 		resolver: zodResolver(appSchema),
-		defaultValues: { name: '', description: '' },
+		defaultValues: { name: '', description: '', repository: '' },
 	});
 
-	const addApp = async (data: { name: string; description: string }) => {
-		console.log(project.slug);
+	const addApp = async (data: { name: string; description: string; repository: string }) => {
 		try {
 			const response = await fetch(`/api/project/${project.slug}/app`, {
 				method: 'POST',
@@ -35,6 +34,7 @@ export function CreateAppForm({ project, onAppCreated }: { project: ProjectType;
 				body: JSON.stringify({
 					name: data.name,
 					description: data.description,
+					repository: data.repository,
 				}),
 			});
 
@@ -76,6 +76,12 @@ export function CreateAppForm({ project, onAppCreated }: { project: ProjectType;
 					</Label>
 					<Input id="description" {...register('description')} />
 					{errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
+
+					<Label htmlFor="repository" className="mt-3 mb-2">
+						Repository
+					</Label>
+					<Input id="repository" {...register('repository')} />
+					{errors.repository && <p className="text-red-500 text-sm">{errors.repository.message}</p>}
 
 					<DialogFooter className="mt-4">
 						<DialogTrigger asChild>

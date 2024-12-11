@@ -32,7 +32,7 @@ export async function getApp(projectName: string, appname: string): Promise<AppT
 	}
 }
 
-export async function createApp(userId: string, { name, description, projectName }: { name: string; description: string; projectName: string }): Promise<ErrorType> {
+export async function createApp(userId: string, { name, description, repository, projectName }: { name: string; description: string; repository: string | null; projectName: string }): Promise<ErrorType> {
 	const existingApp = await AppModel.findOne({ name });
 	if (existingApp) {
 		return {
@@ -48,6 +48,7 @@ export async function createApp(userId: string, { name, description, projectName
 			name,
 			annotations: {
 				description,
+				repository,
 			},
 		},
 	});
