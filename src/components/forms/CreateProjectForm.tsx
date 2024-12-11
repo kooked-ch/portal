@@ -44,12 +44,8 @@ export default function CreateProjectForm({ onProjectCreated }: { onProjectCreat
 				setDialogOpen(false);
 				onProjectCreated();
 			} else {
-				const errorData = await response.json();
-				if (errorData.error) {
-					setError('name', { type: 'manual', message: errorData.error.name.message });
-				} else {
-					console.error('Unexpected error:', errorData);
-				}
+				const error = await response.json();
+				setError('name', { type: 'manual', message: error.message || 'An unexpected error occurred' });
 			}
 		} catch (error) {
 			console.error('Network error:', error);
