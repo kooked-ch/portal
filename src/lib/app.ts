@@ -11,7 +11,7 @@ export async function getApp(projectName: string, appname: string): Promise<AppT
 	}
 
 	try {
-		const app = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appname);
+		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appname);
 		return {
 			name: app.body.metadata.name,
 			description: app.body.metadata.annotations?.description,
