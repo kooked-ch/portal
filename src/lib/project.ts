@@ -37,7 +37,7 @@ export async function createProject(userId: string, project: { name: string; des
 		return { message: 'Project created successfully', status: 201 };
 	} catch (error) {
 		console.error('Error creating project:', error);
-		return { message: { name: { message: 'An unexpected error occurred' } }, status: 500 };
+		return { message: 'An unexpected error occurred', status: 500 };
 	}
 }
 
@@ -75,7 +75,7 @@ export async function getProject(slug: string): Promise<ProjectType | null> {
 			return null;
 		}
 
-		const apps = await customObjectsApi.listNamespacedCustomObject('kooked.ch', 'v1', project.slug, 'kookedapps');
+		const apps: any = await customObjectsApi.listNamespacedCustomObject('kooked.ch', 'v1', project.slug, 'kookedapps');
 
 		return {
 			name: project.name,
