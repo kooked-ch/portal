@@ -91,7 +91,6 @@ async function connect() {
 			authorizations: {
 				level: 1,
 				projects: ['read', 'update'],
-				
 			},
 		},
 		{
@@ -112,6 +111,46 @@ async function connect() {
 			authorizations: {
 				level: 3,
 				projects: ['read'],
+			},
+		},
+		{
+			name: 'Owner',
+			description: 'Has full control over the app and can manage all aspects.',
+			slug: 'own',
+			accessLevel: 2,
+			authorizations: {
+				level: 0,
+				apps: ['read', 'update', 'delete'],
+			},
+		},
+		{
+			name: 'Administrator',
+			description: 'Can manage most app resources and perform updates.',
+			slug: 'adm',
+			accessLevel: 2,
+			authorizations: {
+				level: 1,
+				apps: ['read', 'update'],
+			},
+		},
+		{
+			name: 'App Collaborator',
+			description: 'Has permissions to read and collaborate on the app.',
+			slug: 'col',
+			accessLevel: 2,
+			authorizations: {
+				level: 2,
+				apps: ['read', 'update'],
+			},
+		},
+		{
+			name: 'Guest',
+			description: 'Has minimal access for viewing app information only.',
+			slug: 'gst',
+			accessLevel: 2,
+			authorizations: {
+				level: 3,
+				apps: ['read'],
 			},
 		},
 	];
