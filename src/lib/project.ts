@@ -5,6 +5,7 @@ import { customObjectsApi, k3sApi } from './api';
 import { ProjectsType, ProjectType } from '@/types/project';
 import { checkAccreditation } from './auth';
 import { getRepository } from './utils';
+import { AppModel } from '@/models/App';
 
 export async function createProject(userId: string, project: { name: string; description: string }): Promise<ErrorType> {
 	try {
@@ -75,23 +76,30 @@ export async function getProject(slug: string): Promise<ProjectType | null> {
 			return null;
 		}
 
-		const apps: any = await customObjectsApi.listNamespacedCustomObject('kooked.ch', 'v1', project.slug, 'kookedapps');
+		const appsData: any = await customObjectsApi.listNamespacedCustomObject('kooked.ch', 'v1', project.slug, 'kookedapps');
+		const apps = await AppModel.find({ projectId: project._id }).exec();
+
+		const filteredApps = appsData.body.items
+			.filter((app: any) => apps.some((dbApp) => dbApp.name === app.metadata.name))
+			.map(async (app: any) => {
+				return {
+					name: app.metadata.name,
+					description: app.metadata.annotations?.description || '',
+					repository: await getRepository(app.metadata.annotations?.repository || ''),
+					createdAt: app.metadata.creationTimestamp,
+				};
+			});
+
+		const resolvedApps = await Promise.all(filteredApps);
 
 		return {
 			name: project.name,
 			description: project.description,
 			slug: project.slug,
 			createdAt: project.createdAt,
-			apps: await Promise.all(
-				apps.body.items.map(async (app: any) => ({
-					name: app.metadata.name,
-					description: app.metadata.annotations?.description || '',
-					repository: await getRepository(app.metadata.annotations?.repository || ''),
-					createdAt: app.metadata.creationTimestamp,
-				}))
-			),
+			apps: resolvedApps,
 		};
-	} catch (error: unknown) {
+	} catch (error) {
 		console.error('Error fetching project:', (error as Error).message);
 		return null;
 	}
