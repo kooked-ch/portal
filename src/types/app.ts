@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ContainerType } from './container';
 
 export interface AppsType {
 	name: string;
@@ -59,20 +60,7 @@ export interface AppType {
 			};
 		};
 	}[];
-	containers: {
-		name: string;
-		image: string;
-		env: {
-			key: string;
-			value: string;
-		}[];
-		status: {
-			ready: boolean;
-			state: string;
-			stateDetails: Record<string, unknown>;
-			restartCount: number;
-		}[];
-	}[];
+	containers: ContainerType[];
 	collaborators: {
 		username: string;
 		image: string;
