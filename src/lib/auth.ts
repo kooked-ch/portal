@@ -8,6 +8,7 @@ import { AccreditationModel, IAccreditation } from '@/models/Accreditation';
 import { JWT } from 'next-auth/jwt';
 import { getServerSession } from 'next-auth/next';
 import { IProject, ProjectModel } from '@/models/Project';
+import { AppModel, IApp } from '@/models/App';
 
 const getProviders = () => [
 	GitHubProvider({
@@ -146,6 +147,20 @@ export const checkAccreditation = async (request: string, id?: string): Promise<
 
 		const { authorizations: projectAuthorizations } = projectAccreditation;
 		if (projectAuthorizations && projectAuthorizations[access] && projectAuthorizations[access].includes(action)) {
+			return true;
+		}
+
+		const app = await AppModel.findOne<IApp>({ name: appName, projectId: project._id }).exec();
+		if (!app) return false;
+
+		const collaborator = app.collaborators.find((collaborator) => collaborator.userId.toString() === user._id.toString());
+		if (!collaborator) return false;
+
+		const appAccreditation = await AccreditationModel.findOne({ _id: collaborator.accreditation }).exec();
+		if (!appAccreditation) return false;
+
+		const { authorizations: appAuthorizations } = appAccreditation;
+		if (appAuthorizations && appAuthorizations[access] && appAuthorizations[access].includes(action)) {
 			return true;
 		}
 	}
