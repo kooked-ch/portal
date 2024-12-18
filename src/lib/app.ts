@@ -28,11 +28,12 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 	}
 
 	try {
-		const podsResponse = await coreV1Api.listNamespacedPod(projectName, undefined, undefined, undefined, undefined, `app=${appName},type=container`);
+		const podsResponse = await coreV1Api.listNamespacedPod(projectName, undefined, undefined, undefined, undefined, `app=${appName}`);
 
 		const podStatuses = podsResponse.body.items.map((pod) => ({
 			name: pod.metadata?.name || '',
 			phase: pod.status?.phase,
+			metadata: pod.metadata,
 			conditions: pod.status?.conditions?.map((condition) => ({
 				type: condition.type,
 				status: condition.status,
@@ -71,23 +72,18 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 			(appData.body?.spec?.databases || []).map(async (db: any) => {
 				try {
 					const statefulSet = await appsApi.readNamespacedStatefulSet(`${appName}-${db.provider}`, projectName);
+					const databasePod = podStatuses.find((pod) => pod.metadata?.labels?.type === db.provider);
 
 					return {
 						name: db.name,
 						provider: db.provider,
 						status: {
-							phase: statefulSet.body?.metadata?.deletionTimestamp ? 'Terminating' : statefulSet.body?.status?.phase,
+							state: databasePod?.phase || 'Unknown',
 							replicas: {
 								desired: statefulSet.body?.spec?.replicas || 0,
 								current: statefulSet.body?.status?.currentReplicas || 0,
 								ready: statefulSet.body?.status?.readyReplicas || 0,
 							},
-							conditions: statefulSet.body?.status?.conditions?.map((condition: any) => ({
-								type: condition.type,
-								status: condition.status,
-								reason: condition.reason,
-								message: condition.message,
-							})),
 						},
 					};
 				} catch (error) {
@@ -101,6 +97,8 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 			})
 		);
 
+		console.log('appData:', appData.body.metadata.annotations);
+
 		return {
 			name: appData.body.metadata.name,
 			description: appData.body.metadata.annotations?.description || '',
@@ -110,11 +108,13 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 				image: '',
 				version: '',
 			},
-			status: {
-				deployment: deploymentStatus,
-				pods: podStatuses,
+			replicas: {
+				desired: deploymentStatus.replicas.desired || 0,
+				available: deploymentStatus.replicas.available || 0,
+				ready: deploymentStatus.replicas.ready || 0,
+				updated: deploymentStatus.replicas.updated || 0,
+				asked: appData.body?.spec?.replicas || 0,
 			},
-			replicas: appData.body?.spec?.replicas || 1,
 			domains: appData.body?.spec?.domains || [],
 			databases: databaseStatuses,
 			containers:
@@ -122,7 +122,15 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 					name: container.name,
 					image: container.image,
 					env: hasEnvAccess ? container.env : container.env.map((env: any) => ({ name: env.name, value: '********' })),
-					status: podStatuses.find((pod) => pod.name === `${appName}-${container.name}`),
+					status: podStatuses
+						.filter((pod) => pod.metadata?.labels?.type === 'container')
+						.map((pod) => pod?.containerStatuses?.find((status) => status.name === container.name))
+						.map((status) => ({
+							ready: status?.ready || false,
+							state: status?.state || 'unknown',
+							stateDetails: status?.stateDetails || {},
+							restartCount: status?.restartCount || 0,
+						})),
 				})) || [],
 			collaborators:
 				app.collaborators.map((collaborator) => ({
