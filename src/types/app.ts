@@ -33,7 +33,13 @@ export interface AppType {
 		image: string;
 		version: string;
 	} | null;
-	replicas: number;
+	replicas: {
+		desired: number;
+		available: number;
+		ready: number;
+		updated: number;
+		asked: number;
+	};
 	domains: {
 		url: string;
 		port: number;
@@ -44,6 +50,14 @@ export interface AppType {
 		password: string;
 		provider: string;
 		user: string;
+		status: {
+			state: string;
+			replicas: {
+				desired: number;
+				current: number;
+				ready: number;
+			};
+		};
 	}[];
 	containers: {
 		name: string;
@@ -51,6 +65,12 @@ export interface AppType {
 		env: {
 			key: string;
 			value: string;
+		}[];
+		status: {
+			ready: boolean;
+			state: string;
+			stateDetails: Record<string, unknown>;
+			restartCount: number;
 		}[];
 	}[];
 	collaborators: {
