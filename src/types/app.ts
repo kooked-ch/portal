@@ -12,7 +12,11 @@ export interface AppsType {
 }
 
 export const appSchema = z.object({
-	name: z.string().min(3, 'Name must contain at least 3 characters').max(255, 'Name must contain at most 255 characters'),
+	name: z
+		.string()
+		.min(3, 'Name must contain at least 3 characters')
+		.max(255, 'Name must contain at most 255 characters')
+		.transform((value) => value.toLowerCase()),
 	description: z.string().min(3, 'Description must contain at least 3 characters').max(255, 'Description must contain at most 255 characters'),
 	repository: z
 		.union([z.string().url({ message: 'Invalid URL' }), z.literal('')])
@@ -48,5 +52,9 @@ export interface AppType {
 			key: string;
 			value: string;
 		}[];
+	}[];
+	collaborators: {
+		username: string;
+		image: string;
 	}[];
 }
