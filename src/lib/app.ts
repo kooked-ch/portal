@@ -23,7 +23,24 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 	if (!app) return null;
 
 	try {
-		const [podsResponse, appData, deploymentData]: [any, any, any] = await Promise.all([coreV1Api.listNamespacedPod(projectName, undefined, undefined, undefined, undefined, `app=${appName}`), customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName), appsApi.readNamespacedDeployment(appName, projectName)]);
+		const [podsResponse, appData]: [any, any] = await Promise.all([coreV1Api.listNamespacedPod(projectName, undefined, undefined, undefined, undefined, `app=${appName}`), customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName)]);
+
+		let deploymentData: any = {};
+		try {
+			deploymentData = await appsApi.readNamespacedDeployment(appName, projectName);
+		} catch (error: any) {
+			console.warn(`Deployment not found for app ${appName}:`, error.message);
+			deploymentData = {
+				body: {
+					spec: { replicas: 0 },
+					status: {
+						availableReplicas: 0,
+						readyReplicas: 0,
+						updatedReplicas: 0,
+					},
+				},
+			};
+		}
 
 		const databaseStatuses = await Promise.all(
 			(appData.body?.spec?.databases || []).map(async (db: any) => {
