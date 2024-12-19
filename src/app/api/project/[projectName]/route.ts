@@ -1,6 +1,4 @@
-import { createProject } from '@/lib/project';
 import { NextRequest, NextResponse } from 'next/server';
-import { projectSchema } from '@/types/project';
 import { checkAccreditation, getUser } from '@/lib/auth';
 import { appSchema } from '@/types/app';
 import { createApp } from '@/lib/app';
