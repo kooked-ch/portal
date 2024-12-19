@@ -10,33 +10,10 @@ import { AppType } from '@/types/app';
 import Link from 'next/link';
 import CreateContainerDialog from './forms/CreateContainerForm';
 import DeleteContainerDialog from './forms/DeleteContainerForm';
+import { ContainerStatus } from './container';
 
 const TABS = ['Containers', 'Domains', 'Logs'] as const;
 type Tab = (typeof TABS)[number];
-
-const getColorClass = (status: string, percentageRunning: number) => {
-	if (status === 'ContainerCreating') return 'text-orange-500 border-orange-500';
-	if (status === 'ErrImagePull' || status === 'ImagePullBackOff' || status === 'CrashLoopBackOff') return 'text-red-500 border-red-500';
-	if (percentageRunning === 100) return 'text-green-500 border-green-500';
-	if (percentageRunning >= 75) return 'text-yellow-500 border-yellow-500';
-	return 'text-red-500 border-red-500';
-};
-
-const getErrorMessage = (statuses: any) => {
-	if (!Array.isArray(statuses) || statuses.length === 0) return 'No status information available';
-
-	for (const status of statuses) {
-		if (!status.ready) {
-			if (status.state === 'ErrImagePull') return 'Failed pulling image';
-			if (status.state === 'ContainerCreating') return 'Starting container';
-			if (status.state === 'ImagePullBackOff') return 'Failed pulling image';
-			if (status.state === 'CrashLoopBackOff') return 'Crash loop back off';
-			return status.message || status.state || 'Unknown Error';
-		}
-	}
-
-	return null;
-};
 
 export default function DeploymentInterface({ app }: { app: AppType }) {
 	const [selectedTab, setSelectedTab] = useState<Tab>('Containers');
@@ -71,37 +48,9 @@ export default function DeploymentInterface({ app }: { app: AppType }) {
 								</div>
 								{app.containers.length === 0 && <div className="bg-[#1E1E20] p-4 rounded-lg text-[#666] text-sm">No containers found</div>}
 								<ul className="space-y-2">
-									{app.containers.map((container, index) => {
-										const runningCount = container.status.filter((status) => status.ready).length;
-										const totalCount = container.status.length;
-										const percentageRunning = (runningCount / totalCount) * 100;
-										const errorStatus = container.status.find((status) => !status.ready && status.state !== 'ContainerCreating');
-										const containerStatus = container.status.find((status) => !status.ready)?.state || 'Running';
-
-										return (
-											<li key={index} className={cn('flex justify-between bg-[#1E1E20] px-4 py-3 rounded-lg items-center border-l-4', getColorClass(containerStatus, percentageRunning))}>
-												<div className="flex items-center space-x-3">
-													{errorStatus ? <CircleX className="w-5 h-5 text-red-500" /> : <Server className={cn('w-5 h-5', getColorClass(containerStatus, percentageRunning))} />}
-													<div className="flex flex-col">
-														<span className={cn('text-white font-medium', errorStatus && 'text-red-500')}>{container.name}</span>
-														<p className={cn('text-sm', errorStatus ? 'text-red-500' : 'text-[#666]')}>{container.image}</p>
-														{errorStatus && <span className="text-xs text-red-400">{getErrorMessage(container.status)}</span>}
-													</div>
-												</div>
-												<div className="flex items-center space-x-3">
-													<div className="flex flex-col items-end">
-														<span className={cn('text-sm font-medium', errorStatus ? 'text-red-500' : getColorClass(containerStatus, percentageRunning))}>{containerStatus == 'ContainerCreating' && !errorStatus ? getErrorMessage(container.status) : `${runningCount}/${totalCount} Running`}</span>
-													</div>
-													<div className="flex space-x-2 text-white">
-														<Button variant="ghost" size="icon">
-															<Edit2 className="w-4 h-4" />
-														</Button>
-														<DeleteContainerDialog containerName={container.name} />
-													</div>
-												</div>
-											</li>
-										);
-									})}
+									{app.containers.map((container, index) => (
+										<ContainerStatus key={index} container={container} />
+									))}
 								</ul>
 								<div className="flex justify-between items-center">
 									<h2 className="text-xl font-semibold mt-6">Databases</h2>
