@@ -8,21 +8,21 @@ export async function POST(req: NextRequest) {
 		const user = await getUser();
 
 		if (!user || !(await checkAccreditation('projects:0:create'))) {
-			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 		}
 
 		const { name, description } = await req.json();
 
 		const validationResult = projectSchema.safeParse({ name, description });
 		if (!validationResult.success) {
-			return NextResponse.json({ error: 'Invalid request', details: validationResult.error.errors }, { status: 400 });
+			return NextResponse.json({ message: 'Invalid request', details: validationResult.error.errors }, { status: 400 });
 		}
 
 		const project = await createProject(user.id, { name, description });
 
-		return NextResponse.json({ error: project.message }, { status: project.status });
+		return NextResponse.json({ message: project.message }, { status: project.status });
 	} catch (error) {
 		console.error('Error creating project:', error);
-		return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
+		return NextResponse.json({ message: 'An unexpected error occurred' }, { status: 500 });
 	}
 }
