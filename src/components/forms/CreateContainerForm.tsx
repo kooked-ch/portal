@@ -23,7 +23,6 @@ export default function CreateContainerDialog() {
 		register,
 		handleSubmit,
 		reset,
-		setError,
 		formState: { errors },
 	} = useForm({
 		resolver: zodResolver(containerSchema),
@@ -43,7 +42,7 @@ export default function CreateContainerDialog() {
 			if (!response.ok) {
 				const error = await response.json();
 				console.log(error);
-				setGlobalError(error.error || 'An unexpected error occurred. Please try again later.');
+				setGlobalError(error.message || 'An unexpected error occurred. Please try again later.');
 			} else {
 				router.refresh();
 				reset();
