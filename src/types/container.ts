@@ -12,6 +12,8 @@ export interface ContainerType {
 		state: string;
 		stateDetails: Record<string, unknown>;
 		restartCount: number;
+		message: string;
+		reason: string;
 	}[];
 }
 
