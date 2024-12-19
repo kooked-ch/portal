@@ -3,8 +3,6 @@ import { ErrorType } from '@/types/error';
 
 export async function createContainer({ projectName, appName, name, image, version }: { projectName: string; appName: string; name: string; image: string; version: string }): Promise<ErrorType> {
 	try {
-		console.table({ projectName, appName, name, image, version });
-
 		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
 
 		if (!app || !app.body || !app.body.spec) {
@@ -47,6 +45,7 @@ export async function createContainer({ projectName, appName, name, image, versi
 		return { message: 'An unexpected error occurred', status: 500 };
 	}
 }
+
 export async function deleteContainer({ projectName, appName, containerName }: { projectName: string; appName: string; containerName: string }): Promise<ErrorType> {
 	try {
 		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
