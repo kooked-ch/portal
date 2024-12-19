@@ -81,6 +81,7 @@ async function connect() {
 			authorizations: {
 				level: 0,
 				projects: ['read', 'update', 'delete'],
+				apps: ['create'],
 			},
 		},
 		{
@@ -91,6 +92,7 @@ async function connect() {
 			authorizations: {
 				level: 1,
 				projects: ['read', 'update'],
+				apps: ['create'],
 			},
 		},
 		{
@@ -101,6 +103,7 @@ async function connect() {
 			authorizations: {
 				level: 2,
 				projects: ['read'],
+				apps: ['create'],
 			},
 		},
 		{
