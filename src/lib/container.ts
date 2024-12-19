@@ -47,3 +47,40 @@ export async function createContainer({ projectName, appName, name, image, versi
 		return { message: 'An unexpected error occurred', status: 500 };
 	}
 }
+export async function deleteContainer({ projectName, appName, containerName }: { projectName: string; appName: string; containerName: string }): Promise<ErrorType> {
+	try {
+		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
+
+		if (!app || !app.body || !app.body.spec) {
+			return {
+				message: 'App not found',
+				status: 404,
+			};
+		}
+
+		const containerIndex = app.body.spec.containers.findIndex((container: any) => container.name === containerName);
+
+		if (containerIndex === -1) {
+			return { message: 'Container not found', status: 404 };
+		}
+
+		const patch = [
+			{
+				op: 'remove',
+				path: `/spec/containers/${containerIndex}`,
+			},
+		];
+
+		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
+
+		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+
+		return {
+			message: 'Container deleted',
+			status: 200,
+		};
+	} catch (error: unknown) {
+		console.error('Error deleting container:', error);
+		return { message: 'An unexpected error occurred', status: 500 };
+	}
+}
