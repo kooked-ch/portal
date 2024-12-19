@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { AppType } from '@/types/app';
 import Link from 'next/link';
 import CreateContainerDialog from './forms/CreateContainerForm';
+import DeleteContainerDialog from './forms/DeleteContainerForm';
 
 const TABS = ['Containers', 'Domains', 'Logs'] as const;
 type Tab = (typeof TABS)[number];
@@ -95,9 +96,7 @@ export default function DeploymentInterface({ app }: { app: AppType }) {
 														<Button variant="ghost" size="icon">
 															<Edit2 className="w-4 h-4" />
 														</Button>
-														<Button variant="ghost" size="icon">
-															<Trash2 className="w-4 h-4" />
-														</Button>
+														<DeleteContainerDialog containerName={container.name} />
 													</div>
 												</div>
 											</li>
