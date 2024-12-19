@@ -7,11 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger, DialogDescription, DialogFooter, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
-import { ProjectType } from '@/types/project';
 import { appSchema } from '@/types/app';
+import { usePathname } from 'next/navigation';
 
-export function CreateAppForm({ project, onAppCreated }: { project: ProjectType; onAppCreated: () => void }) {
+export function CreateAppForm({ onAppCreated }: { onAppCreated: () => void }) {
 	const [isDialogOpen, setDialogOpen] = useState(false);
+	const pathname = usePathname();
 
 	const {
 		register,
@@ -26,7 +27,7 @@ export function CreateAppForm({ project, onAppCreated }: { project: ProjectType;
 
 	const addApp = async (data: { name: string; description: string; repository: string }) => {
 		try {
-			const response = await fetch(`/api/project/${project.slug}/app`, {
+			const response = await fetch(`/api/project/${pathname}`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
