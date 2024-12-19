@@ -76,7 +76,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 			image: container.image,
 			env: container.env ? (hasEnvAccess ? container.env : container.env.map((env: any) => ({ name: env.name, value: '********' }))) : [],
 			status: podsResponse.body.items
-				.filter((pod: any) => pod.metadata?.labels?.type === 'container')
+				.filter((pod: any) => pod.metadata?.labels?.type === 'container' && !pod.metadata?.deletionTimestamp)
 				.flatMap((pod: any) =>
 					(pod.status?.containerStatuses || [])
 						.filter((containerStatus: any) => containerStatus.name === container.name)
