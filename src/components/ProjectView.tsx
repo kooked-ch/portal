@@ -17,7 +17,7 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 		<div>
 			<div className="flex justify-between items-center mb-8">
 				<h1 className="text-3xl font-bold">{project.name}</h1>
-				<CreateAppForm project={project} onAppCreated={handleAppCreated} />
+				<CreateAppForm onAppCreated={handleAppCreated} />
 			</div>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{project.apps.map((app, index) => (
