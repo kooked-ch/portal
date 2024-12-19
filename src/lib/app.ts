@@ -74,19 +74,34 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 		const containers = (appData.body?.spec?.containers || []).map((container: any) => ({
 			name: container.name,
 			image: container.image,
-			env: hasEnvAccess ? container.env : container.env.map((env: any) => ({ name: env.name, value: '********' })),
+			env: hasEnvAccess ? container.env || [] : container.env.map((env: any) => ({ name: env.name, value: '********' })),
 			status: podsResponse.body.items
-				.filter((pod: any) => pod.metadata?.labels?.type === 'container' && pod.status.phase !== 'Terminating' && pod.status.conditions.find((condition: any) => condition.type === 'ContainersReady' && condition.status === 'True'))
+				.filter((pod: any) => pod.metadata?.labels?.type === 'container')
 				.flatMap((pod: any) =>
 					(pod.status?.containerStatuses || [])
-						.filter((status: any) => status.name === container.name)
-						.map((status: any) => ({
-							ready: status.ready || false,
-							state: Object.keys(status.state || {})[0] || 'unknown',
-							stateDetails: JSON.parse(JSON.stringify(status.state || {})),
-							restartCount: status.restartCount || 0,
-						}))
-				),
+						.filter((containerStatus: any) => containerStatus.name === container.name)
+						.map((status: any) => {
+							const state = status.state.waiting?.reason || status.state.terminated?.reason || (pod.status?.phase === 'Running' ? 'Running' : 'Unknown');
+							if (!state || (pod.status?.phase === 'Pending' && !status?.state?.waiting)) {
+								return null;
+							}
+
+							return {
+								ready: status.ready || false,
+								state,
+								stateDetails: JSON.parse(JSON.stringify(status.state || {})),
+								restartCount: status.restartCount || 0,
+								message: status.state.waiting?.message || '',
+							};
+						})
+				)
+				.filter((status: any) => status !== null)
+				.filter((status: any, index: number, self: any[]) => {
+					if (status.state === 'Running') {
+						return true;
+					}
+					return !self.some((s: any) => s.state === 'Running');
+				}),
 		}));
 
 		return {
