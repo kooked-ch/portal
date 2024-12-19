@@ -18,9 +18,9 @@ export async function POST(req: NextRequest, { params }: { params: { projectName
 			return NextResponse.json({ message: 'Invalid request', details: validationResult.error.errors }, { status: 400 });
 		}
 
-		const app = await createContainer({ projectName: params.projectName, appName: params.appName, name, image, version });
+		const container = await createContainer({ projectName: params.projectName, appName: params.appName, name, image, version });
 
-		return NextResponse.json({ message: app.message }, { status: app.status });
+		return NextResponse.json({ message: container.message }, { status: container.status });
 	} catch (error) {
 		console.error('Error creating project:', error);
 		return NextResponse.json({ message: 'An unexpected error occurred' }, { status: 500 });
