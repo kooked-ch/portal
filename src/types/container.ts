@@ -4,7 +4,7 @@ export interface ContainerType {
 	name: string;
 	image: string;
 	env: {
-		key: string;
+		name: string;
 		value: string;
 	}[];
 	status: {
