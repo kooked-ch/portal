@@ -32,8 +32,8 @@ export default function DeploymentInterface({ app }: { app: AppType }) {
 					</div>
 
 					<div className="flex space-x-1 border-b border-[#1F1F23]">
-						{TABS.map((tab) => (
-							<button className={cn('px-4 py-2 text-sm', selectedTab === tab ? 'border-b-2 border-purple-500 text-white' : 'text-[#666] hover:text-white')} key={tab} onClick={() => setSelectedTab(tab)}>
+						{TABS.map((tab, index) => (
+							<button key={'tabs' + index} className={cn('px-4 py-2 text-sm', selectedTab === tab ? 'border-b-2 border-purple-500 text-white' : 'text-[#666] hover:text-white')} onClick={() => setSelectedTab(tab)}>
 								{tab}
 							</button>
 						))}
@@ -49,7 +49,7 @@ export default function DeploymentInterface({ app }: { app: AppType }) {
 								{app.containers.length === 0 && <div className="bg-[#1E1E20] p-4 rounded-lg text-[#666] text-sm">No containers found</div>}
 								<ul className="space-y-2">
 									{app.containers.map((container, index) => (
-										<ContainerStatus key={index} container={container} />
+										<ContainerStatus key={'container' + index} container={container} />
 									))}
 								</ul>
 								<div className="flex justify-between items-center">
@@ -65,7 +65,7 @@ export default function DeploymentInterface({ app }: { app: AppType }) {
 										const isRunning = dbStatus.state === 'Running';
 
 										return (
-											<li key={index} className={cn('flex justify-between bg-[#1E1E20] px-4 py-3 rounded-lg items-center', isRunning ? 'border-l-4 border-green-500' : 'border-l-4 border-red-500')}>
+											<li key={'databases' + index} className={cn('flex justify-between bg-[#1E1E20] px-4 py-3 rounded-lg items-center', isRunning ? 'border-l-4 border-green-500' : 'border-l-4 border-red-500')}>
 												<div className="flex items-center space-x-3">
 													<Database className={cn('w-5 h-5', isRunning ? 'text-green-500' : 'text-red-500')} />
 													<div className="flex flex-col">
