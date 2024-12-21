@@ -16,6 +16,7 @@ export default function CreateContainerDialog() {
 	const [loading, setLoading] = useState(false);
 	const [open, setOpen] = useState(false);
 	const [globalError, setGlobalError] = useState<string | null>(null);
+	const [envVars, setEnvVars] = useState([{ name: '', value: '' }]);
 	const pathname = usePathname();
 	const router = useRouter();
 
@@ -29,6 +30,20 @@ export default function CreateContainerDialog() {
 		defaultValues: { name: '', image: '', version: '' },
 	});
 
+	const handleEnvVarChange = (index: number, key: 'name' | 'value', value: string) => {
+		const updatedEnvVars = [...envVars];
+		updatedEnvVars[index][key] = value;
+		setEnvVars(updatedEnvVars);
+	};
+
+	const addEnvVar = () => {
+		setEnvVars([...envVars, { name: '', value: '' }]);
+	};
+
+	const removeEnvVar = (index: number) => {
+		setEnvVars(envVars.filter((_, i) => i !== index));
+	};
+
 	const onSubmit = async (data: { name: string; image: string; version: string }) => {
 		setLoading(true);
 
@@ -36,16 +51,16 @@ export default function CreateContainerDialog() {
 			const response = await fetch(`/api/project/${pathname}/containers`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name: data.name, image: data.image, version: data.version }),
+				body: JSON.stringify({ name: data.name, image: data.image, version: data.version, env: envVars }),
 			});
 
 			if (!response.ok) {
 				const error = await response.json();
-				console.log(error);
 				setGlobalError(error.message || 'An unexpected error occurred. Please try again later.');
 			} else {
 				router.refresh();
 				reset();
+				setEnvVars([{ name: '', value: '' }]);
 				setGlobalError(null);
 				setOpen(false);
 			}
@@ -88,6 +103,22 @@ export default function CreateContainerDialog() {
 							<Input id="version" {...register('version')} placeholder="1.0.0" />
 							{errors.version && <p className="text-red-500 text-sm">{errors.version.message}</p>}
 						</div>
+					</div>
+
+					<div className="mt-3">
+						<Label className="mt-3 mb-2">Environment Variables</Label>
+						{envVars.map((envVar, index) => (
+							<div key={index} className="flex items-center space-x-2 mt-2">
+								<Input value={envVar.name} onChange={(e) => handleEnvVarChange(index, 'name', e.target.value)} placeholder="name" className="w-1/2" />
+								<Input value={envVar.value} onChange={(e) => handleEnvVarChange(index, 'value', e.target.value)} placeholder="Value" className="w-1/2" />
+								<Button variant="outline" size="sm" onClick={() => removeEnvVar(index)} type="button">
+									Remove
+								</Button>
+							</div>
+						))}
+						<Button variant="ghost" className="mt-2" size="sm" onClick={addEnvVar} type="button">
+							+ Add Environment Variable
+						</Button>
 					</div>
 
 					{globalError && <p className="text-red-500 text-sm mt-3">{globalError}</p>}
