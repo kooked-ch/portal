@@ -1,7 +1,7 @@
 import { customObjectsApi } from './api';
 import { ErrorType } from '@/types/error';
 
-export async function createContainer({ projectName, appName, name, image, version }: { projectName: string; appName: string; name: string; image: string; version: string }): Promise<ErrorType> {
+export async function createContainer({ projectName, appName, name, image, version, env }: { projectName: string; appName: string; name: string; image: string; version: string; env: { name: string; value: string }[] }): Promise<ErrorType> {
 	try {
 		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
 
@@ -27,6 +27,7 @@ export async function createContainer({ projectName, appName, name, image, versi
 					{
 						name,
 						image: `${image}:${version}`,
+						env: env.some((envVar) => envVar.name.trim() === '') ? undefined : env,
 					},
 				],
 			},
