@@ -11,14 +11,18 @@ export async function POST(req: NextRequest, { params }: { params: { projectName
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 		}
 
-		const { name, image, version } = await req.json();
+		const { name, image, version, env } = await req.json();
+
+		if (env && Array.isArray(env) && (env.filter((e) => e.name.trim() === '' && e.value.trim() !== '').length > 0 || env.filter((e) => e.name.trim() !== '' && e.value.trim() === '').length > 0)) {
+			return NextResponse.json({ message: 'Environment variables must have both a name and a value' }, { status: 400 });
+		}
 
 		const validationResult = containerSchema.safeParse({ name, image, version });
 		if (!validationResult.success) {
 			return NextResponse.json({ message: 'Invalid request', details: validationResult.error.errors }, { status: 400 });
 		}
 
-		const container = await createContainer({ projectName: params.projectName, appName: params.appName, name, image, version });
+		const container = await createContainer({ projectName: params.projectName, appName: params.appName, name, image, version, env });
 
 		return NextResponse.json({ message: container.message }, { status: container.status });
 	} catch (error) {
