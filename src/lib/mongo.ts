@@ -124,7 +124,7 @@ async function connect() {
 			authorizations: {
 				level: 0,
 				apps: ['read', 'update', 'delete'],
-				env: ['read'],
+				env: ['read', 'update'],
 				containers: ['read', 'update', 'delete'],
 			},
 		},
@@ -136,7 +136,7 @@ async function connect() {
 			authorizations: {
 				level: 1,
 				apps: ['read', 'update'],
-				env: ['read'],
+				env: ['read', 'update'],
 				containers: ['read', 'update', 'delete'],
 			},
 		},
@@ -148,7 +148,7 @@ async function connect() {
 			authorizations: {
 				level: 2,
 				apps: ['read', 'update'],
-				env: ['read'],
+				env: ['read', 'update'],
 				containers: ['read', 'update', 'delete'],
 			},
 		},
