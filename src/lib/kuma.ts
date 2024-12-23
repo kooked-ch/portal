@@ -45,7 +45,6 @@ async function getMonitors() {
 			},
 		});
 		const data = await response.json();
-		console.log(data);
 		return data.monitors;
 	} catch (error: any) {
 		console.error('Error getting monitors:', error);
