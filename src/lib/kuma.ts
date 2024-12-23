@@ -51,3 +51,18 @@ async function getMonitors() {
 	}
 }
 
+async function getBeats(monitorId: number) {
+	try {
+		const token = await getToken();
+		const response = await fetch(new URL(`/monitors/${monitorId}/beats`, process.env.KUMA_URL), {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		const data = await response.json();
+		return data.monitor_beats;
+	} catch (error: any) {
+		console.error('Error getting beats:', error);
+		return [];
+	}
+}
