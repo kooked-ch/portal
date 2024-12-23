@@ -126,6 +126,7 @@ async function connect() {
 				apps: ['read', 'update', 'delete'],
 				env: ['read', 'update'],
 				containers: ['read', 'update', 'delete'],
+				domains: ['read', 'update', 'delete'],
 			},
 		},
 		{
@@ -138,6 +139,7 @@ async function connect() {
 				apps: ['read', 'update'],
 				env: ['read', 'update'],
 				containers: ['read', 'update', 'delete'],
+				domains: ['read', 'update'],
 			},
 		},
 		{
@@ -150,6 +152,7 @@ async function connect() {
 				apps: ['read', 'update'],
 				env: ['read', 'update'],
 				containers: ['read', 'update', 'delete'],
+				domains: ['read', 'update'],
 			},
 		},
 		{
@@ -161,6 +164,7 @@ async function connect() {
 				level: 3,
 				apps: ['read'],
 				containers: ['read'],
+				domains: ['read'],
 			},
 		},
 	];
