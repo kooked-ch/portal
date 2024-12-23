@@ -33,3 +33,21 @@ async function getToken(): Promise<string> {
 		throw error;
 	}
 }
+
+async function getMonitors() {
+	try {
+		const token = await getToken();
+		const response = await fetch(new URL('/monitors', process.env.KUMA_URL), {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		const data = await response.json();
+		console.log(data);
+		return data.monitors;
+	} catch (error: any) {
+		console.error('Error getting monitors:', error);
+		return [];
+	}
+}
+
