@@ -40,7 +40,7 @@ export default function DeleteContainerDialog({ containerName }: { containerName
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button variant="ghost" size="icon">
+				<Button variant="ghost" size="icon" className="hover:bg-red-500/10 hover:text-red-400">
 					<Trash2 className="w-4 h-4" />
 				</Button>
 			</DialogTrigger>
