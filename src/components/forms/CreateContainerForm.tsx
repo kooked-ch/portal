@@ -105,7 +105,7 @@ export default function CreateContainerDialog() {
 						</div>
 					</div>
 
-					<div className="mt-3">
+					<div className="mt-3 flex flex-col">
 						<Label className="mt-3 mb-2">Environment Variables</Label>
 						{envVars.map((envVar, index) => (
 							<div key={index} className="flex items-center space-x-2 mt-2">
@@ -116,7 +116,7 @@ export default function CreateContainerDialog() {
 								</Button>
 							</div>
 						))}
-						<Button variant="ghost" className="mt-2" size="sm" onClick={addEnvVar} type="button">
+						<Button variant="ghost" className="mt-2 w-min" size="sm" onClick={addEnvVar} type="button">
 							+ Add Environment Variable
 						</Button>
 					</div>
