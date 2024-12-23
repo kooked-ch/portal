@@ -107,7 +107,7 @@ export const ContainerStatus = ({
 	const errorStatus = container.status.find((status) => !status.ready && status.state !== 'ContainerCreating');
 
 	return (
-		<li key={'container' + container.name} className={cn('flex justify-between bg-[#1E1E20] px-4 py-3 rounded-lg items-center border-l-4', colorClass)}>
+		<li key={'container' + container.name} className={cn('flex justify-between bg-[#18181a] px-4 py-3 rounded-lg items-center border-l-4', colorClass)}>
 			<div className="flex items-center space-x-3">
 				{icon}
 				<div className="flex flex-col">
