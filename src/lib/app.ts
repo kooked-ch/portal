@@ -99,7 +99,6 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 				.filter((status: any, index: number, self: any[]) => {
 					if (status.state === 'Running' && status.ready) return true;
 					if (status.state === 'ContainerCreating') {
-						console.log(self.filter((s: any) => s.state !== 'ContainerCreating').length);
 						if (self.filter((s: any) => s.state?.waiting !== 'ContainerCreating').length != deploymentData.body.status.availableReplicas) {
 							return false;
 						}
