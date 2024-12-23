@@ -1,3 +1,5 @@
+import { DomainMonitorType } from '@/types/domain';
+
 let cachedToken: string | null = null;
 let tokenExpirationTime: number | null = null;
 
@@ -64,5 +66,43 @@ async function getBeats(monitorId: number) {
 	} catch (error: any) {
 		console.error('Error getting beats:', error);
 		return [];
+	}
+}
+
+export async function getMonitor(url: string): Promise<DomainMonitorType | null> {
+	try {
+		const monitors = await getMonitors();
+		const monitor = monitors.find((monitor: any) => monitor.url === 'https://' + url);
+
+		if (!monitor) {
+			return null;
+		}
+
+		const beats = await getBeats(monitor?.id);
+
+		const latestBeat = beats[beats.length - 1];
+		const responseTime = latestBeat ? latestBeat.ping : null;
+
+		const totalPing = beats.reduce((sum: number, beat: any) => sum + beat.ping, 0);
+		const averageReponseTime = beats.length > 0 ? totalPing / beats.length : null;
+
+		const uptime = (beats.filter((beat: any) => beat.status).length / beats.length) * 100;
+
+		const responseTimeHistory = beats.map((beat: any) => ({
+			id: beat.id,
+			time: beat.time,
+			value: beat.ping,
+			status: beat.status,
+		}));
+
+		return {
+			responseTime,
+			averageReponseTime: averageReponseTime ? Math.round(averageReponseTime) : 0,
+			uptime,
+			responseTimeHistory,
+		};
+	} catch (error: any) {
+		console.error('Error getting monitor:', error);
+		return null;
 	}
 }
