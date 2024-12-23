@@ -11,12 +11,17 @@ import Link from 'next/link';
 import CreateContainerDialog from './forms/CreateContainerForm';
 import DeleteContainerDialog from './forms/DeleteContainerForm';
 import { ContainerStatus } from './container';
+import { DomainStatus } from './domain';
+import useFetch from '@/hooks/useFetch';
+import { usePathname } from 'next/navigation';
 
 const TABS = ['Containers', 'Domains', 'Logs'] as const;
 type Tab = (typeof TABS)[number];
 
 export default function DeploymentInterface({ app }: { app: AppType }) {
 	const [selectedTab, setSelectedTab] = useState<Tab>('Containers');
+	const pathname = usePathname();
+	const { data: domainsDetails, loading: domainsLoading, error: domainsError } = useFetch(`/api/project/${pathname}/domains`);
 
 	return (
 		<div className="mx-auto p-6 pt-0">
@@ -93,18 +98,16 @@ export default function DeploymentInterface({ app }: { app: AppType }) {
 
 						{selectedTab === 'Domains' && (
 							<div className="space-y-4">
-								<h2 className="text-xl font-semibold">Domains</h2>
+								<div className="flex justify-between items-center">
+									<h2 className="text-xl font-semibold">Domains</h2>
+									<CreateContainerDialog />
+								</div>
+								{app.domains.length === 0 && <div className="bg-[#1E1E20] p-4 rounded-lg text-[#666] text-sm">No domains found</div>}
 								<ul className="space-y-2">
 									{app.domains.map((domain, index) => (
-										<li key={index} className="flex justify-between bg-[#1E1E20] px-4 py-2 rounded-lg">
-											<span className="text-white font-medium">{domain.url}</span>
-											<span className="text-[#666]">Port: {domain.port}</span>
-										</li>
+										<DomainStatus key={'domain' + index} domain={domain} monitoringData={Array.isArray(domainsDetails) ? domainsDetails.find((details: any) => details.url === domain.url)?.monitor : {}} />
 									))}
 								</ul>
-								<Button variant="outline" size="sm" className="mt-4">
-									<Plus className="w-4 h-4 mr-2" /> Add Domain
-								</Button>
 							</div>
 						)}
 
