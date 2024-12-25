@@ -1,6 +1,7 @@
 import { DomainType } from '@/types/domain';
 import { customObjectsApi } from './api';
 import { getMonitor } from './kuma';
+import { ErrorType } from '@/types/error';
 
 export async function getDomains({ projectName, appName }: { projectName: string; appName: string }): Promise<DomainType[] | null> {
 	try {
@@ -27,5 +28,70 @@ export async function getDomains({ projectName, appName }: { projectName: string
 	} catch (error) {
 		console.error('Error getting domains:', error);
 		return null;
+	}
+}
+
+export async function createDomain({ projectName, appName, url, port, container }: { projectName: string; appName: string; url: string; port: number; container: string }): Promise<ErrorType> {
+	try {
+		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
+
+		if (!app || !app.body || !app.body.spec) {
+			return {
+				message: 'App not found',
+				status: 404,
+			};
+		}
+
+		if (!app.body.spec.containers.find((c: any) => c.name === container)) {
+			return {
+				message: 'Container not found',
+				status: 404,
+			};
+		}
+
+		const appDomains = app.body.spec.domains || [];
+		if (!Array.isArray(appDomains)) {
+			return {
+				message: 'Domains field is not an array',
+				status: 500,
+			};
+		}
+
+		const apps: any = await customObjectsApi.listClusterCustomObject('kooked.ch', 'v1', 'kookedapps');
+		const allDomains = apps.body.items.flatMap((app: any) => app?.spec?.domains || []);
+
+		if (allDomains.some((domain: any) => domain?.url === url)) {
+			return {
+				message: 'Domain already exists',
+				status: 400,
+			};
+		}
+
+		const patch = [
+			{
+				op: appDomains.length > 0 ? 'replace' : 'add',
+				path: '/spec/domains',
+				value: [
+					...appDomains,
+					{
+						container,
+						port,
+						url,
+					},
+				],
+			},
+		];
+
+		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
+
+		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+
+		return {
+			message: 'Domain created',
+			status: 201,
+		};
+	} catch (error: unknown) {
+		console.error('Error creating domain:', error);
+		return { message: 'An unexpected error occurred', status: 500 };
 	}
 }
