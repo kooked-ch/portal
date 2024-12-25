@@ -146,7 +146,7 @@ export default function DeploymentInterface({ app }: { app: AppType }) {
 					{app?.repository?.url.trim() != '' && (
 						<div className="space-y-2 mt-6">
 							<div className="text-sm text-[#666] uppercase font-medium">Repository</div>
-							<a href={app?.repository?.url} className="flex items-center space-x-2 text-white hover:text-purple-400">
+							<a href={app?.repository?.url} target="_blank" className="flex items-center space-x-2 text-white hover:text-purple-400">
 								<GitBranch className="w-4 h-4" />
 								<span>{app?.repository?.url.replace('https://github.com/', '').replace(/\/$/, '')}</span>
 								<ArrowUpRight className="w-4 h-4" />
