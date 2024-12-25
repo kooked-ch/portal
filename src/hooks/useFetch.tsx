@@ -1,30 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 function useFetch(url: string) {
 	const [data, setData] = useState<object | null>(null);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<any | null>(null);
+	const [reloadKey, setReloadKey] = useState(0);
 
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const response = await fetch(url);
-				if (!response.ok) {
-					throw new Error('Network response was not ok');
-				}
-				const result = await response.json();
-				setData(result);
-			} catch (error: any) {
-				setError(error);
-			} finally {
-				setLoading(false);
+	const fetchData = useCallback(async () => {
+		setLoading(true);
+		setError(null);
+		try {
+			const response = await fetch(url);
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
 			}
-		};
-
-		fetchData();
+			const result = await response.json();
+			setData(result);
+		} catch (error: any) {
+			setError(error);
+		} finally {
+			setLoading(false);
+		}
 	}, [url]);
 
-	return { data, loading, error };
+	useEffect(() => {
+		fetchData();
+	}, [fetchData, reloadKey]);
+
+	const refetch = () => setReloadKey((prev) => prev + 1);
+
+	return { data, loading, error, refetch };
 }
 
 export default useFetch;
