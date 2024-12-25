@@ -2,6 +2,8 @@ import { DomainType } from '@/types/domain';
 import { customObjectsApi } from './api';
 import { getMonitor } from './kuma';
 import { ErrorType } from '@/types/error';
+import fs from 'fs';
+import path from 'path';
 
 export async function getDomains({ projectName, appName }: { projectName: string; appName: string }): Promise<DomainType[] | null> {
 	try {
@@ -62,9 +64,27 @@ export async function createDomain({ projectName, appName, url, port, container 
 
 		if (allDomains.some((domain: any) => domain?.url === url)) {
 			return {
-				message: 'Domain already exists',
+				message: `Domain ${url} already exists`,
 				status: 400,
 			};
+		}
+
+		const badWordsDir = path.resolve('./bad-words');
+		const badWordsFiles = fs.readdirSync(badWordsDir);
+
+		for (const file of badWordsFiles) {
+			const filePath = path.join(badWordsDir, file);
+			const words = fs
+				.readFileSync(filePath, 'utf-8')
+				.split('\n')
+				.map((w) => w.trim().toLowerCase());
+
+			if (words.some((word) => url.toLowerCase().includes(word))) {
+				return {
+					message: 'Domain not allowed due to restricted words',
+					status: 400,
+				};
+			}
 		}
 
 		const patch = [
