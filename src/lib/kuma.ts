@@ -1,15 +1,26 @@
 import { DomainMonitorType } from '@/types/domain';
+import { ErrorType } from '@/types/error';
 
 let cachedToken: string | null = null;
-let tokenExpirationTime: number | null = null;
 
-async function getToken(): Promise<string> {
+async function validateToken(token: string): Promise<boolean> {
 	try {
-		if (cachedToken && tokenExpirationTime && Date.now() < tokenExpirationTime) {
-			return cachedToken;
-		}
+		const response = await fetch(`${process.env.KUMA_URL}/ping`, {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
 
-		const response = await fetch(new URL('/login/access-token', process.env.KUMA_URL), {
+		return response.ok;
+	} catch (error) {
+		console.error('Error during token validation (ping):', error);
+		return false;
+	}
+}
+
+async function fetchNewToken(): Promise<string> {
+	try {
+		const response = await fetch(`${process.env.KUMA_URL}/login/access-token`, {
 			method: 'POST',
 			body: new URLSearchParams({
 				username: process.env.KUMA_USER || '',
@@ -21,49 +32,68 @@ async function getToken(): Promise<string> {
 		});
 
 		if (!response.ok) {
-			throw new Error(`Error retrieving token: ${response.statusText}`);
+			throw new Error(`Token request failed: ${response.status} - ${response.statusText}`);
 		}
 
-		const data = await response.json();
-		cachedToken = data.access_token;
-
-		tokenExpirationTime = Date.now() + 3600 * 100;
+		const { access_token } = await response.json();
+		cachedToken = access_token;
 
 		return cachedToken as string;
-	} catch (error: any) {
-		console.error('Error retrieving token:', error);
+	} catch (error) {
+		console.error('Error fetching new token:', error);
+		throw new Error('Unable to fetch a new token.');
+	}
+}
+
+async function getToken(): Promise<string> {
+	if (cachedToken) {
+		const isValid = await validateToken(cachedToken);
+		if (isValid) {
+			return cachedToken;
+		}
+	}
+
+	return await fetchNewToken();
+}
+
+async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+	try {
+		const token = await getToken();
+		const response = await fetch(new URL(endpoint, process.env.KUMA_URL), {
+			...options,
+			headers: {
+				Authorization: `Bearer ${token}`,
+				...options.headers,
+			},
+		});
+
+		if (!response.ok) {
+			throw new Error(`API request failed: ${response.status} - ${response.statusText}`);
+		}
+
+		return await response.json();
+	} catch (error) {
+		console.error(`Error during API request to ${endpoint}:`, error);
 		throw error;
 	}
 }
 
-async function getMonitors() {
+export async function getMonitors() {
 	try {
-		const token = await getToken();
-		const response = await fetch(new URL('/monitors', process.env.KUMA_URL), {
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
-		const data = await response.json();
+		const data = await apiRequest<{ monitors: any[] }>('/monitors');
 		return data.monitors;
-	} catch (error: any) {
-		console.error('Error getting monitors:', error);
+	} catch (error) {
+		console.error('Error fetching monitors:', error);
 		return [];
 	}
 }
 
-async function getBeats(monitorId: number) {
+export async function getBeats(monitorId: number) {
 	try {
-		const token = await getToken();
-		const response = await fetch(new URL(`/monitors/${monitorId}/beats`, process.env.KUMA_URL), {
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
-		});
-		const data = await response.json();
+		const data = await apiRequest<{ monitor_beats: any[] }>(`/monitors/${monitorId}/beats`);
 		return data.monitor_beats;
-	} catch (error: any) {
-		console.error('Error getting beats:', error);
+	} catch (error) {
+		console.error(`Error fetching beats for monitor ID ${monitorId}:`, error);
 		return [];
 	}
 }
@@ -71,37 +101,38 @@ async function getBeats(monitorId: number) {
 export async function getMonitor(url: string): Promise<DomainMonitorType | null> {
 	try {
 		const monitors = await getMonitors();
-		const monitor = monitors.find((monitor: any) => monitor.url === 'https://' + url);
+		const monitor = monitors.find((monitor) => monitor.url === `https://${url}`);
 
 		if (!monitor) {
+			console.warn(`Monitor not found for URL: ${url}`);
 			return null;
 		}
 
-		const beats = await getBeats(monitor?.id);
+		const beats = await getBeats(monitor.id);
 
-		const latestBeat = beats[beats.length - 1];
-		const responseTime = latestBeat ? latestBeat.ping : null;
-
-		const totalPing = beats.reduce((sum: number, beat: any) => sum + beat.ping, 0);
-		const averageReponseTime = beats.length > 0 ? totalPing / beats.length : null;
-
-		const uptime = (beats.filter((beat: any) => beat.status).length / beats.length) * 100;
-
-		const responseTimeHistory = beats.map((beat: any) => ({
+		const responseTimeHistory = beats.map((beat) => ({
 			id: beat.id,
-			time: beat.time,
+			time: new Date(new Date(beat.time).toLocaleString('en-US', { timeZone: 'Europe/Paris' })).toISOString(),
 			value: beat.ping,
 			status: beat.status,
 		}));
 
+		const latestBeat = beats[beats.length - 1];
+		const responseTime = latestBeat ? latestBeat.ping : null;
+
+		const totalPing = beats.reduce((sum, beat) => sum + beat.ping, 0);
+		const averageReponseTime = beats.length > 0 ? Math.round(totalPing / beats.length) : 0;
+
+		const uptime = (beats.filter((beat) => beat.status).length / beats.length) * 100;
+
 		return {
 			responseTime,
-			averageReponseTime: averageReponseTime ? Math.round(averageReponseTime) : 0,
+			averageReponseTime,
 			uptime,
 			responseTimeHistory,
 		};
-	} catch (error: any) {
-		console.error('Error getting monitor:', error);
+	} catch (error) {
+		console.error(`Error fetching monitor data for URL ${url}:`, error);
 		return null;
 	}
 }
