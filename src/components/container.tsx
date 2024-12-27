@@ -4,6 +4,8 @@ import { Button } from './ui/button';
 import DeleteContainerDialog from './forms/DeleteContainerForm';
 import EditContainerDialog from './forms/UpdateContainerForm';
 import { useState } from 'react';
+import { ContainerType } from '@/types/container';
+import ContainerLogsDialog from './ui/container-logs-dialog';
 
 type ContainerStatus = {
 	ready: boolean;
@@ -90,16 +92,7 @@ const getContainerStatusDetails = (totalCount: number, statuses: ContainerStatus
 	};
 };
 
-export const ContainerStatus = ({
-	container,
-}: {
-	container: {
-		name: string;
-		image: string;
-		status: ContainerStatus[];
-		env: { name: string; value: string }[];
-	};
-}) => {
+export const ContainerStatus = ({ container }: { container: ContainerType }) => {
 	const totalCount = container.status.length;
 	const [customStatus, setCustomStatus] = useState<string>('');
 
@@ -120,7 +113,8 @@ export const ContainerStatus = ({
 				<div className="flex flex-col items-end">
 					<span className={cn('text-sm font-medium', colorClass)}>{message}</span>
 				</div>
-				<div className="flex space-x-2 text-white">
+				<div className="flex space-x-1 text-white">
+					<ContainerLogsDialog container={container} />
 					<EditContainerDialog container={container} setCustomStatus={setCustomStatus} />
 					<DeleteContainerDialog containerName={container.name} />
 				</div>
