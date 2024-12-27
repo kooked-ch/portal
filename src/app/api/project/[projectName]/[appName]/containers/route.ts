@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkAccreditation, getUser } from '@/lib/auth';
 import { containerSchema } from '@/types/container';
 import { createContainer } from '@/lib/container';
+import { log } from 'console';
 
 export async function POST(req: NextRequest, { params }: { params: { projectName: string; appName: string } }) {
 	try {
 		const user = await getUser();
 
 		if (!user || !(await checkAccreditation('containers:2:create', `${params.projectName}/${params.appName}`))) {
+			log(`Unauthorized: Create container`, 'info', params.projectName, params.appName);
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 		}
 
