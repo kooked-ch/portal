@@ -6,7 +6,7 @@ import { AppModel, IApp } from '@/models/App';
 import { ProjectModel } from '@/models/Project';
 import { AccreditationModel } from '@/models/Accreditation';
 import { IUser } from '@/models/User';
-import { getLogs } from './log';
+import { getLogs, log } from './log';
 
 export async function getApp(projectName: string, appName: string): Promise<AppType | null> {
 	const hasAccess = await checkAccreditation('apps:2:read', `${projectName}/${appName}`);
@@ -175,6 +175,8 @@ export async function createApp(userId: string, { name, description, repository,
 		image: '',
 		collaborators: [{ userId, accreditation: defaultAccreditation._id }],
 	});
+
+	log(`Created app`, 'info', projectName, name);
 
 	return {
 		message: 'App created',
