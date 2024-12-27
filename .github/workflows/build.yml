@@ -74,7 +74,7 @@ jobs:
       - name: Set up GitHub CLI
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 22
 
       - name: Install GitHub CLI
         run: |
@@ -90,8 +90,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          tag="${{ env.version }}"
-          gh release create "$tag" \
+          gh release create "${{ env.version }}" \
               --repo="${{ env.REPOSITORY }}" \
-              --title="${{ tag }}" \
+              --title="${{ env.version }}" \
               --generate-notes
