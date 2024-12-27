@@ -72,42 +72,65 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 			})
 		);
 
-		const containers = (appData.body?.spec?.containers || []).map((container: any) => ({
-			name: container.name,
-			image: container.image,
-			env: container.env ? (hasEnvAccess ? container.env : container.env.map((env: any) => ({ name: env.name, value: '********' }))) : [],
-			status: podsResponse.body.items
-				.filter((pod: any) => pod.metadata?.labels?.type === 'container' && !pod.metadata?.deletionTimestamp)
-				.flatMap((pod: any) =>
-					(pod.status?.containerStatuses || [])
-						.filter((containerStatus: any) => containerStatus.name === container.name)
-						.map((status: any) => {
-							const state = status.state.waiting?.reason || status.state.terminated?.reason || (pod.status?.phase === 'Running' ? 'Running' : 'Unknown');
-							if (!state || (pod.status?.phase === 'Pending' && !status?.state?.waiting)) {
-								return null;
-							}
+		const containers = await Promise.all(
+			(appData.body?.spec?.containers || []).map(async (container: any) => {
+				const status = podsResponse.body.items
+					.filter((pod: any) => pod.metadata?.labels?.type === 'container' && !pod.metadata?.deletionTimestamp)
+					.flatMap((pod: any) =>
+						(pod.status?.containerStatuses || [])
+							.filter((containerStatus: any) => containerStatus.name === container.name)
+							.map((status: any) => {
+								const state = status.state.waiting?.reason || status.state.terminated?.reason || (pod.status?.phase === 'Running' ? 'Running' : 'Unknown');
 
-							return {
-								ready: status.ready || false,
-								state,
-								stateDetails: JSON.parse(JSON.stringify(status.state || {})),
-								restartCount: status.restartCount || 0,
-								message: status.state.waiting?.message || '',
-							};
-						})
-				)
-				.filter((status: any) => status !== null)
-				.filter((status: any, index: number, self: any[]) => {
-					if (status.state === 'Running' && status.ready) return true;
-					if (status.state === 'ContainerCreating') {
-						if (self.filter((s: any) => s.state?.waiting !== 'ContainerCreating').length != deploymentData.body.status.availableReplicas) {
-							return false;
+								if (!state || (pod.status?.phase === 'Pending' && !status.state?.waiting)) {
+									return null;
+								}
+
+								return {
+									podName: pod.metadata?.name,
+									ready: status.ready || false,
+									state,
+									stateDetails: JSON.parse(JSON.stringify(status.state)),
+									restartCount: status.restartCount || 0,
+									message: status.state.waiting?.message || '',
+								};
+							})
+					)
+					.filter((status: any) => status !== null)
+					.filter((status: any, index: number, self: any[]) => {
+						if (status.state === 'Running' && status.ready) return true;
+						if (status.state === 'ContainerCreating') {
+							const availableReplicas = deploymentData.body.status?.availableReplicas || 0;
+							const nonCreatingCount = self.filter((s: any) => s.state !== 'ContainerCreating').length;
+							return nonCreatingCount === availableReplicas;
 						}
-					}
+						return true;
+					});
 
-					return true;
-				}),
-		}));
+				const logs = await Promise.all(
+					status.map(async (status: any) => {
+						try {
+							const podLogs = await coreV1Api.readNamespacedPodLog(status.podName, projectName, container.name, undefined, undefined, undefined, undefined);
+							return {
+								podName: status.podName,
+								logs: podLogs.body.split('\n').slice(0, 500),
+							};
+						} catch (error) {
+							console.warn(`Error fetching logs for pod ${status.podName}:`, error);
+							return { podName: status.podName, logs: null };
+						}
+					})
+				);
+
+				return {
+					name: container.name,
+					image: container.image,
+					env: container.env ? (hasEnvAccess ? container.env : container.env.map((env: any) => ({ name: env.name, value: '********' }))) : [],
+					status,
+					logs,
+				};
+			})
+		);
 
 		const logs = await getLogs(projectName, appName);
 
