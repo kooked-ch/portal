@@ -136,3 +136,32 @@ export async function getMonitor(url: string): Promise<DomainMonitorType | null>
 		return null;
 	}
 }
+
+export async function createMonitor(url: string): Promise<ErrorType> {
+	try {
+		const data = await apiRequest('/monitors', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				type: 'http',
+				name: url,
+				url: `https://${url}`,
+				method: 'GET',
+			}),
+		});
+
+		return {
+			message: 'Monitor created',
+			status: 201,
+		};
+	} catch (error) {
+		console.error(`Error creating monitor for URL ${url}:`, error);
+		return {
+			message: 'An unexpected error occurred',
+			status: 500,
+		};
+	}
+}
+
