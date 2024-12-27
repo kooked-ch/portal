@@ -1,6 +1,7 @@
 import { customObjectsApi } from './api';
 import { ErrorType } from '@/types/error';
 import { checkAccreditation } from './auth';
+import { log } from './log';
 
 export async function createContainer({ projectName, appName, name, image, version, env }: { projectName: string; appName: string; name: string; image: string; version: string; env: { name: string; value: string }[] }): Promise<ErrorType> {
 	try {
@@ -37,6 +38,7 @@ export async function createContainer({ projectName, appName, name, image, versi
 		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
 
 		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+		await log(`Created ${name} container`, 'info', projectName, appName);
 
 		return {
 			message: 'Container created',
@@ -83,6 +85,7 @@ export async function updateContainer({ projectName, appName, containerName, dat
 		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
 
 		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+		await log(`Updated ${containerName} container`, 'info', projectName, appName);
 
 		return {
 			message: 'Container updated',
@@ -121,6 +124,7 @@ export async function deleteContainer({ projectName, appName, containerName }: {
 		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
 
 		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+		await log(`Deleted ${containerName} container`, 'info', projectName, appName);
 
 		return {
 			message: 'Container deleted',
