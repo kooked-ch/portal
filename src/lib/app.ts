@@ -24,11 +24,11 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 	if (!app) return null;
 
 	try {
-		const [podsResponse, appData]: [any, any] = await Promise.all([coreV1Api.listNamespacedPod(projectName, undefined, undefined, undefined, undefined, `app=${appName}`), customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName)]);
+		const [podsResponse, appData] = await Promise.all([coreV1Api.listNamespacedPod({ namespace: projectName, labelSelector: `app=${appName}` }), customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName })]);
 
 		let deploymentData: any = {};
 		try {
-			deploymentData = await appsApi.readNamespacedDeployment(appName, projectName);
+			deploymentData = await appsApi.readNamespacedDeployment({ name: appName, namespace: projectName });
 		} catch (error: any) {
 			console.warn(`Deployment not found for app ${appName}:`, error.message);
 			deploymentData = {
@@ -44,10 +44,10 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 		}
 
 		const databaseStatuses = await Promise.all(
-			(appData.body?.spec?.databases || []).map(async (db: any) => {
+			(appData.spec?.databases || []).map(async (db: any) => {
 				try {
-					const statefulSet = await appsApi.readNamespacedStatefulSet(`${appName}-${db.provider}`, projectName);
-					const databasePod = podsResponse.body.items.find((pod: any) => pod.metadata?.labels?.type === db.provider);
+					const statefulSet = await appsApi.readNamespacedStatefulSet({ name: `${appName}-${db.provider}`, namespace: projectName });
+					const databasePod = podsResponse.items.find((pod) => pod.metadata?.labels?.type === db.provider);
 
 					return {
 						name: db.name,
@@ -55,9 +55,9 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 						status: {
 							state: databasePod?.status?.phase || 'Unknown',
 							replicas: {
-								desired: statefulSet.body?.spec?.replicas || 0,
-								current: statefulSet.body?.status?.currentReplicas || 0,
-								ready: statefulSet.body?.status?.readyReplicas || 0,
+								desired: statefulSet.spec?.replicas || 0,
+								current: statefulSet.status?.currentReplicas || 0,
+								ready: statefulSet.status?.readyReplicas || 0,
 							},
 						},
 					};
@@ -73,14 +73,14 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 		);
 
 		const containers = await Promise.all(
-			(appData.body?.spec?.containers || []).map(async (container: any) => {
-				const status = podsResponse.body.items
-					.filter((pod: any) => pod.metadata?.labels?.type === 'container' && !pod.metadata?.deletionTimestamp)
-					.flatMap((pod: any) =>
+			(appData.spec?.containers || []).map(async (container: any) => {
+				const status = podsResponse.items
+					.filter((pod) => pod.metadata?.labels?.type === 'container' && !pod.metadata?.deletionTimestamp)
+					.flatMap((pod) =>
 						(pod.status?.containerStatuses || [])
-							.filter((containerStatus: any) => containerStatus.name === container.name)
-							.map((status: any) => {
-								const state = status.state.waiting?.reason || status.state.terminated?.reason || (pod.status?.phase === 'Running' ? 'Running' : 'Unknown');
+							.filter((containerStatus) => containerStatus.name === container.name)
+							.map((status) => {
+								const state = status?.state?.waiting?.reason || status?.state?.terminated?.reason || (pod.status?.phase === 'Running' ? 'Running' : 'Unknown');
 
 								if (!state || (pod.status?.phase === 'Pending' && !status.state?.waiting)) {
 									return null;
@@ -92,7 +92,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 									state,
 									stateDetails: JSON.parse(JSON.stringify(status.state)),
 									restartCount: status.restartCount || 0,
-									message: status.state.waiting?.message || '',
+									message: status?.state?.waiting?.message || '',
 								};
 							})
 					)
@@ -100,7 +100,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 					.filter((status: any, index: number, self: any[]) => {
 						if (status.state === 'Running' && status.ready) return true;
 						if (status.state === 'ContainerCreating') {
-							const availableReplicas = deploymentData.body.status?.availableReplicas || 0;
+							const availableReplicas = deploymentData.status?.availableReplicas || 0;
 							const nonCreatingCount = self.filter((s: any) => s.state !== 'ContainerCreating').length;
 							return nonCreatingCount === availableReplicas;
 						}
@@ -110,10 +110,10 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 				const logs = await Promise.all(
 					status.map(async (status: any) => {
 						try {
-							const podLogs = await coreV1Api.readNamespacedPodLog(status.podName, projectName, container.name, undefined, undefined, undefined, undefined);
+							const podLogs = await coreV1Api.readNamespacedPodLog({ name: status.podName, namespace: projectName, container: container.name });
 							return {
 								podName: status.podName,
-								logs: podLogs.body.split('\n').slice(0, 500),
+								logs: podLogs.split('\n').slice(0, 500),
 							};
 						} catch (error) {
 							console.warn(`Error fetching logs for pod ${status.podName}:`, error);
@@ -135,22 +135,22 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 		const logs = await getLogs(projectName, appName);
 
 		return {
-			name: appData.body.metadata.name,
-			description: appData.body.metadata.annotations?.description || '',
-			createdAt: appData.body.metadata.creationTimestamp,
+			name: appData.metadata.name,
+			description: appData.metadata.annotations?.description || '',
+			createdAt: appData.metadata.creationTimestamp,
 			repository: {
-				url: appData.body.metadata.annotations?.repository || '',
+				url: appData.metadata.annotations?.repository || '',
 				image: '',
 				version: '',
 			},
 			replicas: {
-				desired: deploymentData.body?.spec?.replicas || 0,
-				available: deploymentData.body?.status?.availableReplicas || 0,
-				ready: deploymentData.body?.status?.readyReplicas || 0,
-				updated: deploymentData.body?.status?.updatedReplicas || 0,
-				asked: appData.body?.spec?.replicas || 0,
+				desired: deploymentData.spec?.replicas || 0,
+				available: deploymentData.status?.availableReplicas || 0,
+				ready: deploymentData.status?.readyReplicas || 0,
+				updated: deploymentData.status?.updatedReplicas || 0,
+				asked: appData.spec?.replicas || 0,
 			},
-			domains: appData.body?.spec?.domains || [],
+			domains: appData.spec?.domains || [],
 			databases: databaseStatuses,
 			containers,
 			collaborators: app.collaborators.map((collaborator) => ({
@@ -174,14 +174,23 @@ export async function createApp(userId: string, { name, description, repository,
 		};
 	}
 
-	await customObjectsApi.createNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', {
-		apiVersion: 'kooked.ch/v1',
-		kind: 'KookedApp',
-		metadata: {
-			name,
-			annotations: {
-				description,
-				repository,
+	await customObjectsApi.createNamespacedCustomObject({
+		group: 'kooked.ch',
+		version: 'v1',
+		namespace: projectName,
+		plural: 'kookedapps',
+		body: {
+			apiVersion: 'kooked.ch/v1',
+			kind: 'KookedApp',
+			metadata: {
+				name,
+				annotations: {
+					description,
+					repository,
+				},
+			},
+			spec: {
+				replicas: 1,
 			},
 		},
 	});

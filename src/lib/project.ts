@@ -31,9 +31,7 @@ export async function createProject(userId: string, project: { name: string; des
 			members: [{ userId, accreditation: defaultAccreditation._id }],
 		});
 
-		await k3sApi.createNamespace({
-			metadata: { name: slug },
-		});
+		await k3sApi.createNamespace({ body: { metadata: { name: slug } } });
 
 		return { message: 'Project created successfully', status: 201 };
 	} catch (error) {
@@ -76,10 +74,10 @@ export async function getProject(slug: string): Promise<ProjectType | null> {
 			return null;
 		}
 
-		const appsData: any = await customObjectsApi.listNamespacedCustomObject('kooked.ch', 'v1', project.slug, 'kookedapps');
+		const appsData: any = await customObjectsApi.listNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: project.slug, plural: 'kookedapps' });
 		const apps = await AppModel.find({ projectId: project._id }).exec();
 
-		const filteredApps = appsData.body.items
+		const filteredApps = appsData.items
 			.filter((app: any) => apps.some((dbApp) => dbApp.name === app.metadata.name))
 			.map(async (app: any) => {
 				return {

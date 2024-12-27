@@ -8,14 +8,14 @@ import { log } from './log';
 
 export async function getDomains({ projectName, appName }: { projectName: string; appName: string }): Promise<DomainType[] | null> {
 	try {
-		const appData: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
+		const appData: any = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
 
-		if (!appData || !appData.body || !appData.body.spec || !appData.body.spec.domains) {
+		if (!appData || !appData.spec.domains) {
 			return null;
 		}
 
 		const domains = await Promise.all(
-			(appData.body?.spec?.domains || []).map(async (domain: { container: string; port: number; url: string }) => {
+			(appData.spec.domains || []).map(async (domain: { container: string; port: number; url: string }) => {
 				const monitor = await getMonitor(domain.url);
 
 				return {
@@ -36,23 +36,23 @@ export async function getDomains({ projectName, appName }: { projectName: string
 
 export async function createDomain({ projectName, appName, url, port, container }: { projectName: string; appName: string; url: string; port: number; container: string }): Promise<ErrorType> {
 	try {
-		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
+		const app: any = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
 
-		if (!app || !app.body || !app.body.spec) {
+		if (!app) {
 			return {
 				message: 'App not found',
 				status: 404,
 			};
 		}
 
-		if (!app.body.spec.containers.find((c: any) => c.name === container)) {
+		if (!app.spec.containers.find((c: any) => c.name === container)) {
 			return {
 				message: 'Container not found',
 				status: 404,
 			};
 		}
 
-		const appDomains = app.body.spec.domains || [];
+		const appDomains = app.spec.domains || [];
 		if (!Array.isArray(appDomains)) {
 			return {
 				message: 'Domains field is not an array',
@@ -60,8 +60,8 @@ export async function createDomain({ projectName, appName, url, port, container 
 			};
 		}
 
-		const apps: any = await customObjectsApi.listClusterCustomObject('kooked.ch', 'v1', 'kookedapps');
-		const allDomains = apps.body.items.flatMap((app: any) => app?.spec?.domains || []);
+		const apps: any = await customObjectsApi.listClusterCustomObject({ group: 'kooked.ch', version: 'v1', plural: 'kookedapps' });
+		const allDomains = apps.items.flatMap((app: any) => app?.spec?.domains || []);
 
 		if (allDomains.some((domain: any) => domain?.url === url)) {
 			return {
@@ -114,7 +114,7 @@ export async function createDomain({ projectName, appName, url, port, container 
 			return monitor;
 		}
 
-		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+		await customObjectsApi.patchNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName, body: patch });
 
 		log(`Created ${url} domain for ${container} container`, 'info', projectName, appName);
 
@@ -130,9 +130,9 @@ export async function createDomain({ projectName, appName, url, port, container 
 
 export async function deleteDomain({ projectName, appName, url }: { projectName: string; appName: string; url: string }): Promise<ErrorType> {
 	try {
-		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
+		const app: any = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
 
-		const appDomains = app.body.spec.domains || [];
+		const appDomains = app.spec.domains || [];
 		if (!Array.isArray(appDomains)) {
 			return {
 				message: 'Domains field is not an array',
@@ -161,7 +161,7 @@ export async function deleteDomain({ projectName, appName, url }: { projectName:
 		const monitor = await deleteMonitor(url);
 		if (monitor.status !== 200) return monitor;
 
-		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+		await customObjectsApi.patchNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName, body: patch });
 
 		log(`Deleted ${url} domain`, 'info', projectName, appName);
 

@@ -5,16 +5,16 @@ import { log } from './log';
 
 export async function createContainer({ projectName, appName, name, image, version, env }: { projectName: string; appName: string; name: string; image: string; version: string; env: { name: string; value: string }[] }): Promise<ErrorType> {
 	try {
-		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
+		const app: any = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
 
-		if (!app || !app.body || !app.body.spec) {
+		if (!app) {
 			return {
 				message: 'App not found',
 				status: 404,
 			};
 		}
 
-		const existingContainer = app.body.spec.containers.find((container: any) => container.name === name);
+		const existingContainer = app.spec.containers.find((container: any) => container.name === name);
 
 		if (existingContainer) {
 			return { message: 'Container already exists', status: 400 };
@@ -25,7 +25,7 @@ export async function createContainer({ projectName, appName, name, image, versi
 				op: 'replace',
 				path: '/spec/containers',
 				value: [
-					...app.body.spec.containers,
+					...app.spec.containers,
 					{
 						name,
 						image: `${image}:${version}`,
@@ -35,9 +35,7 @@ export async function createContainer({ projectName, appName, name, image, versi
 			},
 		];
 
-		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
-
-		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+		await customObjectsApi.patchNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName, body: patch });
 		await log(`Created ${name} container`, 'info', projectName, appName);
 
 		return {
@@ -52,17 +50,17 @@ export async function createContainer({ projectName, appName, name, image, versi
 
 export async function updateContainer({ projectName, appName, containerName, data }: { projectName: string; appName: string; containerName: string; data: { name: string; image: string; version: string; env: { name: string; value: string }[] } }): Promise<ErrorType> {
 	try {
-		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
+		const app: any = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
 
-		if (!app || !app.body || !app.body.spec) {
+		if (!app) {
 			return {
 				message: 'App not found',
 				status: 404,
 			};
 		}
 
-		const containerIndex = app.body.spec.containers.findIndex((container: any) => container.name === containerName);
-		const container = app.body.spec.containers[containerIndex];
+		const containerIndex = app.spec.containers.findIndex((container: any) => container.name === containerName);
+		const container = app.spec.containers[containerIndex];
 
 		if (containerIndex === -1) {
 			return { message: 'Container not found', status: 404 };
@@ -84,7 +82,7 @@ export async function updateContainer({ projectName, appName, containerName, dat
 
 		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
 
-		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+		await customObjectsApi.patchNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName, body: patch });
 		await log(`Updated ${containerName} container`, 'info', projectName, appName);
 
 		return {
@@ -99,16 +97,16 @@ export async function updateContainer({ projectName, appName, containerName, dat
 
 export async function deleteContainer({ projectName, appName, containerName }: { projectName: string; appName: string; containerName: string }): Promise<ErrorType> {
 	try {
-		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
+		const app: any = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
 
-		if (!app || !app.body || !app.body.spec) {
+		if (!app) {
 			return {
 				message: 'App not found',
 				status: 404,
 			};
 		}
 
-		const containerIndex = app.body.spec.containers.findIndex((container: any) => container.name === containerName);
+		const containerIndex = app.spec.containers.findIndex((container: any) => container.name === containerName);
 
 		if (containerIndex === -1) {
 			return { message: 'Container not found', status: 404 };
@@ -123,7 +121,7 @@ export async function deleteContainer({ projectName, appName, containerName }: {
 
 		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
 
-		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+		await customObjectsApi.patchNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName, body: patch });
 		await log(`Deleted ${containerName} container`, 'info', projectName, appName);
 
 		return {
