@@ -165,3 +165,32 @@ export async function createMonitor(url: string): Promise<ErrorType> {
 	}
 }
 
+export async function deleteMonitor(url: string): Promise<ErrorType> {
+	try {
+		const monitors = await getMonitors();
+		const monitor = monitors.find((monitor) => monitor.url === `https://${url}`);
+
+		if (!monitor) {
+			console.warn(`Monitor not found for URL: ${url}`);
+			return {
+				message: 'Monitor not found',
+				status: 404,
+			};
+		}
+
+		await apiRequest(`/monitors/${monitor.id}`, {
+			method: 'DELETE',
+		});
+
+		return {
+			message: 'Monitor deleted',
+			status: 200,
+		};
+	} catch (error) {
+		console.error(`Error deleting monitor:`, error);
+		return {
+			message: 'An unexpected error occurred',
+			status: 500,
+		};
+	}
+}
