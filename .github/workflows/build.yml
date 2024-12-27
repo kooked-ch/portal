@@ -1,4 +1,4 @@
-name: Build Docker image
+name: Build Docker image and Create Release
 
 on:
   push:
@@ -10,7 +10,24 @@ env:
   REPOSITORY: ${{ github.repository }}
 
 jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get Version from package.json
+        id: get_version
+        run: |
+          version=$(jq -r .version package.json)
+          echo "Version from package.json: $version"
+          echo "version=$version" >> $GITHUB_OUTPUT
+
   build:
+    needs: get-version
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,15 +49,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get Version from package.json
-        id: get_version
-        run: |
-          version=$(jq -r .version package.json)
-          echo "Version from package.json: $version"
-          echo "version=$version" >> $GITHUB_ENV
-
       - name: Echo version
-        run: echo "Building ${{ env.REGISTRY }}/${{ env.REPOSITORY }}, version ${{ env.version }}"
+        run: echo "Building ${{ env.REGISTRY }}/${{ env.REPOSITORY }}, version ${{ needs.get-version.outputs.version }}"
 
       - name: Extract Docker metadata
         id: meta
@@ -49,20 +59,20 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}
           tags: |
             latest,
-            ${{ env.version }}
+            ${{ needs.get-version.outputs.version }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:latest,${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.version }}
+          tags: ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:latest,${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ needs.get-version.outputs.version }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  create_release:
-    needs: build
+  create-release:
+    needs: [get-version, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -80,7 +90,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ env.version }}" \
-              --repo="${{ env.REPOSITORY }}" \
-              --title="${{ env.version }}" \
-              --generate-notes
+          gh release create "${{ needs.get-version.outputs.version }}" \
+          --repo="${{ github.repository }}" \
+          --title="${{ needs.get-version.outputs.version }}" \
+          --generate-notes
