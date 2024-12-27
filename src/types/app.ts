@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { ContainerType } from './container';
+import { logType } from './log';
 
 export interface AppsType {
 	name: string;
@@ -66,4 +67,5 @@ export interface AppType {
 		username: string;
 		image: string;
 	}[];
+	logs: logType[];
 }
