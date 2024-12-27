@@ -6,6 +6,7 @@ import { AppModel, IApp } from '@/models/App';
 import { ProjectModel } from '@/models/Project';
 import { AccreditationModel } from '@/models/Accreditation';
 import { IUser } from '@/models/User';
+import { getLogs } from './log';
 
 export async function getApp(projectName: string, appName: string): Promise<AppType | null> {
 	const hasAccess = await checkAccreditation('apps:2:read', `${projectName}/${appName}`);
@@ -108,6 +109,8 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 				}),
 		}));
 
+		const logs = await getLogs(projectName, appName);
+
 		return {
 			name: appData.body.metadata.name,
 			description: appData.body.metadata.annotations?.description || '',
@@ -131,6 +134,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 				username: collaborator.userId.username || '',
 				image: collaborator.userId.image || '',
 			})),
+			logs,
 		};
 	} catch (error) {
 		console.error('Error fetching app:', error);
