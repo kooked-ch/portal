@@ -79,11 +79,14 @@ export async function createDomain({ projectName, appName, url, port, container 
 				.split('\n')
 				.map((w) => w.trim().toLowerCase());
 
-			if (words.some((word) => url.toLowerCase().includes(word))) {
-				return {
-					message: 'Domain not allowed due to restricted words',
-					status: 400,
-				};
+			for (const word of words) {
+				const regex = new RegExp(`(^|\\.)${word}(\\.|$)`, 'i');
+				if (regex.test(url)) {
+					return {
+						message: 'Domain not allowed due to restricted words',
+						status: 400,
+					};
+				}
 			}
 		}
 
