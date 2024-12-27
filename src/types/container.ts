@@ -15,6 +15,10 @@ export interface ContainerType {
 		message: string;
 		reason: string;
 	}[];
+	logs: {
+		podName: string;
+		logs: string[] | null;
+	}[];
 }
 
 export const containerSchema = z.object({
