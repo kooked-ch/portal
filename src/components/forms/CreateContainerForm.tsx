@@ -48,7 +48,7 @@ export default function CreateContainerDialog() {
 		setLoading(true);
 
 		try {
-			const response = await fetch(`/api/project/${pathname}/containers`, {
+			const response = await fetch(`/api/project${pathname}/containers`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ name: data.name, image: data.image, version: data.version, env: envVars }),

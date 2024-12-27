@@ -16,7 +16,7 @@ export default function DeleteDomainDialog({ url }: { url: string }) {
 		setLoading(true);
 
 		try {
-			const response = await fetch(`/api/project/${pathname}/domains/${url}`, {
+			const response = await fetch(`/api/project${pathname}/domains/${url}`, {
 				method: 'DELETE',
 			});
 

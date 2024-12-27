@@ -32,7 +32,7 @@ export default function CreateDomainDialog({ containersList, refetch }: { contai
 		setLoading(true);
 
 		try {
-			const response = await fetch(`/api/project/${pathname}/domains`, {
+			const response = await fetch(`/api/project${pathname}/domains`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ url: data.url, port: data.port, container: data.container }),

@@ -17,7 +17,7 @@ export default function DeleteContainerDialog({ containerName }: { containerName
 		setLoading(true);
 
 		try {
-			const response = await fetch(`/api/project/${pathname}/containers/${containerName}`, {
+			const response = await fetch(`/api/project${pathname}/containers/${containerName}`, {
 				method: 'DELETE',
 			});
 

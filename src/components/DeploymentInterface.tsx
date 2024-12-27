@@ -19,7 +19,7 @@ import LogViewer from './log';
 export default function DeploymentInterface({ app }: { app: AppType }) {
 	const [selectedTab, setSelectedTab] = useState<Tab>('Containers');
 	const pathname = usePathname();
-	const { data: domainsDetails, loading: domainsLoading, error: domainsError, refetch: domainRefetch } = useFetch(`/api/project/${pathname}/domains`);
+	const { data: domainsDetails, loading: domainsLoading, error: domainsError, refetch: domainRefetch } = useFetch(`/api/project${pathname}/domains`);
 
 	const TABS = ['Containers', 'Domains', ...(app.logs.length > 0 ? ['Logs'] : [])] as const;
 	type Tab = (typeof TABS)[number];

@@ -47,7 +47,7 @@ export default function EditContainerDialog({ container, setCustomStatus }: { co
 		setLoading(true);
 
 		try {
-			const response = await fetch(`/api/project/${pathname}/containers/${container.name}`, {
+			const response = await fetch(`/api/project${pathname}/containers/${container.name}`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
