@@ -4,6 +4,7 @@ import { getMonitor } from './kuma';
 import { ErrorType } from '@/types/error';
 import fs from 'fs';
 import path from 'path';
+import { log } from './log';
 
 export async function getDomains({ projectName, appName }: { projectName: string; appName: string }): Promise<DomainType[] | null> {
 	try {
@@ -108,6 +109,8 @@ export async function createDomain({ projectName, appName, url, port, container 
 		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
 
 		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+
+		log(`Created ${url} domain for ${container} container`, 'info', projectName, appName);
 
 		return {
 			message: 'Domain created',
