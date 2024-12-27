@@ -1,5 +1,5 @@
 import { AppModel } from '@/models/App';
-import { getUser } from './auth';
+import { checkAccreditation, getUser } from './auth';
 import { ProjectModel } from '@/models/Project';
 import { LogsModel } from '@/models/Logs';
 import { UserModel } from '@/models/User';
@@ -21,6 +21,10 @@ export async function log(message: string, type: string, projectName: string, ap
 }
 
 export async function getLogs(projectName: string, appName: string): Promise<logType[]> {
+	if (!(await checkAccreditation('logs:2:read', `${projectName}/${appName}`))) {
+		return [];
+	}
+
 	const project = await ProjectModel.findOne({ slug: projectName }).exec();
 	if (!project) {
 		return [];
