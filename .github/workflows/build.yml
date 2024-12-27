@@ -90,7 +90,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ needs.get-version.outputs.version }}" \
-          --repo="${{ github.repository }}" \
-          --title="${{ needs.get-version.outputs.version }}" \
-          --generate-notes
+          version="${{ needs.get-version.outputs.version }}"
+
+          if ! gh release create "$version" \
+            --repo="${{ github.repository }}" \
+            --title="$version" \
+            --generate-notes; then
+            
+            if gh release view "$version" --repo ${{ github.repository }} &>/dev/null; then
+              echo "Release $version already exists, treating as success"
+              exit 0
+            else
+              echo "Failed to create release and release doesn't exist"
+              exit 1
+            fi
+          fi
