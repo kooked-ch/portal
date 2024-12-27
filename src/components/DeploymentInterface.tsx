@@ -14,6 +14,7 @@ import { DomainStatus } from './domain';
 import useFetch from '@/hooks/useFetch';
 import { usePathname } from 'next/navigation';
 import CreateDomainDialog from './forms/CreateDomainForm';
+import LogViewer from './log';
 
 const TABS = ['Containers', 'Domains', 'Logs'] as const;
 type Tab = (typeof TABS)[number];
@@ -114,14 +115,7 @@ export default function DeploymentInterface({ app }: { app: AppType }) {
 						{selectedTab === 'Logs' && (
 							<div className="space-y-4">
 								<h2 className="text-xl font-semibold">Logs</h2>
-								<div className="bg-[#1E1E20] p-4 rounded-lg h-48 overflow-y-auto">
-									<pre className="text-sm text-[#666]">
-										{`2024-12-02T12:01:15Z: Container web started successfully.
-2024-12-02T12:05:22Z: Connected to database.
-2024-12-02T12:10:05Z: GET request received on /convert
-2024-12-02T12:11:33Z: Conversion completed successfully.`}
-									</pre>
-								</div>
+								<LogViewer logs={app.logs} collaborators={app.collaborators} />
 							</div>
 						)}
 					</div>
