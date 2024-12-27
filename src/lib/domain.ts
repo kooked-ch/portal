@@ -1,6 +1,6 @@
 import { DomainType } from '@/types/domain';
 import { customObjectsApi } from './api';
-import { getMonitor } from './kuma';
+import { createMonitor, deleteMonitor, getMonitor } from './kuma';
 import { ErrorType } from '@/types/error';
 import fs from 'fs';
 import path from 'path';
@@ -108,6 +108,12 @@ export async function createDomain({ projectName, appName, url, port, container 
 
 		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
 
+		const monitor = await createMonitor(url);
+
+		if (monitor.status !== 201) {
+			return monitor;
+		}
+
 		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
 
 		log(`Created ${url} domain for ${container} container`, 'info', projectName, appName);
@@ -118,6 +124,53 @@ export async function createDomain({ projectName, appName, url, port, container 
 		};
 	} catch (error: unknown) {
 		console.error('Error creating domain:', error);
+		return { message: 'An unexpected error occurred', status: 500 };
+	}
+}
+
+export async function deleteDomain({ projectName, appName, url }: { projectName: string; appName: string; url: string }): Promise<ErrorType> {
+	try {
+		const app: any = await customObjectsApi.getNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName);
+
+		const appDomains = app.body.spec.domains || [];
+		if (!Array.isArray(appDomains)) {
+			return {
+				message: 'Domains field is not an array',
+				status: 500,
+			};
+		}
+
+		const domainIndex = appDomains.findIndex((d: any) => d.url === url);
+		if (domainIndex === -1) {
+			return {
+				message: 'Domain not found',
+				status: 404,
+			};
+		}
+
+		const patch = [
+			{
+				op: appDomains.length > 0 ? 'replace' : 'add',
+				path: '/spec/domains',
+				value: appDomains.filter((d: any) => d.url !== url),
+			},
+		];
+
+		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
+
+		const monitor = await deleteMonitor(url);
+		if (monitor.status !== 200) return monitor;
+
+		await customObjectsApi.patchNamespacedCustomObject('kooked.ch', 'v1', projectName, 'kookedapps', appName, patch, undefined, undefined, undefined, options);
+
+		log(`Deleted ${url} domain`, 'info', projectName, appName);
+
+		return {
+			message: 'Domain deleted',
+			status: 200,
+		};
+	} catch (error: unknown) {
+		console.error('Error deleting domain:', error);
 		return { message: 'An unexpected error occurred', status: 500 };
 	}
 }
