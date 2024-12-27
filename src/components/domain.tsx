@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DomainMonitorType } from '@/types/domain';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from './ui/chart';
 import { cn } from '@/lib/utils';
+import DeleteDomainDialog from './forms/DeleteDomainForm';
 
 const LoadingState = () => (
 	<Card className="bg-[#18181a] border-0">
@@ -59,7 +60,7 @@ export const DomainStatus = ({
 	}
 
 	const chartData = monitoringData.responseTimeHistory.map((item) => ({
-		time: new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+		time: item.time.split('T')[1].slice(0, 5),
 		value: item.value,
 		status: item.status,
 	}));
@@ -95,11 +96,18 @@ export const DomainStatus = ({
 								<Globe className={cn('w-5 h-5', isHealthy ? 'text-blue-500' : 'text-red-500')} />
 							</div>
 							<div className="flex flex-col">
-								<span className={cn('font-medium text-lg flex gap-2', isHealthy ? 'text-white' : 'text-red-500')}>{domain.url}</span>
 								<div className="flex items-center space-x-2">
-									<p className="text-[#666] text-sm">Port: {domain.port}</p>
+									<span className={cn('font-medium text-lg flex gap-2', isHealthy ? 'text-white' : 'text-red-500')}>{domain.url}</span>
+								</div>
+								<div className="flex items-center space-x-2">
+									<p className="text-[#666] text-sm">
+										{domain.container}: {domain.port}
+									</p>
 									<span className="text-[#666]">•</span>
-									<p className="text-[#666] text-sm">Container: {domain.container}</p>
+									<Button variant="link" className="text-[#666] px-0 py-0 h-1">
+										Edit
+									</Button>
+									<DeleteDomainDialog url={domain.url} />
 								</div>
 							</div>
 						</div>
