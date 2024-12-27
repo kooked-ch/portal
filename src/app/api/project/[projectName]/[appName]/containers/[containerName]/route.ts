@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkAccreditation, getUser } from '@/lib/auth';
 import { deleteContainer, updateContainer } from '@/lib/container';
 import { containerSchema } from '@/types/container';
+import { log } from '@/lib/log';
 
 export async function PUT(req: NextRequest, { params }: { params: { projectName: string; appName: string; containerName: string } }) {
 	try {
 		const user = await getUser();
 
 		if (!user || !(await checkAccreditation('containers:2:update', `${params.projectName}/${params.appName}`))) {
+			log(`Unauthorized: Update container`, 'info', params.projectName, params.appName);
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 		}
 
@@ -36,6 +38,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { projectNa
 		const user = await getUser();
 
 		if (!user || !(await checkAccreditation('containers:2:delete', `${params.projectName}/${params.appName}`))) {
+			log(`Unauthorized: Delete container`, 'info', params.projectName, params.appName);
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 		}
 
