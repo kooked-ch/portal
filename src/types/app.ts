@@ -11,6 +11,34 @@ export interface AppsType {
 		image: string;
 		version: string;
 	};
+	containers: {
+		name: string;
+		image: string;
+		status: {
+			ready: boolean;
+			stateDetails: any;
+		}[];
+	}[];
+	domains: {
+		url: string;
+		port: number;
+		container: string;
+		status: boolean;
+	}[];
+	databases: {
+		name: string;
+		password: string;
+		provider: string;
+		user: string;
+		status: {
+			state: string;
+			replicas: {
+				desired: number;
+				current: number;
+				ready: number;
+			};
+		};
+	}[];
 }
 
 export const appSchema = z.object({
