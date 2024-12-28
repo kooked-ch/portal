@@ -5,7 +5,13 @@ import { log } from './log';
 
 export async function createContainer({ projectName, appName, name, image, version, env }: { projectName: string; appName: string; name: string; image: string; version: string; env: { name: string; value: string }[] }): Promise<ErrorType> {
 	try {
-		const app: any = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
+		const app: any = await customObjectsApi.getNamespacedCustomObject({
+			group: 'kooked.ch',
+			version: 'v1',
+			namespace: projectName,
+			plural: 'kookedapps',
+			name: appName,
+		});
 
 		if (!app) {
 			return {
@@ -14,7 +20,9 @@ export async function createContainer({ projectName, appName, name, image, versi
 			};
 		}
 
-		const existingContainer = app.spec.containers.find((container: any) => container.name === name);
+		const containers = app?.spec?.containers || [];
+
+		const existingContainer = containers.find((container: any) => container.name === name);
 
 		if (existingContainer) {
 			return { message: 'Container already exists', status: 400 };
@@ -22,10 +30,10 @@ export async function createContainer({ projectName, appName, name, image, versi
 
 		const patch = [
 			{
-				op: 'replace',
+				op: containers.length > 0 ? 'replace' : 'add',
 				path: '/spec/containers',
 				value: [
-					...app.spec.containers,
+					...containers,
 					{
 						name,
 						image: `${image}:${version}`,
@@ -35,7 +43,14 @@ export async function createContainer({ projectName, appName, name, image, versi
 			},
 		];
 
-		await customObjectsApi.patchNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName, body: patch });
+		await customObjectsApi.patchNamespacedCustomObject({
+			group: 'kooked.ch',
+			version: 'v1',
+			namespace: projectName,
+			plural: 'kookedapps',
+			name: appName,
+			body: patch,
+		});
 		await log(`Created ${name} container`, 'info', projectName, appName);
 
 		return {
