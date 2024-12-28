@@ -151,8 +151,8 @@ export default function DeploymentInterface({ app }: { app: AppType }) {
 						<div className="space-y-2 mt-6">
 							<div className="text-sm text-[#666] uppercase font-medium">Domains</div>
 							{app.domains.map((domain, index) => (
-								<Link key={'domain' + index} href={'https://' + domain.url} target="_blank" className="flex gap-2 items-center text-purple-500">
-									<Globe className="w-4 h-4" />
+								<Link key={'domain' + index} href={'https://' + domain.url} target="_blank" className="flex gap-1 justify-start items-center text-purple-500">
+									<Globe className="w-4 h-4 mt-[0.2rem]" />
 									<p className="hover:underline">{domain.url}</p>
 								</Link>
 							))}
