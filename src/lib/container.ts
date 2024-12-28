@@ -2,6 +2,7 @@ import { customObjectsApi } from './api';
 import { ErrorType } from '@/types/error';
 import { checkAccreditation } from './auth';
 import { log } from './log';
+import { DomainType } from '@/types/domain';
 
 export async function createContainer({ projectName, appName, name, image, version, env }: { projectName: string; appName: string; name: string; image: string; version: string; env: { name: string; value: string }[] }): Promise<ErrorType> {
 	try {
@@ -75,11 +76,11 @@ export async function updateContainer({ projectName, appName, containerName, dat
 		}
 
 		const containerIndex = app.spec.containers.findIndex((container: any) => container.name === containerName);
-		const container = app.spec.containers[containerIndex];
-
 		if (containerIndex === -1) {
 			return { message: 'Container not found', status: 404 };
 		}
+
+		const container = app.spec.containers[containerIndex];
 
 		const canUpdateEnv = await checkAccreditation('env:2:update', `${projectName}/${appName}`);
 
@@ -94,6 +95,17 @@ export async function updateContainer({ projectName, appName, containerName, dat
 				},
 			},
 		];
+
+		if (app.spec.domains && Array.isArray(app.spec.domains) && app.spec.domains.length > 0) {
+			patch.push({
+				op: 'replace',
+				path: '/spec/domains',
+				value: app.spec.domains.map((domain: DomainType) => ({
+					...domain,
+					container: domain.container === containerName ? data.name : domain.container,
+				})),
+			});
+		}
 
 		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
 
