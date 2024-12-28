@@ -6,6 +6,7 @@ import { ProjectsType, ProjectType } from '@/types/project';
 import { checkAccreditation } from './auth';
 import { getRepository } from './utils';
 import { AppModel } from '@/models/App';
+import { getApp } from './app';
 
 export async function createProject(userId: string, project: { name: string; description: string }): Promise<ErrorType> {
 	try {
@@ -80,11 +81,23 @@ export async function getProject(slug: string): Promise<ProjectType | null> {
 		const filteredApps = appsData.items
 			.filter((app: any) => apps.some((dbApp) => dbApp.name === app.metadata.name))
 			.map(async (app: any) => {
+				const appData = await getApp(project.slug, app.metadata.name);
 				return {
 					name: app.metadata.name,
 					description: app.metadata.annotations?.description || '',
 					repository: await getRepository(app.metadata.annotations?.repository || ''),
 					createdAt: app.metadata.creationTimestamp,
+					containers:
+						appData?.containers.map((container) => ({
+							name: container.name,
+							image: container.image,
+							status: container.status.map((status) => ({
+								ready: status.ready,
+								stateDetails: status.stateDetails,
+							})),
+						})) || [],
+					domains: appData?.domains || [],
+					databases: appData?.databases || [],
 				};
 			});
 
