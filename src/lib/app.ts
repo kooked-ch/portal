@@ -43,6 +43,18 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 			};
 		}
 
+		const domainStatuses = await Promise.all(
+			(appData.spec?.domains || []).map(async (domain: any) => {
+				try {
+					const response = await fetch(`https://${domain.url}`, { method: 'GET' });
+					return { ...domain, status: response.ok };
+				} catch (error) {
+					console.warn(`Domain check failed for ${domain.url}`);
+					return { ...domain, status: 'down' };
+				}
+			})
+		);
+
 		const databaseStatuses = await Promise.all(
 			(appData.spec?.databases || []).map(async (db: any) => {
 				try {
@@ -150,7 +162,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 				updated: deploymentData.status?.updatedReplicas || 0,
 				asked: appData.spec?.replicas || 0,
 			},
-			domains: appData.spec?.domains || [],
+			domains: domainStatuses,
 			databases: databaseStatuses,
 			containers,
 			collaborators: app.collaborators.map((collaborator) => ({
