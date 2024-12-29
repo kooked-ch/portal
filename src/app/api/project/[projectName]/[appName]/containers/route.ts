@@ -15,7 +15,7 @@ export async function POST(req: NextRequest, { params }: { params: { projectName
 
 		const { name, image, version, env } = await req.json();
 
-		if (env && Array.isArray(env) && (env.filter((e) => e.name.trim() === '' && e.value.trim() !== '').length > 0 || env.filter((e) => e.name.trim() !== '' && e.value.trim() === '').length > 0)) {
+		if (env && Array.isArray(env) && (env.some((e) => e.name.trim() === '' && e.value.trim() !== '') || env.some((e) => e.name.trim() !== '' && e.value.trim() === ''))) {
 			return NextResponse.json({ message: 'Environment variables must have both a name and a value' }, { status: 400 });
 		}
 
@@ -24,11 +24,18 @@ export async function POST(req: NextRequest, { params }: { params: { projectName
 			return NextResponse.json({ message: 'Invalid request', details: validationResult.error.errors }, { status: 400 });
 		}
 
-		const container = await createContainer({ projectName: params.projectName, appName: params.appName, name, image, version, env });
+		const container = await createContainer({
+			projectName: params.projectName,
+			appName: params.appName,
+			name,
+			image,
+			version,
+			env,
+		});
 
 		return NextResponse.json({ message: container.message }, { status: container.status });
 	} catch (error) {
-		console.error('Error creating project:', error);
+		console.error('Error creating container:', error);
 		return NextResponse.json({ message: 'An unexpected error occurred' }, { status: 500 });
 	}
 }
