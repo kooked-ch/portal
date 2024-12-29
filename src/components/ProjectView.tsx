@@ -84,19 +84,17 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 		const uptime = calculateUptime(app);
 
 		return (
-			<Link href={`/${project.name}/${app.name}`}>
-				<Card className="hover:shadow-lg transition-shadow">
-					<CardHeader>
-						<div className="flex justify-between items-start">
-							<div>
-								<CardTitle className="text-xl">{app.name}</CardTitle>
-								<CardDescription>{app.description}</CardDescription>
-							</div>
-							<Badge variant={isOnline ? 'outline' : 'destructive'}>{isOnline ? 'Online' : 'Offline'}</Badge>
+			<Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/${project.name}/${app.name}`)}>
+				<CardHeader>
+					<div className="flex justify-between items-start">
+						<div>
+							<CardTitle className="text-xl">{app.name}</CardTitle>
+							<CardDescription>{app.description}</CardDescription>
 						</div>
-					</CardHeader>
-				</Card>
-			</Link>
+						<Badge variant={isOnline ? 'outline' : 'destructive'}>{isOnline ? 'Online' : 'Offline'}</Badge>
+					</div>
+				</CardHeader>
+			</Card>
 		);
 	};
 
@@ -105,22 +103,20 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 		const uptime = calculateUptime(app);
 
 		return (
-			<Link href={`/${project.name}/${app.name}`}>
-				<Card className="hover:shadow-lg transition-shadow">
-					<CardContent className="py-4">
-						<div className="flex justify-between items-center">
-							<div className="flex items-center gap-4">
-								<Activity className="w-5 h-5" />
-								<div>
-									<div className="font-medium">{app.name}</div>
-									<div className="text-sm text-gray-500">{app.description}</div>
-								</div>
+			<Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/${project.name}/${app.name}`)}>
+				<CardContent className="py-4">
+					<div className="flex justify-between items-center">
+						<div className="flex items-center gap-4">
+							<Activity className="w-5 h-5" />
+							<div>
+								<div className="font-medium">{app.name}</div>
+								<div className="text-sm text-gray-500">{app.description}</div>
 							</div>
-							<Badge variant={isOnline ? 'outline' : 'destructive'}>{isOnline ? 'Online' : 'Offline'}</Badge>
 						</div>
-					</CardContent>
-				</Card>
-			</Link>
+						<Badge variant={isOnline ? 'outline' : 'destructive'}>{isOnline ? 'Online' : 'Offline'}</Badge>
+					</div>
+				</CardContent>
+			</Card>
 		);
 	};
 
@@ -129,7 +125,9 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 			<div className="flex justify-between items-center">
 				<div>
 					<h1 className="text-3xl font-bold">{project.name}</h1>
-					<p className="text-gray-500 mt-1">Managing {totalApps} applications</p>
+					<p className="text-gray-500 mt-1">
+						Managing {totalApps} application{totalApps > 1 && 's'}
+					</p>
 				</div>
 				<CreateAppForm onAppCreated={handleAppCreated} />
 			</div>
