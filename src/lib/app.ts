@@ -120,11 +120,12 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 					});
 
 				const logs = await Promise.all(
-					status.map(async (status: any) => {
+					status.map(async (status: any, index: number) => {
 						try {
+							if (podsResponse.items.find((pod) => pod.metadata?.name === status.podName)?.status?.phase === 'Pending') return { podName: `container-${index + 1}`, logs: ['The container is starting'] };
 							const podLogs = await coreV1Api.readNamespacedPodLog({ name: status.podName, namespace: projectName, container: container.name });
 							return {
-								podName: status.podName,
+								podName: `container-${index + 1}`,
 								logs: podLogs.split('\n').slice(0, 500),
 							};
 						} catch (error) {
