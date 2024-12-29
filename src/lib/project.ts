@@ -92,7 +92,7 @@ export async function getProject(slug: string): Promise<ProjectType | null> {
 							name: container.name,
 							image: container.image,
 							status: container.status.map((status) => ({
-								ready: status.ready,
+								ready: status.state == 'ContainerCreating' ? true : status.ready,
 								stateDetails: status.stateDetails,
 							})),
 						})) || [],
