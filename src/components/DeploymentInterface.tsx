@@ -15,6 +15,7 @@ import useFetch from '@/hooks/useFetch';
 import { usePathname } from 'next/navigation';
 import CreateDomainDialog from './forms/CreateDomainForm';
 import LogViewer from './log';
+import CreateDatabaseDialog from './forms/CreateDatabaseForm';
 
 export default function DeploymentInterface({ app }: { app: AppType }) {
 	const [selectedTab, setSelectedTab] = useState<Tab>('Containers');
@@ -58,11 +59,9 @@ export default function DeploymentInterface({ app }: { app: AppType }) {
 										<ContainerStatus key={'container' + index} container={container} />
 									))}
 								</ul>
-								<div className="flex justify-between items-center">
-									<h2 className="text-xl font-semibold mt-6">Databases</h2>
-									<Button variant="outline" size="sm" className="mt-4">
-										<Plus className="w-4 h-4" /> Add Database
-									</Button>
+								<div className="flex justify-between mt-6 items-center">
+									<h2 className="text-xl font-semibold">Databases</h2>
+									<CreateDatabaseDialog />
 								</div>
 								{app.databases.length === 0 && <div className="bg-[#1E1E20] p-4 rounded-lg text-[#666] text-sm">No databases found</div>}
 								<ul className="space-y-2">
