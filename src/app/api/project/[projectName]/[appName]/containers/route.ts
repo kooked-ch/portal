@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkAccreditation, getUser } from '@/lib/auth';
 import { containerSchema } from '@/types/container';
 import { createContainer } from '@/lib/container';
-import { log } from 'console';
+import { log } from '@/lib/log';
 
 export async function POST(req: NextRequest, { params }: { params: { projectName: string; appName: string } }) {
 	try {
