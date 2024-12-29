@@ -10,7 +10,7 @@ export default async function ProjectsPage({ params }: { params: { projectName: 
 	}
 
 	return (
-		<div className="max-w-[1400px] mx-auto py-8 px-4">
+		<div className="xl:container mx-auto px-4 xl:px-28 py-8">
 			<ProjectView project={project} />
 		</div>
 	);
