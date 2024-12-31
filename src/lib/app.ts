@@ -12,7 +12,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 	const hasAccess = await checkAccreditation('apps:2:read', `${projectName}/${appName}`);
 	if (!hasAccess) return null;
 
-	const hasEnvAccess = await checkAccreditation('env:2:read', `${projectName}/${appName}`);
+	const hasSecretsAccess = await checkAccreditation('secrets:2:read', `${projectName}/${appName}`);
 
 	const app = await AppModel.findOne<IApp>({ name: appName })
 		.populate<{ collaborators: Array<{ userId: IUser }> }>({
@@ -64,6 +64,10 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 					return {
 						name: db.name,
 						provider: db.provider,
+						...(hasSecretsAccess && {
+							username: db.user,
+							password: db.password,
+						}),
 						status: {
 							state: databasePod?.status?.phase || 'Unknown',
 							replicas: {
@@ -138,7 +142,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 				return {
 					name: container.name,
 					image: container.image,
-					env: container.env ? (hasEnvAccess ? container.env : container.env.map((env: any) => ({ name: env.name, value: '********' }))) : [],
+					env: container.env ? (hasSecretsAccess ? container.env : container.env.map((env: any) => ({ name: env.name, value: '********' }))) : [],
 					status,
 					logs,
 				};
