@@ -43,8 +43,6 @@ export async function createDatabase(projectName: string, appName: string, data:
 			},
 		];
 
-		console.log(JSON.stringify(patch));
-
 		await customObjectsApi.patchNamespacedCustomObject({
 			group: 'kooked.ch',
 			version: 'v1',
