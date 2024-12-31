@@ -114,7 +114,7 @@ export async function getMonitor(url: string): Promise<DomainMonitorType | null>
 			id: beat.id,
 			time: new Date(new Date(beat.time).toLocaleString('en-US', { timeZone: 'Europe/Paris' })).toISOString(),
 			value: beat.ping,
-			status: beat.status,
+			status: beat.status === 2 ? 0 : beat.status,
 		}));
 
 		const latestBeat = beats[beats.length - 1];
