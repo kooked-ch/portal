@@ -8,6 +8,7 @@ import { DomainMonitorType } from '@/types/domain';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from './ui/chart';
 import { cn } from '@/lib/utils';
 import DeleteDomainDialog from './forms/DeleteDomainForm';
+import EditDomainDialog from './forms/UpdateDomainForm';
 
 const LoadingState = () => (
 	<Card className="bg-[#18181a] border-0">
@@ -47,6 +48,7 @@ const config = {
 export const DomainStatus = ({
 	domain,
 	monitoringData,
+	containersList,
 }: {
 	domain: {
 		url: string;
@@ -54,6 +56,7 @@ export const DomainStatus = ({
 		container: string;
 	};
 	monitoringData?: DomainMonitorType;
+	containersList: string[];
 }) => {
 	if (!monitoringData || Object.keys(monitoringData).length === 0) {
 		return <LoadingState />;
@@ -104,9 +107,7 @@ export const DomainStatus = ({
 										{domain.container}: {domain.port}
 									</p>
 									<span className="text-[#666]">•</span>
-									<Button variant="link" className="text-[#666] px-0 py-0 h-1">
-										Edit
-									</Button>
+									<EditDomainDialog domain={domain} containersList={containersList} />
 									<DeleteDomainDialog url={domain.url} />
 								</div>
 							</div>
