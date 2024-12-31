@@ -39,8 +39,9 @@ async function connect() {
 				projects: ['create', 'read', 'update', 'delete'],
 				apps: ['create', 'read', 'update', 'delete'],
 				users: ['read', 'update'],
-				containers: ['read', 'create'],
+				containers: ['read'],
 				domains: ['read'],
+				databases: ['read'],
 			},
 		},
 		{
@@ -126,9 +127,10 @@ async function connect() {
 			authorizations: {
 				level: 0,
 				apps: ['read', 'update', 'delete'],
-				env: ['read', 'update'],
+				secrets: ['read', 'update'],
 				containers: ['read', 'update', 'delete', 'create'],
 				domains: ['read', 'update', 'delete', 'create'],
+				databases: ['read', 'update', 'delete', 'create'],
 				logs: ['read'],
 			},
 		},
@@ -140,9 +142,10 @@ async function connect() {
 			authorizations: {
 				level: 1,
 				apps: ['read', 'update'],
-				env: ['read', 'update'],
+				secrets: ['read', 'update'],
 				containers: ['read', 'update', 'delete', 'create'],
-				domains: ['read', 'update', 'create'],
+				domains: ['read', 'update', 'delete', 'create'],
+				databases: ['read', 'update', 'delete', 'create'],
 				logs: ['read'],
 			},
 		},
@@ -154,9 +157,10 @@ async function connect() {
 			authorizations: {
 				level: 2,
 				apps: ['read', 'update'],
-				env: ['read', 'update'],
+				secrets: ['read', 'update'],
 				containers: ['read', 'update', 'delete', 'create'],
 				domains: ['read', 'update', 'create'],
+				databases: ['read', 'update', 'create'],
 				logs: ['read'],
 			},
 		},
@@ -168,8 +172,9 @@ async function connect() {
 			authorizations: {
 				level: 3,
 				apps: ['read'],
-				containers: ['read', 'create'],
+				containers: ['read'],
 				domains: ['read'],
+				databases: ['read'],
 			},
 		},
 	];
