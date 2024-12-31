@@ -27,7 +27,7 @@ const calculateUptime = (app: AppsType) => {
 };
 
 export default function ProjectView({ project }: { project: ProjectType }) {
-	const [view, setView] = useState('grid');
+	const [view, setView] = useState('list');
 	const [searchQuery, setSearchQuery] = useState('');
 	const [sortBy, setSortBy] = useState('name');
 	const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
