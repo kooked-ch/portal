@@ -92,7 +92,7 @@ const getContainerStatusDetails = (totalCount: number, statuses: ContainerStatus
 	};
 };
 
-export const ContainerStatus = ({ container }: { container: ContainerType }) => {
+export const ContainerItem = ({ container }: { container: ContainerType }) => {
 	const totalCount = container.status.length;
 	const [customStatus, setCustomStatus] = useState<string>('');
 
