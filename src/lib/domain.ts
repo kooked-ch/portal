@@ -128,6 +128,59 @@ export async function createDomain({ projectName, appName, url, port, container 
 	}
 }
 
+export async function updateDomain(projectName: string, appName: string, { url, container, port }: { url: string; container: string; port: number }): Promise<ErrorType> {
+	try {
+		const app: any = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
+
+		if (!app) {
+			return {
+				message: 'App not found',
+				status: 404,
+			};
+		}
+
+		const appDomains = app.spec.domains || [];
+		if (!Array.isArray(appDomains)) {
+			return {
+				message: 'Domains field is not an array',
+				status: 500,
+			};
+		}
+
+		const domainIndex = appDomains.findIndex((d: any) => d.url === url);
+		if (domainIndex === -1) {
+			return {
+				message: 'Domain not found',
+				status: 404,
+			};
+		}
+
+		const patch = [
+			{
+				op: 'replace',
+				path: `/spec/domains/${domainIndex}`,
+				value: {
+					container,
+					port,
+					url,
+				},
+			},
+		];
+
+		await customObjectsApi.patchNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName, body: patch });
+
+		log(`Updated ${url} domain for ${container} container`, 'info', projectName, appName);
+
+		return {
+			message: 'Domain updated',
+			status: 200,
+		};
+	} catch (error: unknown) {
+		console.error('Error updating domain:', error);
+		return { message: 'An unexpected error occurred', status: 500 };
+	}
+}
+
 export async function deleteDomain({ projectName, appName, url }: { projectName: string; appName: string; url: string }): Promise<ErrorType> {
 	try {
 		const app: any = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
