@@ -79,7 +79,7 @@ export default function DeploymentInterface({ app }: { app: AppType }) {
 						) : (
 							<ul className="space-y-2">
 								{app.domains.map((domain, index) => (
-									<DomainStatus key={'domainStatus' + index} domain={domain} monitoringData={Array.isArray(domainsDetails) ? domainsDetails.find((details: any) => details.url === domain.url)?.monitor : {}} />
+									<DomainStatus key={'domainStatus' + index} domain={domain} containersList={app.containers.map((container) => container.name)} monitoringData={Array.isArray(domainsDetails) ? domainsDetails.find((details: any) => details.url === domain.url)?.monitor : {}} />
 								))}
 							</ul>
 						)}
