@@ -168,7 +168,6 @@ export const authOptions: NextAuthOptions = {
 	},
 	callbacks: {
 		jwt: enhanceToken,
-		session: enhanceSession,
 		signIn: handleSignIn,
 	},
 };
