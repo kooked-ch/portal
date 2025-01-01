@@ -87,3 +87,48 @@ export async function enableTwoFactor(otp: string, req: NextRequest) {
 
 	return await verifyTwoFactor(otp, req);
 }
+
+export async function verifyTwoFactor(otp: string, req: NextRequest) {
+	const session = await getServerSession();
+	if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+	const { enabled, disabled } = await getTwoFactor();
+	if (!enabled || disabled) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+	const user = await UserModel.findOne<IUser>({ email: session.user.email }).exec();
+	if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+	if (!user.twoFactorSecret) return NextResponse.json({ error: 'Unexpected error' }, { status: 401 });
+
+	const secret = symmetricDecrypt(user.twoFactorSecret, process.env.NEXTAUTH_ENCRYPTION!);
+	const isValidToken = authenticator.check(otp, secret);
+
+	if (!isValidToken) {
+		return NextResponse.json({ error: 'The submitted code is invalid' }, { status: 401 });
+	}
+
+	const token = await getToken({ req });
+
+	if (token) {
+		token.twoFactorComplete = true;
+		token.twoFactorExpiration = new Date(Date.now() + 1000 * 60 * 60 * 4).getTime();
+
+		const encodedToken = await encode({
+			token,
+			secret: process.env.NEXTAUTH_SECRET!,
+		});
+
+		const response = NextResponse.json({ message: '2FA verification successful' }, { status: 200 });
+		response.cookies.set({
+			name: process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
+			value: encodedToken,
+			httpOnly: true,
+			secure: true,
+			sameSite: 'lax' as const,
+			path: '/',
+			maxAge: 60 * 60 * 24 * 7,
+		});
+
+		return response;
+	}
+	return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
+}
