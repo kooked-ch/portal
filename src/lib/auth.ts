@@ -67,9 +67,18 @@ const handleSignIn = async ({ user, account, profile }: { user: User; account: a
 		const provider = account?.provider ?? 'credentials';
 		const defaultAccreditation = await AccreditationModel.findOne({ slug: 'std', accessLevel: 0 }).exec();
 
-		const updatedUser = await UserModel.findOneAndReplace(
-			{ email },
-			{
+		if (!defaultAccreditation) return false;
+
+		const existingUser = await UserModel.findOne({ email }).exec();
+
+		if (existingUser) {
+			existingUser.username = profile?.name ?? profile?.login ?? existingUser.username;
+			existingUser.image = user.image ?? profile?.image ?? existingUser.image;
+			existingUser.name = profile?.name ?? user.name ?? profile?.login ?? existingUser.name;
+
+			await existingUser.save();
+		} else {
+			await UserModel.create({
 				email,
 				id: uuid().replace(/-/g, ''),
 				username: profile?.name ?? profile?.login ?? null,
@@ -77,10 +86,9 @@ const handleSignIn = async ({ user, account, profile }: { user: User; account: a
 				provider,
 				name: profile?.name ?? user.name ?? profile?.login ?? null,
 				verified: ['google', 'github'].includes(provider),
-				accreditation: defaultAccreditation?._id ?? null,
-			},
-			{ upsert: true, new: true }
-		).exec();
+				accreditation: defaultAccreditation._id,
+			});
+		}
 
 		return true;
 	} catch (error) {
