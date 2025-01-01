@@ -61,3 +61,29 @@ export async function skipTwoFactor() {
 
 	return true;
 }
+
+export async function enableTwoFactor(otp: string, req: NextRequest) {
+	const session = await getServerSession();
+	if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+	const user = await UserModel.findOne<IUser>({ email: session.user.email }).exec();
+	if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+	if (!user.twoFactorSecret) return NextResponse.json({ error: 'Unexpected error' }, { status: 401 });
+
+	const secret = symmetricDecrypt(user.twoFactorSecret, process.env.NEXTAUTH_ENCRYPTION!);
+	const isValidToken = authenticator.check(otp, secret);
+
+	if (!isValidToken) {
+		return NextResponse.json({ error: 'The submitted code is invalid' }, { status: 401 });
+	}
+
+	await UserModel.updateOne(
+		{ email: session.user.email },
+		{
+			twoFactorEnabled: true,
+			twoFactorDisabled: false,
+		}
+	);
+
+	return await verifyTwoFactor(otp, req);
+}
