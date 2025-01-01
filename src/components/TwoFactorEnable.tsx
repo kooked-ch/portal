@@ -115,7 +115,6 @@ export default function TwoFactorEnable({ secret, QRUri }: { secret: string; QRU
 									<InputOTPSlot index={5} />
 								</InputOTPGroup>
 							</InputOTP>
-							{error && <p className="text-center text-sm text-red-500">{error}</p>}
 						</div>
 					)}
 				</CardContent>
