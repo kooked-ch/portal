@@ -47,3 +47,17 @@ export async function getTwoFactorQR() {
 		QRUri,
 	};
 }
+
+export async function skipTwoFactor() {
+	const session = await getServerSession();
+	if (!session?.user?.email) return null;
+
+	await UserModel.updateOne(
+		{ email: session.user.email },
+		{
+			twoFactorDisabled: true,
+		}
+	);
+
+	return true;
+}
