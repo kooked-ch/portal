@@ -132,3 +132,25 @@ export async function verifyTwoFactor(otp: string, req: NextRequest) {
 	}
 	return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
 }
+
+export async function checkTwoFactor(cookie: RequestCookie) {
+	try {
+		const token = await decode({
+			token: cookie.value,
+			secret: process.env.NEXTAUTH_SECRET!,
+		});
+
+		if (!token) return false;
+
+		await db.connect();
+		const user = await UserModel.findOne<IUser>({ email: token.email }).exec();
+		if (!user) return false;
+
+		if (user.twoFactorDisabled) return true;
+
+		return token.twoFactorComplete;
+	} catch (error) {
+		console.error('Error during two factor check:', error);
+		return false;
+	}
+}
