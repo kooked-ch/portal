@@ -43,7 +43,6 @@ export default function CreateDatabaseDialog() {
 
 	const onSubmit = async (data: DatabaseType) => {
 		setLoading(true);
-		console.log(data);
 
 		try {
 			const response = await fetch(`/api/project${pathname}/databases`, {
