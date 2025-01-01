@@ -21,3 +21,29 @@ export async function getTwoFactor() {
 		disabled: user.twoFactorDisabled ?? false,
 	};
 }
+
+export async function getTwoFactorQR() {
+	const session = await getServerSession();
+	if (!session?.user?.email) return null;
+
+	const secret = authenticator.generateSecret(20);
+
+	if (!process.env.NEXTAUTH_ENCRYPTION) throw new Error('NEXTAUTH_ENCRYPTION is not set.');
+
+	await UserModel.updateOne(
+		{ email: session?.user?.email },
+		{
+			twoFactorEnabled: false,
+			twoFactorSecret: symmetricEncrypt(secret, process.env.NEXTAUTH_ENCRYPTION),
+		}
+	);
+
+	const name = session?.user?.email;
+	const keyUri = authenticator.keyuri(name, 'Kooked Portal', secret);
+	const QRUri = await qrcode.toDataURL(keyUri);
+
+	return {
+		secret,
+		QRUri,
+	};
+}
