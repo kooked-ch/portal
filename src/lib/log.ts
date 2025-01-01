@@ -7,6 +7,9 @@ import { logType } from '@/types/log';
 
 export async function log(message: string, type: string, projectName: string, appName: string) {
 	const user = await getUser();
+	if (!user) {
+		return;
+	}
 
 	const project = await ProjectModel.findOne({ slug: projectName }).exec();
 
