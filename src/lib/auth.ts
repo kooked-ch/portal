@@ -9,6 +9,8 @@ import { JWT } from 'next-auth/jwt';
 import { getServerSession } from 'next-auth/next';
 import { IProject, ProjectModel } from '@/models/Project';
 import { AppModel, IApp } from '@/models/App';
+import { cookies } from 'next/headers';
+import { checkTwoFactor } from './factor';
 
 const getProviders = () => [
 	GitHubProvider({
@@ -23,39 +25,10 @@ const getProviders = () => [
 
 const enhanceToken = async ({ token, user }: { token: JWT; user: User }): Promise<JWT> => {
 	if (user) {
-		token.isTwoFactorComplete = user.isTwoFactorComplete ?? false;
+		token.twoFactorComplete = user.twoFactorComplete ?? false;
+		token.twoFactorDisabled = user.twoFactorDisabled ?? false;
 	}
 	return token;
-};
-
-const enhanceSession = async ({ session, token }: { session: Session; token: JWT }): Promise<Session> => {
-	try {
-		await db.connect();
-		const user = await UserModel.findOne<IUser>({ email: session.user?.email }).populate<{ accreditation: IAccreditation }>('accreditation', '-slug -accessLevel').exec();
-
-		if (!user) return session;
-
-		const accreditation = user.accreditation
-			? {
-					...user.accreditation.toObject(),
-					_id: undefined,
-					authorizations: {
-						...user.accreditation.authorizations,
-						level: undefined,
-					},
-			  }
-			: undefined;
-
-		session.user = {
-			...session.user,
-			isTwoFactorComplete: Boolean(token.isTwoFactorComplete),
-		};
-
-		return session;
-	} catch (error) {
-		console.error('Error enhancing session:', error);
-		return session;
-	}
 };
 
 const handleSignIn = async ({ user, account, profile }: { user: User; account: any; profile?: any }): Promise<boolean> => {
