@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { signIn } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
 
 const formSchema = z.object({
 	email: z.string().email('Invalid email address'),
@@ -18,6 +19,7 @@ const formSchema = z.object({
 
 export default function LoginPage() {
 	const [isLoading, setIsLoading] = useState(false);
+	const searchParams = useSearchParams();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -80,7 +82,7 @@ export default function LoginPage() {
 
 				<div className="space-y-3">
 					<div className="text-xs text-center text-muted-foreground mb-4">Or continue with</div>
-					<Button type="button" className="w-full h-10 bg-accent/50 border-border hover:bg-accent/70 text-muted-foreground py-2 text-white rounded-md flex items-center justify-center" onClick={() => signIn('github')}>
+					<Button type="button" className="w-full h-10 bg-accent/50 border-border hover:bg-accent/70 text-muted-foreground py-2 text-white rounded-md flex items-center justify-center" onClick={() => signIn('github', { callbackUrl: searchParams.get('callbackUrl') || '/' })}>
 						<Github className="mr-2 h-4 w-4" />
 						Continue with GitHub
 					</Button>
