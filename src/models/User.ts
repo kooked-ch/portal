@@ -9,6 +9,7 @@ export interface IUser extends Document {
 	email: string;
 	password?: string;
 	twoFactorEnabled: boolean;
+	twoFactorDisabled?: boolean;
 	twoFactorSecret?: string;
 	accreditation: String;
 	resourcesPolicy: String;
@@ -22,6 +23,7 @@ const userSchema = new mongoose.Schema<IUser>({
 	email: { type: String, required: true },
 	password: { type: String, required: false },
 	twoFactorEnabled: { type: Boolean, required: true, default: false },
+	twoFactorDisabled: { type: Boolean, required: false, default: false },
 	twoFactorSecret: { type: String, required: false },
 	accreditation: { type: mongoose.Schema.Types.ObjectId, ref: 'Accreditation' },
 	resourcesPolicy: { type: mongoose.Schema.Types.ObjectId, ref: 'ResourcesPolicy' },
