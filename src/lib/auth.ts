@@ -89,8 +89,15 @@ const handleSignIn = async ({ user, account, profile }: { user: User; account: a
 	}
 };
 
-export const getUser = async (): Promise<User> => {
+export const getUser = async (): Promise<User | null> => {
 	const session = await getServerSession();
+
+	const userCookies = await cookies();
+
+	const token = userCookies.get(process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token');
+	if (!token) return null;
+
+	if (!(await checkTwoFactor(token))) return null;
 
 	await db.connect();
 	const user = await UserModel.findOne<IUser>({ email: session?.user?.email }).populate<{ accreditation: IAccreditation }>('accreditation', '-slug -accessLevel').exec();
