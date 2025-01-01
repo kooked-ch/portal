@@ -23,7 +23,7 @@ export default function DeleteDatabaseDialog({ databaseName }: { databaseName: s
 
 			if (!response.ok) {
 				const error = await response.json();
-				console.log(error);
+				console.error(error);
 				setGlobalError(error.message || 'An unexpected error occurred. Please try again later.');
 			} else {
 				router.refresh();
