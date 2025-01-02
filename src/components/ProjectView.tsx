@@ -39,11 +39,9 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 	const offlineApps = totalApps - onlineApps;
 	const totalDatabases = project.apps.reduce((acc, app) => acc + app.databases.length, 0);
 	const totalDomains = project.apps.reduce((acc, app) => acc + app.domains.length, 0);
-	const averageUptime =
-		project.apps
-			.map(calculateUptime)
-			.filter((uptime) => uptime !== null)
-			.reduce((acc, uptime) => acc + uptime, 0) / project.apps.filter((app) => calculateUptime(app) !== null).length;
+	const validUptimes = project.apps.map(calculateUptime).filter((uptime) => uptime !== null);
+	const uptimes = validUptimes.length === 0 ? 100 : validUptimes.reduce((acc, uptime) => acc + uptime, 0) / validUptimes.length;
+	const averageUptime = project.apps.length === 0 ? 100 : uptimes;
 
 	const handleAppCreated = () => {
 		router.refresh();
@@ -80,7 +78,6 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 
 	const AppCard = ({ app }: { app: AppsType }) => {
 		const isOnline = getAppStatus(app);
-		const uptime = calculateUptime(app);
 
 		return (
 			<Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/${project.name}/${app.name}`)}>
@@ -99,7 +96,6 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 
 	const AppList = ({ app }: { app: AppsType }) => {
 		const isOnline = getAppStatus(app);
-		const uptime = calculateUptime(app);
 
 		return (
 			<Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/${project.name}/${app.name}`)}>
@@ -128,7 +124,7 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 						Managing {totalApps} application{totalApps > 1 && 's'}
 					</p>
 				</div>
-				<CreateAppForm onAppCreated={handleAppCreated} />
+				<CreateAppForm onAppCreated={handleAppCreated} disabled={project.resourcesPolicy.remainingLimit === 0} />
 			</div>
 
 			<div className="grid grid-cols-6 grid-rows-2 md:grid-rows-1 md:grid-cols-4 xl:grid-cols-5 md:gap-4 gap-2">
@@ -246,7 +242,6 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 					</div>
 				</div>
 			</div>
-
 			<div className={view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'flex flex-col gap-4'}>{filteredAndSortedApps.map((app, index) => (view === 'grid' ? <AppCard key={index} app={app} /> : <AppList key={index} app={app} />))}</div>
 		</div>
 	);
