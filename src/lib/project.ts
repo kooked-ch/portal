@@ -7,6 +7,8 @@ import { checkAccreditation } from './auth';
 import { getRepository } from './utils';
 import { AppModel } from '@/models/App';
 import { getApp } from './app';
+import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
+import { getProjectResourcesPolicy } from './resourcesPolicy';
 
 export async function createProject(userId: string, project: { name: string; description: string }): Promise<ErrorType> {
 	try {
@@ -26,9 +28,15 @@ export async function createProject(userId: string, project: { name: string; des
 			throw new Error('Default accreditation not found');
 		}
 
+		const defaultresourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'dal', accessLevel: 1 }).exec();
+		if (!defaultresourcesPolicy) {
+			throw new Error('Default resource policy not found');
+		}
+
 		await ProjectModel.create({
 			...project,
 			slug,
+			resourcesPolicy: defaultresourcesPolicy?._id,
 			members: [{ userId, accreditation: defaultAccreditation._id }],
 		});
 
@@ -77,6 +85,7 @@ export async function getProject(slug: string): Promise<ProjectType | null> {
 
 		const appsData: any = await customObjectsApi.listNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: project.slug, plural: 'kookedapps' });
 		const apps = await AppModel.find({ projectId: project._id }).exec();
+		const resourcesPolicy = await getProjectResourcesPolicy(project.slug);
 
 		const filteredApps = appsData.items
 			.filter((app: any) => apps.some((dbApp) => dbApp.name === app.metadata.name))
@@ -109,6 +118,7 @@ export async function getProject(slug: string): Promise<ProjectType | null> {
 			slug: project.slug,
 			createdAt: project.createdAt,
 			apps: resolvedApps,
+			resourcesPolicy: resourcesPolicy,
 		};
 	} catch (error) {
 		console.error('Error fetching project:', (error as Error).message);
