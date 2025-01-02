@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { ContainerType } from './container';
 import { logType } from './log';
+import { AppResourcesPolicy } from './resourcesPolicy';
 
 export interface AppsType {
 	name: string;
@@ -96,4 +97,5 @@ export interface AppType {
 		image: string;
 	}[];
 	logs: logType[];
+	resourcesPolicy: AppResourcesPolicy;
 }
