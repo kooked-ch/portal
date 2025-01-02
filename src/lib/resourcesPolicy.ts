@@ -19,6 +19,22 @@ export async function getProjectResourcesPolicy(projectName: string): Promise<Pr
 	};
 }
 
+export async function getProjectsResourcesPolicy(): Promise<ProjectsResourcesPolicy> {
+	const session = await getServerSession();
+	if (!session?.user?.email) return { name: '', description: '', totalLimit: 0, remainingLimit: 0 };
+
+	const user = await UserModel.findOne({ email: session.user.email }).populate('resourcesPolicy');
+	const projects = await ProjectModel.find({ 'members.userId': user._id }).exec();
+
+	const resourcesPolicy = user.resourcesPolicy;
+	return {
+		name: resourcesPolicy.name,
+		description: resourcesPolicy.description,
+		totalLimit: resourcesPolicy.limitation.projects,
+		remainingLimit: resourcesPolicy.limitation.projects - (projects ? projects.length : 0),
+	};
+}
+
 export async function getAppResourcesPolicy(projectName: string, appName: string): Promise<AppResourcesPolicy> {
 	const project = await ProjectModel.findOne({ slug: projectName }).exec();
 	if (!project) {
