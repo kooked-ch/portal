@@ -25,7 +25,7 @@ const TabButton = ({ tab, selectedTab, onClick }: { tab: Tab; selectedTab: Tab; 
 	</button>
 );
 
-export default function DeploymentInterface({ app }: { app: AppType }) {
+export default function AppView({ app }: { app: AppType }) {
 	const [selectedTab, setSelectedTab] = useState<Tab>('Containers');
 	const pathname = usePathname();
 	const { data: domainsDetails, loading: domainsLoading, error: domainsError, refetch: domainRefetch } = useFetch(`/api/project${pathname}/domains`);

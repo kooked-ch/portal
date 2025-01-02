@@ -1,7 +1,7 @@
 'use server';
 
 import { AppDropdown } from '@/components/appDropdown';
-import DeploymentInterface from '@/components/DeploymentInterface';
+import AppView from '@/components/AppView';
 import { Button } from '@/components/ui/button';
 import { getApp } from '@/lib/app';
 import { AppType } from '@/types/app';
@@ -27,7 +27,7 @@ export default async function AppPage({ params }: { params: { projectName: strin
 
 				<AppDropdown />
 			</div>
-			<DeploymentInterface app={app} />
+			<AppView app={app} />
 		</div>
 	);
 }
