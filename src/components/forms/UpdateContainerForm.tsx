@@ -128,7 +128,7 @@ export default function EditContainerDialog({ container, setCustomStatus }: { co
 
 					{globalError && <p className="text-red-500 text-sm mt-3">{globalError}</p>}
 
-					<DialogFooter className="mt-4">
+					<DialogFooter className="mt-4 gap-2 md:gap-0">
 						<DialogTrigger asChild>
 							<Button variant="secondary">Cancel</Button>
 						</DialogTrigger>

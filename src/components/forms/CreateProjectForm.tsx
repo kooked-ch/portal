@@ -76,7 +76,7 @@ export default function CreateProjectForm({ onProjectCreated }: { onProjectCreat
 					<Input id="description" {...register('description')} />
 					{errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
 
-					<DialogFooter className="mt-4">
+					<DialogFooter className="mt-4 gap-2 md:gap-0">
 						<DialogTrigger asChild>
 							<Button variant="secondary">Cancel</Button>
 						</DialogTrigger>

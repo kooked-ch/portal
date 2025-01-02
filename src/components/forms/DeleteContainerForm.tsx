@@ -55,7 +55,7 @@ export default function DeleteContainerDialog({ containerName }: { containerName
 
 					{globalError && <p className="text-red-500 text-sm my-3">{globalError}</p>}
 
-					<DialogFooter className="">
+					<DialogFooter className="mt-4 gap-2 md:gap-0">
 						<DialogTrigger asChild>
 							<Button variant="secondary">Cancel</Button>
 						</DialogTrigger>

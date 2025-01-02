@@ -84,7 +84,7 @@ export function CreateAppForm({ onAppCreated }: { onAppCreated: () => void }) {
 					<Input id="repository" {...register('repository')} />
 					{errors.repository && <p className="text-red-500 text-sm">{errors.repository.message}</p>}
 
-					<DialogFooter className="mt-4">
+					<DialogFooter className="mt-4 gap-2 md:gap-0">
 						<DialogTrigger asChild>
 							<Button variant="secondary">Cancel</Button>
 						</DialogTrigger>
