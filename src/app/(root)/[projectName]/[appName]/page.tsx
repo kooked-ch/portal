@@ -16,7 +16,7 @@ export default async function AppPage({ params }: { params: { projectName: strin
 	}
 
 	return (
-		<div className="xl:container mx-auto px-4 xl:px-28">
+		<div className="xl:container mx-auto md:px-4 px-0 xl:px-28">
 			<div className="flex justify-between py-4">
 				<Button variant="link" className="text-muted-foreground" asChild>
 					<Link href={'/' + params.projectName} className="gap-1 flex">
