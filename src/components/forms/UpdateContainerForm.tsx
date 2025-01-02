@@ -110,15 +110,17 @@ export default function EditContainerDialog({ container, setCustomStatus }: { co
 
 					<div className="mt-3 flex flex-col">
 						<Label className="mt-3 mb-2">Environment Variables</Label>
-						{envVars.map((envVar, index) => (
-							<div key={index} className="flex items-center space-x-2 mt-2">
-								<Input value={envVar.name} onChange={(e) => handleEnvVarChange(index, 'name', e.target.value)} placeholder="name" className="w-1/2" />
-								<Input value={envVar.value} onChange={(e) => handleEnvVarChange(index, 'value', e.target.value)} placeholder="Value" className="w-1/2" />
-								<Button variant="outline" size="sm" onClick={() => removeEnvVar(index)} type="button">
-									Remove
-								</Button>
-							</div>
-						))}
+						<div className="max-h-48 overflow-y-auto border rounded p-2">
+							{envVars.map((envVar, index) => (
+								<div key={index} className="flex items-center space-x-2 mb-2">
+									<Input value={envVar.name} onChange={(e) => handleEnvVarChange(index, 'name', e.target.value)} placeholder="Name" className="w-1/2" />
+									<Input value={envVar.value} onChange={(e) => handleEnvVarChange(index, 'value', e.target.value)} placeholder="Value" className="w-1/2" />
+									<Button variant="outline" size="sm" onClick={() => removeEnvVar(index)} type="button">
+										Remove
+									</Button>
+								</div>
+							))}
+						</div>
 						<Button variant="ghost" className="mt-2 w-min" size="sm" onClick={addEnvVar} type="button">
 							+ Add Environment Variable
 						</Button>
