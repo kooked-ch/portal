@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { AppsType } from './app';
+import { ProjectResourcesPolicy } from './resourcesPolicy';
 
 export interface ProjectsType {
 	name: string;
@@ -23,4 +24,5 @@ export interface ProjectType {
 	slug: string;
 	createdAt: Date;
 	apps: AppsType[];
+	resourcesPolicy: ProjectResourcesPolicy;
 }
