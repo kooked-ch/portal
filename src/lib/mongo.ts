@@ -1,4 +1,5 @@
 import { AccreditationModel } from '@/models/Accreditation';
+import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
 import mongoose from 'mongoose';
 
 const MONGO_URI = `mongodb://${process.env.MONGO_USER_USERNAME}:${process.env.MONGO_USER_PASSWORD}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT || 27017}/${process.env.MONGO_DATABASE || 'portalDB'}`;
@@ -181,6 +182,214 @@ async function connect() {
 
 	accreditations.forEach(async (accreditation) => {
 		await AccreditationModel.findOneAndReplace({ name: accreditation.name, accessLevel: accreditation.accessLevel }, accreditation, { upsert: true, new: true });
+	});
+
+	const resourcesPolicy = [
+		{
+			name: 'No Project limit',
+			description: 'No limit on the number of project that can be created.',
+			slug: 'npl',
+			accessLevel: 0,
+			limitation: {
+				level: 0,
+				projects: -1,
+			},
+		},
+		{
+			name: 'Default Project limit',
+			description: 'Default limit of 1 project that can be created.',
+			slug: 'dpl',
+			accessLevel: 0,
+			limitation: {
+				level: 1,
+				projects: 1,
+			},
+		},
+		{
+			name: 'Max Project limit',
+			description: 'Maximum limit of 5 projects that can be created.',
+			slug: 'mpl',
+			accessLevel: 0,
+			limitation: {
+				level: 2,
+				projects: 5,
+			},
+		},
+		{
+			name: 'Denied Project creation',
+			description: 'No permission to create any project.',
+			slug: 'dpc',
+			accessLevel: 0,
+			limitation: {
+				level: 3,
+				projects: 0,
+			},
+		},
+		{
+			name: 'No App limit',
+			description: 'No limit on the number of app that can be created.',
+			slug: 'nal',
+			accessLevel: 1,
+			limitation: {
+				level: 0,
+				apps: -1,
+			},
+		},
+		{
+			name: 'Default App limit',
+			description: 'Default limit of 1 app that can be created.',
+			slug: 'dal',
+			accessLevel: 1,
+			limitation: {
+				level: 1,
+				apps: 1,
+			},
+		},
+		{
+			name: 'Max App limit',
+			description: 'Maximum limit of 5 apps that can be created.',
+			slug: 'mal',
+			accessLevel: 1,
+			limitation: {
+				level: 2,
+				apps: 5,
+			},
+		},
+		{
+			name: 'Denied App creation',
+			description: 'No permission to create any app.',
+			slug: 'dac',
+			accessLevel: 1,
+			limitation: {
+				level: 3,
+				apps: 0,
+			},
+		},
+		{
+			name: 'No Container limit',
+			description: 'No limit on the number of container that can be created.',
+			slug: 'ncl',
+			accessLevel: 2,
+			limitation: {
+				level: 0,
+				containers: -1,
+			},
+		},
+		{
+			name: 'Default Container limit',
+			description: 'Default limit of 1 container that can be created.',
+			slug: 'dcl',
+			accessLevel: 2,
+			limitation: {
+				level: 1,
+				containers: 1,
+			},
+		},
+		{
+			name: 'Max Container limit',
+			description: 'Maximum limit of 5 containers that can be created.',
+			slug: 'mcl',
+			accessLevel: 2,
+			limitation: {
+				level: 2,
+				containers: 5,
+			},
+		},
+		{
+			name: 'Denied Container creation',
+			description: 'No permission to create any container.',
+			slug: 'dcc',
+			accessLevel: 2,
+			limitation: {
+				level: 3,
+				containers: 0,
+			},
+		},
+		{
+			name: 'No Domain limit',
+			description: 'No limit on the number of domain that can be created.',
+			slug: 'ndl',
+			accessLevel: 2,
+			limitation: {
+				level: 0,
+				domains: -1,
+			},
+		},
+		{
+			name: 'Default Domain limit',
+			description: 'Default limit of 1 domain that can be created.',
+			slug: 'ddl',
+			accessLevel: 2,
+			limitation: {
+				level: 1,
+				domains: 1,
+			},
+		},
+		{
+			name: 'Max Domain limit',
+			description: 'Maximum limit of 5 domains that can be created.',
+			slug: 'mdl',
+			accessLevel: 2,
+			limitation: {
+				level: 2,
+				domains: 5,
+			},
+		},
+		{
+			name: 'Denied Domain creation',
+			description: 'No permission to create any domain.',
+			slug: 'ddc',
+			accessLevel: 2,
+			limitation: {
+				level: 3,
+				domains: 0,
+			},
+		},
+		{
+			name: 'No Database limit',
+			description: 'No limit on the number of database that can be created.',
+			slug: 'ndb',
+			accessLevel: 2,
+			limitation: {
+				level: 0,
+				databases: -1,
+			},
+		},
+		{
+			name: 'Default Database limit',
+			description: 'Default limit of 1 database that can be created.',
+			slug: 'ddb',
+			accessLevel: 2,
+			limitation: {
+				level: 1,
+				databases: 1,
+			},
+		},
+		{
+			name: 'Max Database limit',
+			description: 'Maximum limit of 2 databases that can be created.',
+			slug: 'mdb',
+			accessLevel: 2,
+			limitation: {
+				level: 2,
+				databases: 2,
+			},
+		},
+		{
+			name: 'Denied Database creation',
+			description: 'No permission to create any database.',
+			slug: 'ddc',
+			accessLevel: 2,
+			limitation: {
+				level: 3,
+				databases: 0,
+			},
+		},
+	];
+
+	resourcesPolicy.forEach(async (policy) => {
+		console.log('policy', policy);
+		await ResourcesPolicyModel.findOneAndReplace({ name: policy.name, accessLevel: policy.accessLevel }, policy, { upsert: true, new: true });
 	});
 
 	return cached.conn;
