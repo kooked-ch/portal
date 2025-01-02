@@ -88,7 +88,7 @@ export default function AppView({ app }: { app: AppType }) {
 					<div className="space-y-4">
 						<div className="flex justify-between items-center gap-4">
 							<h2 className="text-xl font-semibold">Containers</h2>
-							<CreateContainerDialog />
+							<CreateContainerDialog disabled={app.resourcesPolicy.containers.remainingLimit === 0} />
 						</div>
 						{app.containers.length === 0 ? (
 							<div className="bg-[#1E1E20] p-4 rounded-lg text-[#666] text-sm">No containers found</div>
@@ -102,7 +102,7 @@ export default function AppView({ app }: { app: AppType }) {
 
 						<div className="flex justify-between items-center gap-4 mt-6">
 							<h2 className="text-xl font-semibold">Databases</h2>
-							<CreateDatabaseDialog />
+							<CreateDatabaseDialog disabled={app.resourcesPolicy.databases.remainingLimit === 0} />
 						</div>
 						{app.databases.length === 0 ? (
 							<div className="bg-[#1E1E20] p-4 rounded-lg text-[#666] text-sm">No databases found</div>
@@ -121,7 +121,7 @@ export default function AppView({ app }: { app: AppType }) {
 					<div className="space-y-4">
 						<div className="flex justify-between items-center gap-4">
 							<h2 className="text-xl font-semibold">Domains</h2>
-							<CreateDomainDialog containersList={app.containers.map((container) => container.name)} refetch={domainRefetch} />
+							<CreateDomainDialog disabled={app.resourcesPolicy.domains.remainingLimit === 0} containersList={app.containers.map((container) => container.name)} refetch={domainRefetch} />
 						</div>
 						{app.domains.length === 0 ? (
 							<div className="bg-[#1E1E20] p-4 rounded-lg text-[#666] text-sm">No domains found</div>
@@ -146,7 +146,7 @@ export default function AppView({ app }: { app: AppType }) {
 	};
 
 	return (
-		<div className="mx-auto p-4 sm:p-6 pt-0">
+		<div className="mx-auto p-4 sm:p-6 sm:pt-0 pt-0">
 			<div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-6">
 				<div className="space-y-6">
 					<div className="flex flex-col sm:flex-row justify-between gap-4">
