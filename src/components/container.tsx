@@ -103,9 +103,9 @@ export const ContainerItem = ({ container }: { container: ContainerType }) => {
 		<li key={'container' + container.name} className={cn('flex justify-between bg-[#18181a] px-4 py-3 rounded-lg items-center border-l-4', colorClass)}>
 			<div className="flex items-center space-x-3">
 				{icon}
-				<div className="flex flex-col">
-					<span className={cn('text-white font-medium', errorStatus && 'text-red-500')}>{container.name}</span>
-					<p className={cn('text-sm', errorStatus ? 'text-red-500' : 'text-[#666]')}>{container.image}</p>
+				<div>
+					<span className={cn('text-white font-medium w-min', errorStatus && 'text-red-500')}>{container.name}</span>
+					<p className={cn('text-sm truncate md:w-full w-[calc(100vw-310px)]', errorStatus ? 'text-red-500' : 'text-[#666]')}>{container.image}</p>
 					{errorStatus && <span className="text-xs text-red-400">{message}</span>}
 				</div>
 			</div>
