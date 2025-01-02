@@ -10,7 +10,6 @@ import { ProjectType } from '@/types/project';
 import { CreateAppForm } from './forms/CreateAppFrom';
 import { useRouter } from 'next/navigation';
 import { AppsType } from '@/types/app';
-import Link from 'next/link';
 
 const getAppStatus = (app: AppsType) => {
 	const containersReady = app.containers.every((container) => container.status.every((status) => status.ready));
@@ -125,69 +124,69 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 			<div className="flex justify-between items-center">
 				<div>
 					<h1 className="text-3xl font-bold">{project.name}</h1>
-					<p className="text-gray-500 mt-1">
+					<p className="text-gray-500 md:mt-1">
 						Managing {totalApps} application{totalApps > 1 && 's'}
 					</p>
 				</div>
 				<CreateAppForm onAppCreated={handleAppCreated} />
 			</div>
 
-			<div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-4">
-				<Card>
-					<CardContent className="pt-4">
+			<div className="grid grid-cols-6 grid-rows-2 md:grid-rows-1 md:grid-cols-4 xl:grid-cols-5 md:gap-4 gap-2">
+				<Card className="col-span-2 md:col-span-1">
+					<CardContent className="md:pt-4 md:p-6 pb-0 p-2 pl-3">
 						<div className="flex flex-col">
-							<span className="text-sm text-gray-500">Online Apps</span>
-							<div className="flex items-center gap-2">
-								<ArrowUpCircle className="h-4 w-4 text-green-500" />
-								<span className="text-2xl font-bold">{onlineApps}</span>
+							<span className="md:text-sm text-xs text-gray-500">Online Apps</span>
+							<div className="flex items-center md:gap-2 gap-1.5">
+								<ArrowUpCircle className="size-4 text-green-500" />
+								<span className="md:text-2xl text-lg font-bold">{onlineApps}</span>
 							</div>
 						</div>
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardContent className="pt-4">
+				<Card className="col-span-2 col-start-3 md:col-span-1 md:col-start-2">
+					<CardContent className="md:pt-4 md:p-6 pb-0 p-2 pl-3">
 						<div className="flex flex-col">
-							<span className="text-sm text-gray-500">Offline Apps</span>
-							<div className="flex items-center gap-2">
-								<ArrowDownCircle className="h-4 w-4 text-red-500" />
-								<span className="text-2xl font-bold">{offlineApps}</span>
+							<span className="md:text-sm text-xs text-gray-500">Offline Apps</span>
+							<div className="flex items-center md:gap-2 gap-1.5">
+								<ArrowDownCircle className="size-4 text-red-500" />
+								<span className="md:text-2xl text-lg font-bold">{offlineApps}</span>
 							</div>
 						</div>
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardContent className="pt-4">
+				<Card className="col-span-2 col-start-5 md:col-span-1 md:col-start-3">
+					<CardContent className="md:pt-4 md:p-6 pb-0 p-2 pl-3">
 						<div className="flex flex-col">
-							<span className="text-sm text-gray-500">Average Uptime</span>
-							<div className="flex items-center gap-2">
-								<Activity className="h-4 w-4 text-blue-500" />
-								<span className="text-2xl font-bold">{averageUptime === 100 ? averageUptime : averageUptime.toFixed(2)}%</span>
+							<span className="md:text-sm text-xs text-gray-500">Average Uptime</span>
+							<div className="flex items-center md:gap-2 gap-1.5">
+								<Activity className="size-4 text-blue-500" />
+								<span className="md:text-2xl text-lg font-bold">{averageUptime === 100 ? averageUptime : averageUptime.toFixed(2)}%</span>
 							</div>
 						</div>
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardContent className="pt-4">
+				<Card className="col-span-3 row-start-2 md:row-start-1 md:col-span-1 md:col-start-4">
+					<CardContent className="md:pt-4 md:p-6 pb-0 p-2 pl-3">
 						<div className="flex flex-col">
-							<span className="text-sm text-gray-500">Total Databases</span>
-							<div className="flex items-center gap-2">
-								<Database className="h-4 w-4 text-purple-500" />
-								<span className="text-2xl font-bold">{totalDatabases}</span>
+							<span className="md:text-sm text-xs text-gray-500">Total Databases</span>
+							<div className="flex items-center md:gap-2 gap-1.5">
+								<Database className="size-4 text-purple-500" />
+								<span className="md:text-2xl text-lg font-bold">{totalDatabases}</span>
 							</div>
 						</div>
 					</CardContent>
 				</Card>
 
-				<Card>
-					<CardContent className="pt-4">
+				<Card className="col-span-3 col-start-4 row-start-2 md:row-start-1 md:col-span-1 md:col-start-5">
+					<CardContent className="md:pt-4 md:p-6 pb-0 p-2 pl-3">
 						<div className="flex flex-col">
-							<span className="text-sm text-gray-500">Total Domains</span>
-							<div className="flex items-center gap-2">
-								<Globe className="h-4 w-4 text-orange-500" />
-								<span className="text-2xl font-bold">{totalDomains}</span>
+							<span className="md:text-sm text-xs text-gray-500">Total Domains</span>
+							<div className="flex items-center md:gap-2 gap-1.5">
+								<Globe className="size-4 text-orange-500" />
+								<span className="md:text-2xl text-lg font-bold">{totalDomains}</span>
 							</div>
 						</div>
 					</CardContent>
@@ -201,49 +200,50 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 						<Input placeholder="Search applications..." className="pl-9" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
 					</div>
 				</div>
+				<div className="flex gap-2 w-full md:w-min">
+					<Select value={sortBy} onValueChange={setSortBy}>
+						<SelectTrigger className="w-full md:w-[180px]">
+							<div className="flex items-center gap-2">
+								{sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4 transform rotate-180" />}
+								<SelectValue placeholder="Sort by" />
+							</div>
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="name">Name</SelectItem>
+							<SelectItem value="status">Status</SelectItem>
+							<SelectItem value="date">Created Date</SelectItem>
+							<SelectItem value="uptime">Uptime</SelectItem>
+						</SelectContent>
+					</Select>
 
-				<Select value={sortBy} onValueChange={setSortBy}>
-					<SelectTrigger className="w-full md:w-[180px]">
-						<div className="flex items-center gap-2">
-							{sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4 transform rotate-180" />}
-							<SelectValue placeholder="Sort by" />
-						</div>
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="name">Name</SelectItem>
-						<SelectItem value="status">Status</SelectItem>
-						<SelectItem value="date">Created Date</SelectItem>
-						<SelectItem value="uptime">Uptime</SelectItem>
-					</SelectContent>
-				</Select>
+					<div className="flex gap-2">
+						<Button variant="outline" size="icon" onClick={() => setSortOrder((current) => (current === 'asc' ? 'desc' : 'asc'))}>
+							<ArrowUpDown className="h-4 w-4" />
+						</Button>
+					</div>
 
-				<div className="flex gap-2">
-					<Button variant="outline" size="icon" onClick={() => setSortOrder((current) => (current === 'asc' ? 'desc' : 'asc'))}>
-						<ArrowUpDown className="h-4 w-4" />
-					</Button>
-				</div>
+					<Select value={statusFilter} onValueChange={setStatusFilter}>
+						<SelectTrigger className="w-full md:w-[180px]">
+							<div className="flex items-center gap-2">
+								<Activity className="h-4 w-4" />
+								<SelectValue placeholder="Filter by status" />
+							</div>
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Status</SelectItem>
+							<SelectItem value="online">Online</SelectItem>
+							<SelectItem value="offline">Offline</SelectItem>
+						</SelectContent>
+					</Select>
 
-				<Select value={statusFilter} onValueChange={setStatusFilter}>
-					<SelectTrigger className="w-full md:w-[180px]">
-						<div className="flex items-center gap-2">
-							<Activity className="h-4 w-4" />
-							<SelectValue placeholder="Filter by status" />
-						</div>
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="all">All Status</SelectItem>
-						<SelectItem value="online">Online</SelectItem>
-						<SelectItem value="offline">Offline</SelectItem>
-					</SelectContent>
-				</Select>
-
-				<div className="flex gap-2">
-					<Button variant={view === 'grid' ? 'default' : 'outline'} size="icon" onClick={() => setView('grid')}>
-						<LayoutGrid className="h-4 w-4" />
-					</Button>
-					<Button variant={view === 'list' ? 'default' : 'outline'} size="icon" onClick={() => setView('list')}>
-						<List className="h-4 w-4" />
-					</Button>
+					<div className="md:flex gap-2 hidden ">
+						<Button variant={view === 'grid' ? 'default' : 'outline'} size="icon" onClick={() => setView('grid')}>
+							<LayoutGrid className="h-4 w-4" />
+						</Button>
+						<Button variant={view === 'list' ? 'default' : 'outline'} size="icon" onClick={() => setView('list')}>
+							<List className="h-4 w-4" />
+						</Button>
+					</div>
 				</div>
 			</div>
 
