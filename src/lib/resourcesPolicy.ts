@@ -62,3 +62,29 @@ export async function getAppResourcesPolicy(projectName: string, appName: string
 		},
 	};
 }
+
+export async function checkResourcesPolicy(projectName: string, appName: string, action: string): Promise<boolean> {
+	const project = await ProjectModel.findOne({
+		slug: projectName,
+	}).exec();
+	if (!project) return false;
+
+	const app = await AppModel.findOne({
+		name: appName,
+		projectId: project._id,
+	}).exec();
+	if (!app) return false;
+
+	const resourcesPolicy = await getAppResourcesPolicy(projectName, appName);
+
+	switch (action) {
+		case 'containers':
+			return resourcesPolicy.containers.remainingLimit > 0;
+		case 'domains':
+			return resourcesPolicy.domains.remainingLimit > 0;
+		case 'databases':
+			return resourcesPolicy.databases.remainingLimit > 0;
+		default:
+			return false;
+	}
+}
