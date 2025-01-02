@@ -17,10 +17,10 @@ import LogViewer from './log';
 import CreateDatabaseDialog from './forms/CreateDatabaseForm';
 import { DatabaseItem } from './database';
 
-type Tab = 'Containers' | 'Domains' | 'Logs';
+type Tab = 'Containers' | 'Domains' | 'Logs' | 'Info';
 
-const TabButton = ({ tab, selectedTab, onClick }: { tab: Tab; selectedTab: Tab; onClick: () => void }) => (
-	<button className={cn('px-4 py-2 text-sm', selectedTab === tab ? 'border-b-2 border-purple-500 text-white' : 'text-[#666] hover:text-white')} onClick={onClick}>
+const TabButton = ({ tab, selectedTab, onClick, className = '' }: { tab: Tab; selectedTab: Tab; onClick: () => void; className?: string }) => (
+	<button className={cn('px-3 py-2 text-sm whitespace-nowrap', selectedTab === tab ? 'border-b-2 border-purple-500 text-white' : 'text-[#666] hover:text-white', className)} onClick={onClick}>
 		{tab}
 	</button>
 );
@@ -30,14 +30,63 @@ export default function AppView({ app }: { app: AppType }) {
 	const pathname = usePathname();
 	const { data: domainsDetails, loading: domainsLoading, error: domainsError, refetch: domainRefetch } = useFetch(`/api/project${pathname}/domains`);
 
-	const tabs: Tab[] = ['Containers', 'Domains', ...(app.logs.length > 0 ? (['Logs'] as Tab[]) : [])];
+	const mainTabs: Tab[] = ['Containers', 'Domains', ...(app.logs.length > 0 ? (['Logs'] as Tab[]) : [])];
+	const asideTabs: Tab[] = ['Info'];
+	const allTabs = [...mainTabs, ...asideTabs];
 
 	const renderContent = () => {
 		switch (selectedTab) {
+			case 'Info':
+				return (
+					<div className="space-y-6">
+						{app?.repository?.url.trim() && (
+							<div className="space-y-2">
+								<div className="text-sm text-[#666] uppercase font-medium">Repository</div>
+								<a href={app.repository.url} target="_blank" className="flex items-center space-x-2 text-white hover:text-purple-400 break-all">
+									<GitBranch className="w-4 h-4 flex-shrink-0" />
+									<span>{app.repository.url.replace('https://github.com/', '').replace(/\/$/, '')}</span>
+									<ArrowUpRight className="w-4 h-4 flex-shrink-0" />
+								</a>
+							</div>
+						)}
+
+						{app.domains.length > 0 && (
+							<div className="space-y-2">
+								<div className="text-sm text-[#666] uppercase font-medium">Domains</div>
+								{app.domains.map((domain, index) => (
+									<Link key={'domain' + index} href={`https://${domain.url}`} target="_blank" className="flex gap-1 justify-start items-center text-purple-500 break-all">
+										<Globe className="w-4 h-4 mt-[0.2rem] flex-shrink-0" />
+										<p className="hover:underline">{domain.url}</p>
+									</Link>
+								))}
+							</div>
+						)}
+
+						{app.collaborators.length > 0 && (
+							<div className="space-y-2">
+								<div className="text-sm text-[#666] uppercase font-medium">Collaborators</div>
+								<div className="flex flex-wrap items-center gap-2">
+									{app.collaborators.map((collaborator, index) => (
+										<Avatar key={'collaborator' + index} className="border shadow-sm w-8 sm:w-10 h-8 sm:h-10">
+											<AvatarImage src={collaborator.image} alt={collaborator.username} />
+											<AvatarFallback>
+												{collaborator.username
+													?.split(' ')
+													.map((word) => word.charAt(0).toUpperCase())
+													.join('')}
+											</AvatarFallback>
+										</Avatar>
+									))}
+								</div>
+							</div>
+						)}
+					</div>
+				);
+
 			case 'Containers':
 				return (
 					<div className="space-y-4">
-						<div className="flex justify-between items-center">
+						<div className="flex justify-between items-center gap-4">
 							<h2 className="text-xl font-semibold">Containers</h2>
 							<CreateContainerDialog />
 						</div>
@@ -51,7 +100,7 @@ export default function AppView({ app }: { app: AppType }) {
 							</ul>
 						)}
 
-						<div className="flex justify-between mt-6 items-center">
+						<div className="flex justify-between items-center gap-4 mt-6">
 							<h2 className="text-xl font-semibold">Databases</h2>
 							<CreateDatabaseDialog />
 						</div>
@@ -70,7 +119,7 @@ export default function AppView({ app }: { app: AppType }) {
 			case 'Domains':
 				return (
 					<div className="space-y-4">
-						<div className="flex justify-between items-center">
+						<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
 							<h2 className="text-xl font-semibold">Domains</h2>
 							<CreateDomainDialog containersList={app.containers.map((container) => container.name)} refetch={domainRefetch} />
 						</div>
@@ -97,85 +146,80 @@ export default function AppView({ app }: { app: AppType }) {
 	};
 
 	return (
-		<div className="mx-auto p-6 pt-0">
-			<div className="grid grid-cols-[2fr,1fr] gap-6">
+		<div className="mx-auto p-4 sm:p-6 pt-0">
+			<div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-6">
 				<div className="space-y-6">
-					<div className="flex justify-between">
-						<div className="space-y-6">
-							<div>
-								<h1 className="text-4xl font-bold">{app?.name}</h1>
-								<p className="text-muted-foreground mt-2">{app?.description}</p>
-							</div>
+					<div className="flex flex-col sm:flex-row justify-between gap-4">
+						<div>
+							<h1 className="text-3xl sm:text-4xl font-bold break-words">{app?.name}</h1>
+							<p className="text-muted-foreground md:mt-2">{app?.description}</p>
 						</div>
 					</div>
 
-					<div className="flex space-x-1 border-b border-[#1F1F23]">
-						{tabs.map((tab) => (
-							<TabButton key={tab} tab={tab} selectedTab={selectedTab} onClick={() => setSelectedTab(tab)} />
+					<div className="flex space-x-1 border-b border-[#1F1F23] overflow-x-auto">
+						{allTabs.map((tab) => (
+							<TabButton key={tab} tab={tab} selectedTab={selectedTab} onClick={() => setSelectedTab(tab)} className={cn(asideTabs.includes(tab) && 'lg:hidden')} />
 						))}
 					</div>
 
-					{renderContent()}
+					<div className="lg:hidden">{renderContent()}</div>
+					<div className="hidden lg:block">{mainTabs.includes(selectedTab) && renderContent()}</div>
 				</div>
 
-				<aside>
-					<Card className="bg-[#0E1E25] border-none overflow-hidden">
-						<div className="aspect-video bg-gradient-to-br from-purple-500/20 to-cyan-500/20 flex items-center justify-center">
-							<div className="grid grid-cols-3 gap-2">
-								{Array.from({ length: 9 }).map((_, i) => (
-									<div
-										key={'image' + i}
-										className="w-4 h-4 rounded-full"
-										style={{
-											backgroundColor: `hsla(${220 + i * 20}, 70%, 60%, ${0.5 + i * 0.05})`,
-										}}
-									/>
+				<aside className="hidden lg:block space-y-6">
+					<div className="space-y-6">
+						<Card className="bg-[#0E1E25] border-none overflow-hidden">
+							<div className="aspect-video bg-gradient-to-br from-purple-500/20 to-cyan-500/20 flex items-center justify-center">
+								<div className="grid grid-cols-3 gap-2">
+									{Array.from({ length: 9 }).map((_, i) => (
+										<div key={'image' + i} className="w-4 h-4 rounded-full" style={{ backgroundColor: `hsla(${220 + i * 20}, 70%, 60%, ${0.5 + i * 0.05})` }} />
+									))}
+								</div>
+							</div>
+						</Card>
+
+						{app?.repository?.url.trim() && (
+							<div className="space-y-2">
+								<div className="text-sm text-[#666] uppercase font-medium">Repository</div>
+								<a href={app.repository.url} target="_blank" className="flex items-center space-x-2 text-white hover:text-purple-400 break-all">
+									<GitBranch className="w-4 h-4 flex-shrink-0" />
+									<span>{app.repository.url.replace('https://github.com/', '').replace(/\/$/, '')}</span>
+									<ArrowUpRight className="w-4 h-4 flex-shrink-0" />
+								</a>
+							</div>
+						)}
+
+						{app.domains.length > 0 && (
+							<div className="space-y-2">
+								<div className="text-sm text-[#666] uppercase font-medium">Domains</div>
+								{app.domains.map((domain, index) => (
+									<Link key={'domain' + index} href={`https://${domain.url}`} target="_blank" className="flex gap-1 justify-start items-center text-purple-500 break-all">
+										<Globe className="w-4 h-4 mt-[0.2rem] flex-shrink-0" />
+										<p className="hover:underline">{domain.url}</p>
+									</Link>
 								))}
 							</div>
-						</div>
-					</Card>
+						)}
 
-					{app?.repository?.url.trim() && (
-						<div className="space-y-2 mt-6">
-							<div className="text-sm text-[#666] uppercase font-medium">Repository</div>
-							<a href={app.repository.url} target="_blank" className="flex items-center space-x-2 text-white hover:text-purple-400">
-								<GitBranch className="w-4 h-4" />
-								<span>{app.repository.url.replace('https://github.com/', '').replace(/\/$/, '')}</span>
-								<ArrowUpRight className="w-4 h-4" />
-							</a>
-						</div>
-					)}
-
-					{app.domains.length > 0 && (
-						<div className="space-y-2 mt-6">
-							<div className="text-sm text-[#666] uppercase font-medium">Domains</div>
-							{app.domains.map((domain, index) => (
-								<Link key={'domain' + index} href={`https://${domain.url}`} target="_blank" className="flex gap-1 justify-start items-center text-purple-500">
-									<Globe className="w-4 h-4 mt-[0.2rem]" />
-									<p className="hover:underline">{domain.url}</p>
-								</Link>
-							))}
-						</div>
-					)}
-
-					{app.collaborators.length > 0 && (
-						<div className="space-y-2 mt-6">
-							<div className="text-sm text-[#666] uppercase font-medium">Collaborators</div>
-							<div className="flex items-center space-x-2">
-								{app.collaborators.map((collaborator, index) => (
-									<Avatar key={'collaborator' + index} className="border shadow-sm w-10 h-10">
-										<AvatarImage src={collaborator.image} alt={collaborator.username} />
-										<AvatarFallback>
-											{collaborator.username
-												?.split(' ')
-												.map((word) => word.charAt(0).toUpperCase())
-												.join('')}
-										</AvatarFallback>
-									</Avatar>
-								))}
+						{app.collaborators.length > 0 && (
+							<div className="space-y-2">
+								<div className="text-sm text-[#666] uppercase font-medium">Collaborators</div>
+								<div className="flex flex-wrap items-center gap-2">
+									{app.collaborators.map((collaborator, index) => (
+										<Avatar key={'collaborator' + index} className="border shadow-sm w-8 sm:w-10 h-8 sm:h-10">
+											<AvatarImage src={collaborator.image} alt={collaborator.username} />
+											<AvatarFallback>
+												{collaborator.username
+													?.split(' ')
+													.map((word) => word.charAt(0).toUpperCase())
+													.join('')}
+											</AvatarFallback>
+										</Avatar>
+									))}
+								</div>
 							</div>
-						</div>
-					)}
+						)}
+					</div>
 				</aside>
 			</div>
 		</div>
