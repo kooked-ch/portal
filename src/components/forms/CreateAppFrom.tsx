@@ -55,8 +55,8 @@ export function CreateAppForm({ onAppCreated }: { onAppCreated: () => void }) {
 	return (
 		<Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
 			<DialogTrigger asChild>
-				<Button>
-					<Plus className="h-4 w-4" /> Create New App
+				<Button size="sm">
+					<Plus className="size-4" /> Create New App
 				</Button>
 			</DialogTrigger>
 			<DialogContent tabIndex={undefined}>
