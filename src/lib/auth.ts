@@ -11,6 +11,7 @@ import { IProject, ProjectModel } from '@/models/Project';
 import { AppModel, IApp } from '@/models/App';
 import { cookies } from 'next/headers';
 import { checkTwoFactor } from './factor';
+import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
 
 const getProviders = () => [
 	GitHubProvider({
@@ -38,9 +39,12 @@ const handleSignIn = async ({ user, account, profile }: { user: User; account: a
 		if (!email) return false;
 
 		const provider = account?.provider ?? 'credentials';
-		const defaultAccreditation = await AccreditationModel.findOne({ slug: 'std', accessLevel: 0 }).exec();
 
+		const defaultAccreditation = await AccreditationModel.findOne({ slug: 'std', accessLevel: 0 }).exec();
 		if (!defaultAccreditation) return false;
+
+		const defaultResourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'std', accessLevel: 0 }).exec();
+		if (!defaultResourcesPolicy) return false;
 
 		const existingUser = await UserModel.findOne({ email }).exec();
 
@@ -60,6 +64,7 @@ const handleSignIn = async ({ user, account, profile }: { user: User; account: a
 				name: profile?.name ?? user.name ?? profile?.login ?? null,
 				verified: ['google', 'github'].includes(provider),
 				accreditation: defaultAccreditation._id,
+				resourcesPolicy: defaultResourcesPolicy._id,
 			});
 		}
 
