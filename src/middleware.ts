@@ -55,7 +55,7 @@ export async function middleware(req: NextRequest) {
 					name: process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
 					value: encodedToken,
 					httpOnly: true,
-					secure: true,
+					secure: process.env.NODE_ENV === 'production',
 					sameSite: 'lax' as const,
 					path: '/',
 					maxAge: 60 * 60 * 24 * 7,
