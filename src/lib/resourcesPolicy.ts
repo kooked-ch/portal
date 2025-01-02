@@ -1,8 +1,10 @@
 import { AppModel } from '@/models/App';
 import { ProjectModel } from '@/models/Project';
 import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
-import { AppResourcesPolicy, ProjectResourcesPolicy } from '@/types/resourcesPolicy';
+import { AppResourcesPolicy, ProjectResourcesPolicy, ProjectsResourcesPolicy } from '@/types/resourcesPolicy';
 import { customObjectsApi } from './api';
+import { getServerSession } from 'next-auth';
+import { UserModel } from '@/models/User';
 
 export async function getProjectResourcesPolicy(projectName: string): Promise<ProjectResourcesPolicy> {
 	const project = await ProjectModel.findOne({ slug: projectName }).populate('resourcesPolicy');
@@ -79,27 +81,43 @@ export async function getAppResourcesPolicy(projectName: string, appName: string
 	};
 }
 
-export async function checkResourcesPolicy(projectName: string, appName: string, action: string): Promise<boolean> {
-	const project = await ProjectModel.findOne({
-		slug: projectName,
-	}).exec();
-	if (!project) return false;
+export async function checkResourcesPolicy(action: string, projectName?: string, appName?: string): Promise<boolean> {
+	const project = await ProjectModel.findOne({ slug: projectName }).exec();
+	if (!project && projectName) return false;
 
 	const app = await AppModel.findOne({
 		name: appName,
 		projectId: project._id,
 	}).exec();
-	if (!app) return false;
+	if (!app && appName) return false;
 
-	const resourcesPolicy = await getAppResourcesPolicy(projectName, appName);
+	let resourcesPolicy;
 
 	switch (action) {
 		case 'containers':
-			return resourcesPolicy.containers.remainingLimit > 0;
+			if (!appName || !projectName) return false;
+			resourcesPolicy = await getAppResourcesPolicy(projectName, appName);
+			return resourcesPolicy.containers.totalLimit === -1 || resourcesPolicy.containers.remainingLimit > 0;
+
 		case 'domains':
-			return resourcesPolicy.domains.remainingLimit > 0;
+			if (!appName || !projectName) return false;
+			resourcesPolicy = await getAppResourcesPolicy(projectName, appName);
+			return resourcesPolicy.domains.totalLimit === -1 || resourcesPolicy.domains.remainingLimit > 0;
+
 		case 'databases':
-			return resourcesPolicy.databases.remainingLimit > 0;
+			if (!appName || !projectName) return false;
+			resourcesPolicy = await getAppResourcesPolicy(projectName, appName);
+			return resourcesPolicy.databases.totalLimit === -1 || resourcesPolicy.databases.remainingLimit > 0;
+
+		case 'apps':
+			if (!projectName) return false;
+			resourcesPolicy = await getProjectResourcesPolicy(projectName);
+			return resourcesPolicy.totalLimit === -1 || resourcesPolicy.remainingLimit > 0;
+
+		case 'projects':
+			resourcesPolicy = await getProjectsResourcesPolicy();
+			return resourcesPolicy.totalLimit === -1 || resourcesPolicy.remainingLimit > 0;
+
 		default:
 			return false;
 	}
