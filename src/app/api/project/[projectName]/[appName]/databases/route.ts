@@ -14,7 +14,7 @@ export async function POST(req: NextRequest, { params }: { params: { projectName
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 		}
 
-		if (!(await checkResourcesPolicy(params.projectName, params.appName, 'databases'))) {
+		if (!(await checkResourcesPolicy('databases', params.projectName, params.appName))) {
 			return NextResponse.json({ message: 'Resource limit reached' }, { status: 400 });
 		}
 
