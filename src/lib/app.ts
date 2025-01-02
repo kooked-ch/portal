@@ -7,6 +7,8 @@ import { ProjectModel } from '@/models/Project';
 import { AccreditationModel } from '@/models/Accreditation';
 import { IUser } from '@/models/User';
 import { getLogs, log } from './log';
+import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
+import { getAppResourcesPolicy } from './resourcesPolicy';
 
 export async function getApp(projectName: string, appName: string): Promise<AppType | null> {
 	const hasAccess = await checkAccreditation('apps:2:read', `${projectName}/${appName}`);
@@ -150,6 +152,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 		);
 
 		const logs = await getLogs(projectName, appName);
+		const resourcesPolicy = await getAppResourcesPolicy(projectName, appName);
 
 		return {
 			name: appData.metadata.name,
@@ -170,6 +173,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 			domains: domainStatuses,
 			databases: databaseStatuses,
 			containers,
+			resourcesPolicy: resourcesPolicy,
 			collaborators: app.collaborators.map((collaborator) => ({
 				username: collaborator.userId.username || '',
 				image: collaborator.userId.image || '',
@@ -218,10 +222,23 @@ export async function createApp(userId: string, { name, description, repository,
 		throw new Error('Default accreditation not found');
 	}
 
+	const defaultContainerresourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'dcl', accessLevel: 2 }).exec();
+	const defaultDomainresourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'ddl', accessLevel: 2 }).exec();
+	const defaultDatabaseresourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'ddb', accessLevel: 2 }).exec();
+
+	if (!defaultContainerresourcesPolicy || !defaultDomainresourcesPolicy || !defaultDatabaseresourcesPolicy) {
+		throw new Error('Default resource policy not found');
+	}
+
 	await AppModel.create({
 		name,
 		projectId: project?._id,
 		image: '',
+		resourcesPolicy: {
+			container: defaultContainerresourcesPolicy._id,
+			domain: defaultDomainresourcesPolicy._id,
+			database: defaultDatabaseresourcesPolicy._id,
+		},
 		collaborators: [{ userId, accreditation: defaultAccreditation._id }],
 	});
 
