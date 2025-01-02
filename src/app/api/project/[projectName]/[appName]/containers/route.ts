@@ -3,6 +3,7 @@ import { checkAccreditation, getUser } from '@/lib/auth';
 import { containerSchema } from '@/types/container';
 import { createContainer } from '@/lib/container';
 import { log } from '@/lib/log';
+import { checkResourcesPolicy } from '@/lib/resourcesPolicy';
 
 export async function POST(req: NextRequest, { params }: { params: { projectName: string; appName: string } }) {
 	try {
@@ -11,6 +12,10 @@ export async function POST(req: NextRequest, { params }: { params: { projectName
 		if (!user || !(await checkAccreditation('containers:2:create', `${params.projectName}/${params.appName}`))) {
 			log(`Unauthorized: Create container`, 'info', params.projectName, params.appName);
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+		}
+
+		if (!(await checkResourcesPolicy(params.projectName, params.appName, 'containers'))) {
+			return NextResponse.json({ message: 'Resource limit reached' }, { status: 400 });
 		}
 
 		const { name, image, version, env } = await req.json();

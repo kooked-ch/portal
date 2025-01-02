@@ -3,6 +3,7 @@ import { checkAccreditation, getUser } from '@/lib/auth';
 import { createDomain, getDomains } from '@/lib/domain';
 import { domainSchema } from '@/types/domain';
 import { log } from '@/lib/log';
+import { checkResourcesPolicy } from '@/lib/resourcesPolicy';
 
 export async function GET(req: NextRequest, { params }: { params: { projectName: string; appName: string } }) {
 	try {
@@ -29,6 +30,10 @@ export async function POST(req: NextRequest, { params }: { params: { projectName
 		if (!user || !(await checkAccreditation('domains:2:create', `${params.projectName}/${params.appName}`))) {
 			log('Unauthorized: Create domain', 'error', params.projectName, params.appName);
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+		}
+
+		if (!(await checkResourcesPolicy(params.projectName, params.appName, 'domains'))) {
+			return NextResponse.json({ message: 'Resource limit reached' }, { status: 400 });
 		}
 
 		const { url, port, container } = await req.json();

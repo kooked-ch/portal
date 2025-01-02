@@ -2,6 +2,7 @@ import { createProject } from '@/lib/project';
 import { NextRequest, NextResponse } from 'next/server';
 import { projectSchema } from '@/types/project';
 import { checkAccreditation, getUser } from '@/lib/auth';
+import { checkResourcesPolicy } from '@/lib/resourcesPolicy';
 
 export async function POST(req: NextRequest) {
 	try {
@@ -9,6 +10,10 @@ export async function POST(req: NextRequest) {
 
 		if (!user || !(await checkAccreditation('projects:0:create'))) {
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+		}
+
+		if (!(await checkResourcesPolicy('projects'))) {
+			return NextResponse.json({ message: 'Resource limit reached' }, { status: 400 });
 		}
 
 		const { name, description } = await req.json();

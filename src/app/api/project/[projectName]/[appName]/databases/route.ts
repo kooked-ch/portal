@@ -3,6 +3,7 @@ import { checkAccreditation, getUser } from '@/lib/auth';
 import { log } from '@/lib/log';
 import { databaseSchema } from '@/types/database';
 import { createDatabase } from '@/lib/database';
+import { checkResourcesPolicy } from '@/lib/resourcesPolicy';
 
 export async function POST(req: NextRequest, { params }: { params: { projectName: string; appName: string } }) {
 	try {
@@ -11,6 +12,10 @@ export async function POST(req: NextRequest, { params }: { params: { projectName
 		if (!user || !(await checkAccreditation('databases:2:create', `${params.projectName}/${params.appName}`))) {
 			log(`Unauthorized: Create database`, 'info', params.projectName, params.appName);
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+		}
+
+		if (!(await checkResourcesPolicy(params.projectName, params.appName, 'databases'))) {
+			return NextResponse.json({ message: 'Resource limit reached' }, { status: 400 });
 		}
 
 		const { name, provider, username, password } = await req.json();
