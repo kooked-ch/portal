@@ -10,7 +10,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { domainSchema } from '@/types/domain';
 
-export default function CreateDomainDialog({ containersList, refetch }: { containersList: string[]; refetch: () => void }) {
+export default function CreateDomainDialog({ containersList, refetch, disabled }: { containersList: string[]; refetch: () => void; disabled: boolean }) {
 	const [loading, setLoading] = useState(false);
 	const [open, setOpen] = useState(false);
 	const [globalError, setGlobalError] = useState<string | null>(null);
@@ -58,7 +58,7 @@ export default function CreateDomainDialog({ containersList, refetch }: { contai
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button variant="outline" size="sm">
+				<Button variant="outline" size="sm" disabled={disabled}>
 					<Plus className="w-4 h-4" /> Add Domain
 				</Button>
 			</DialogTrigger>

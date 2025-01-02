@@ -10,7 +10,7 @@ import { Plus } from 'lucide-react';
 import { appSchema } from '@/types/app';
 import { usePathname } from 'next/navigation';
 
-export function CreateAppForm({ onAppCreated }: { onAppCreated: () => void }) {
+export function CreateAppForm({ onAppCreated, disabled }: { onAppCreated: () => void; disabled: boolean }) {
 	const [isDialogOpen, setDialogOpen] = useState(false);
 	const pathname = usePathname();
 
@@ -55,7 +55,7 @@ export function CreateAppForm({ onAppCreated }: { onAppCreated: () => void }) {
 	return (
 		<Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
 			<DialogTrigger asChild>
-				<Button size="sm">
+				<Button className="h-8 px-3 py-0 md:h-9 md:px-4 md:py-2" disabled={disabled}>
 					<Plus className="size-4" /> Create New App
 				</Button>
 			</DialogTrigger>

@@ -23,7 +23,7 @@ const generateRandomString = (length: number) => {
 	return result;
 };
 
-export default function CreateDatabaseDialog() {
+export default function CreateDatabaseDialog({ disabled }: { disabled: boolean }) {
 	const [loading, setLoading] = useState(false);
 	const [open, setOpen] = useState(false);
 	const [globalError, setGlobalError] = useState<string | null>(null);
@@ -70,7 +70,7 @@ export default function CreateDatabaseDialog() {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button variant="outline" size="sm">
+				<Button variant="outline" size="sm" disabled={disabled}>
 					<Plus className="w-4 h-4" /> Add Database
 				</Button>
 			</DialogTrigger>

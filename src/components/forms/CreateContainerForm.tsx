@@ -11,7 +11,7 @@ import { Label } from '../ui/label';
 import { usePathname, useRouter } from 'next/navigation';
 import { containerSchema } from '@/types/container';
 
-export default function CreateContainerDialog() {
+export default function CreateContainerDialog({ disabled }: { disabled: boolean }) {
 	const [loading, setLoading] = useState(false);
 	const [open, setOpen] = useState(false);
 	const [globalError, setGlobalError] = useState<string | null>(null);
@@ -73,7 +73,7 @@ export default function CreateContainerDialog() {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button variant="outline" size="sm">
+				<Button variant="outline" size="sm" disabled={disabled}>
 					<Plus className="w-4 h-4" /> Add Container
 				</Button>
 			</DialogTrigger>
