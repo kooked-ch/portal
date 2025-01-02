@@ -61,8 +61,8 @@ export default function TwoFactorEnable({ secret, QRUri }: { secret: string; QRU
 	}
 
 	return (
-		<div className="min-h-screen w-full flex items-center justify-center p-4">
-			<Card className="w-full max-w-md">
+		<div className="h-svh w-full flex items-center justify-center p-4">
+			<Card className="w-full max-w-md md:border border-0">
 				<CardHeader className="text-center space-y-4">
 					<div className="mx-auto bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center">
 						<Lock className="w-6 h-6 text-primary" />
