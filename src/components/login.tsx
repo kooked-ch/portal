@@ -37,8 +37,8 @@ export default function LoginComponent() {
 	}
 
 	return (
-		<div className="min-h-screen w-full flex items-center justify-center p-4 md:p-8">
-			<div className={cn('w-full max-w-md bg-card/95 rounded-xl shadow-2xl shadow-black/20', 'border border-border/50 backdrop-blur-sm', 'p-6 md:p-8 space-y-6')}>
+		<div className="h-svh w-full flex items-center justify-center p-4 md:p-8">
+			<div className={cn('w-full max-w-md bg-card/95 rounded-xl shadow-2xl shadow-black/20', 'md:border md:border-border/50 md:backdrop-blur-sm', 'p-6 pt-2 md:p-8 space-y-6')}>
 				<div className="space-y-2 text-center">
 					<div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent mb-4">
 						<Sparkles className="w-6 h-6 text-accent-foreground" />
