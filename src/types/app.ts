@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ContainerType } from './container';
 import { logType } from './log';
 import { AppResourcesPolicy } from './resourcesPolicy';
+import { AppAuthorizationsType } from './authorization';
 
 export interface AppsType {
 	name: string;
@@ -98,4 +99,5 @@ export interface AppType {
 	}[];
 	logs: logType[];
 	resourcesPolicy: AppResourcesPolicy;
+	authorizations: AppAuthorizationsType;
 }
