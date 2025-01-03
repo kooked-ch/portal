@@ -9,6 +9,7 @@ import { IUser } from '@/models/User';
 import { getLogs, log } from './log';
 import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
 import { getAppResourcesPolicy } from './resourcesPolicy';
+import { getAppAuthorization } from './authorization';
 
 export async function getApp(projectName: string, appName: string): Promise<AppType | null> {
 	const hasAccess = await checkAccreditation('apps:2:read', `${projectName}/${appName}`);
@@ -153,6 +154,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 
 		const logs = await getLogs(projectName, appName);
 		const resourcesPolicy = await getAppResourcesPolicy(projectName, appName);
+		const authorizations = await getAppAuthorization(projectName, appName);
 
 		return {
 			name: appData.metadata.name,
@@ -179,6 +181,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 				image: collaborator.userId.image || '',
 			})),
 			logs,
+			authorizations,
 		};
 	} catch (error) {
 		console.error('Error fetching app:', error);
