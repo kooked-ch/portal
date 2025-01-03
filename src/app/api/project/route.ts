@@ -8,13 +8,9 @@ export async function POST(req: NextRequest) {
 	try {
 		const user = await getUser();
 
-		console.log('user:', user);
-
 		if (!user || !(await checkAccreditation('projects:0:create'))) {
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 		}
-
-		console.log('checkResourcesPolicy');
 
 		if (!(await checkResourcesPolicy('projects'))) {
 			return NextResponse.json({ message: 'Resource limit reached' }, { status: 400 });
