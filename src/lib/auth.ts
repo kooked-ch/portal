@@ -43,7 +43,7 @@ const handleSignIn = async ({ user, account, profile }: { user: User; account: a
 		const defaultAccreditation = await AccreditationModel.findOne({ slug: 'std', accessLevel: 0 }).exec();
 		if (!defaultAccreditation) return false;
 
-		const defaultResourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'std', accessLevel: 0 }).exec();
+		const defaultResourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'dpl', accessLevel: 0 }).exec();
 		if (!defaultResourcesPolicy) return false;
 
 		const existingUser = await UserModel.findOne({ email }).exec();
