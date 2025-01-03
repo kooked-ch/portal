@@ -87,7 +87,7 @@ export async function checkResourcesPolicy(action: string, projectName?: string,
 
 	const app = await AppModel.findOne({
 		name: appName,
-		projectId: project._id,
+		projectId: project?._id,
 	}).exec();
 	if (!app && appName) return false;
 

@@ -107,7 +107,10 @@ export const checkAccreditation = async (request: string, id?: string): Promise<
 
 	const [access, accessLevel, action]: string[] = request.split(':');
 
+	console.log('Checking accreditation:', { access, accessLevel, action });
+
 	const { authorizations } = user.accreditation;
+	console.log('authorizations:', authorizations);
 	if (authorizations && authorizations[access] && authorizations[access].includes(action)) {
 		return true;
 	}
