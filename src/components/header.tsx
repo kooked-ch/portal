@@ -31,7 +31,7 @@ export function Header({ user, projects }: { user: User; projects: ProjectsType[
 							<SelectContent>
 								<SelectGroup>
 									{projects.map((project, index) => (
-										<SelectItem key={index} value={project.name}>
+										<SelectItem key={index} value={project.slug}>
 											{project.name}
 										</SelectItem>
 									))}
