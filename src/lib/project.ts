@@ -28,15 +28,19 @@ export async function createProject(userId: string, project: { name: string; des
 			throw new Error('Default accreditation not found');
 		}
 
-		const defaultresourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'dal', accessLevel: 1 }).exec();
-		if (!defaultresourcesPolicy) {
+		const defaultResourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'dal', accessLevel: 1 }).exec();
+		if (!defaultResourcesPolicy) {
 			throw new Error('Default resource policy not found');
 		}
+
+		console.log('Creating project:', project);
+		console.log('defaultAccreditation:', defaultAccreditation);
+		console.log('defaultResourcesPolicy:', defaultResourcesPolicy);
 
 		await ProjectModel.create({
 			...project,
 			slug,
-			resourcesPolicy: defaultresourcesPolicy?._id,
+			resourcesPolicy: defaultResourcesPolicy?._id,
 			members: [{ userId, accreditation: defaultAccreditation._id }],
 		});
 
