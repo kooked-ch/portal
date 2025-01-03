@@ -34,7 +34,7 @@ export default function LogViewer({ logs, collaborators }: { logs: logType[]; co
 	return (
 		<div className="space-y-4">
 			<div className="flex gap-2 md:flex-row flex-col">
-				<div className="flex flex-row md:flex-col gap-2 md:max-w-[22rem] w-full">
+				<div className="flex flex-row md:flex-col gap-2 w-full">
 					<div className="w-full">
 						<div className="relative h-10">
 							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10 -mt-0.5 w-4 h-4" />
