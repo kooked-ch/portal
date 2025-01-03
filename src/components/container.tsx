@@ -6,6 +6,7 @@ import EditContainerDialog from './forms/UpdateContainerForm';
 import { useState } from 'react';
 import { ContainerType } from '@/types/container';
 import ContainerLogsDialog from './ui/container-logs-dialog';
+import { AppAuthorizationsType } from '@/types/authorization';
 
 type ContainerStatus = {
 	ready: boolean;
@@ -92,7 +93,7 @@ const getContainerStatusDetails = (totalCount: number, statuses: ContainerStatus
 	};
 };
 
-export const ContainerItem = ({ container }: { container: ContainerType }) => {
+export const ContainerItem = ({ container, authorizations }: { container: ContainerType; authorizations: AppAuthorizationsType }) => {
 	const totalCount = container.status.length;
 	const [customStatus, setCustomStatus] = useState<string>('');
 
@@ -114,9 +115,9 @@ export const ContainerItem = ({ container }: { container: ContainerType }) => {
 					<span className={cn('text-sm font-medium', colorClass)}>{message}</span>
 				</div>
 				<div className="flex space-x-1 text-white">
-					<ContainerLogsDialog container={container} />
-					<EditContainerDialog container={container} setCustomStatus={setCustomStatus} />
-					<DeleteContainerDialog containerName={container.name} />
+					{authorizations.secrets.includes('read') && <ContainerLogsDialog container={container} />}
+					{authorizations.containers.includes('update') && <EditContainerDialog container={container} setCustomStatus={setCustomStatus} />}
+					{authorizations.containers.includes('delete') && <DeleteContainerDialog containerName={container.name} />}
 				</div>
 			</div>
 		</li>
