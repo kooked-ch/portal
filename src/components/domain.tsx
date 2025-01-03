@@ -8,6 +8,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from './ui/chart';
 import { cn } from '@/lib/utils';
 import DeleteDomainDialog from './forms/DeleteDomainForm';
 import EditDomainDialog from './forms/UpdateDomainForm';
+import { AppAuthorizationsType } from '@/types/authorization';
 
 const LoadingState = () => (
 	<Card className="bg-[#18181a] border-0">
@@ -42,19 +43,7 @@ const config = {
 	},
 };
 
-export const DomainStatus = ({
-	domain,
-	monitoringData,
-	containersList,
-}: {
-	domain: {
-		url: string;
-		port: number;
-		container: string;
-	};
-	monitoringData?: DomainMonitorType;
-	containersList: string[];
-}) => {
+export const DomainStatus = ({ domain, monitoringData, containersList, authorizations }: { domain: { url: string; port: number; container: string }; monitoringData?: DomainMonitorType; containersList: string[]; authorizations: AppAuthorizationsType }) => {
 	if (!monitoringData || Object.keys(monitoringData).length === 0) {
 		return <LoadingState />;
 	}
@@ -104,8 +93,8 @@ export const DomainStatus = ({
 										{domain.container}: {domain.port}
 									</p>
 									<span className="text-[#666]">•</span>
-									<EditDomainDialog domain={domain} containersList={containersList} />
-									<DeleteDomainDialog url={domain.url} />
+									{authorizations.domains.includes('update') && <EditDomainDialog domain={domain} containersList={containersList} />}
+									{authorizations.domains.includes('delete') && <DeleteDomainDialog url={domain.url} />}
 								</div>
 							</div>
 						</div>
