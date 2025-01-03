@@ -13,7 +13,6 @@ export async function POST(req: NextRequest, { params }: { params: { projectName
 		}
 
 		if (!(await checkResourcesPolicy('apps', params.projectName))) {
-			console.log('Resource limit reached');
 			return NextResponse.json({ message: 'Resource limit reached' }, { status: 400 });
 		}
 

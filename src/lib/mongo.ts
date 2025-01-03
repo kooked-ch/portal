@@ -388,7 +388,6 @@ async function connect() {
 	];
 
 	resourcesPolicy.forEach(async (policy) => {
-		console.log('policy', policy);
 		await ResourcesPolicyModel.findOneAndReplace({ name: policy.name, accessLevel: policy.accessLevel }, policy, { upsert: true, new: true });
 	});
 
