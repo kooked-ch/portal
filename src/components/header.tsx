@@ -24,7 +24,7 @@ export function Header({ user, projects }: { user: User; projects: ProjectsType[
 				</div>
 				{projects && (
 					<div className="flex items-center gap-3">
-						<Select onValueChange={onProjectChange} defaultValue={projects.find((project) => pathname.includes(`/${project.name}`))?.name}>
+						<Select onValueChange={onProjectChange} defaultValue={projects.find((project) => pathname.includes(`/${project.slug}`))?.name}>
 							<SelectTrigger className="md:w-[180px] w-32">
 								<SelectValue placeholder="Select a project" />
 							</SelectTrigger>
