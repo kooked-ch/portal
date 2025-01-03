@@ -88,28 +88,28 @@ export default function AppView({ app }: { app: AppType }) {
 					<div className="space-y-4">
 						<div className="flex justify-between items-center gap-4">
 							<h2 className="text-xl font-semibold">Containers</h2>
-							<CreateContainerDialog disabled={app.resourcesPolicy.containers.remainingLimit === 0} />
+							{app.authorizations.containers.includes('create') && <CreateContainerDialog disabled={app.resourcesPolicy.containers.remainingLimit === 0} />}
 						</div>
 						{app.containers.length === 0 ? (
 							<div className="bg-[#1E1E20] p-4 rounded-lg text-[#666] text-sm">No containers found</div>
 						) : (
 							<ul className="space-y-2">
 								{app.containers.map((container, index) => (
-									<ContainerItem key={'containerStatus' + index} container={container} />
+									<ContainerItem key={'containerStatus' + index} container={container} authorizations={app.authorizations} />
 								))}
 							</ul>
 						)}
 
 						<div className="flex justify-between items-center gap-4 mt-6">
 							<h2 className="text-xl font-semibold">Databases</h2>
-							<CreateDatabaseDialog disabled={app.resourcesPolicy.databases.remainingLimit === 0} />
+							{app.authorizations.databases.includes('create') && <CreateDatabaseDialog disabled={app.resourcesPolicy.databases.remainingLimit === 0} />}
 						</div>
 						{app.databases.length === 0 ? (
 							<div className="bg-[#1E1E20] p-4 rounded-lg text-[#666] text-sm">No databases found</div>
 						) : (
 							<ul className="space-y-2">
 								{app.databases.map((database, index) => (
-									<DatabaseItem key={'databaseItem' + index} database={database} />
+									<DatabaseItem key={'databaseItem' + index} database={database} authorizations={app.authorizations} />
 								))}
 							</ul>
 						)}
@@ -121,14 +121,14 @@ export default function AppView({ app }: { app: AppType }) {
 					<div className="space-y-4">
 						<div className="flex justify-between items-center gap-4">
 							<h2 className="text-xl font-semibold">Domains</h2>
-							<CreateDomainDialog disabled={app.resourcesPolicy.domains.remainingLimit === 0} containersList={app.containers.map((container) => container.name)} refetch={domainRefetch} />
+							{app.authorizations.domains.includes('create') && <CreateDomainDialog disabled={app.resourcesPolicy.domains.remainingLimit === 0} containersList={app.containers.map((container) => container.name)} refetch={domainRefetch} />}
 						</div>
 						{app.domains.length === 0 ? (
 							<div className="bg-[#1E1E20] p-4 rounded-lg text-[#666] text-sm">No domains found</div>
 						) : (
 							<ul className="space-y-2">
 								{app.domains.map((domain, index) => (
-									<DomainStatus key={'domainStatus' + index} domain={domain} containersList={app.containers.map((container) => container.name)} monitoringData={Array.isArray(domainsDetails) ? domainsDetails.find((details: any) => details.url === domain.url)?.monitor : {}} />
+									<DomainStatus key={'domainStatus' + index} domain={domain} containersList={app.containers.map((container) => container.name)} monitoringData={Array.isArray(domainsDetails) ? domainsDetails.find((details: any) => details.url === domain.url)?.monitor : {}} authorizations={app.authorizations} />
 								))}
 							</ul>
 						)}
