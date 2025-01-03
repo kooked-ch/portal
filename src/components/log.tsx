@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar, Search } from 'lucide-react';
 import { logType } from '@/types/log';
 import { AppType } from '@/types/app';
+import { cn } from '@/lib/utils';
 
 export default function LogViewer({ logs, collaborators }: { logs: logType[]; collaborators: AppType['collaborators'] }) {
 	const [searchQuery, setSearchQuery] = useState('');
@@ -82,7 +83,7 @@ export default function LogViewer({ logs, collaborators }: { logs: logType[]; co
 				{filteredLogs.length > 0 ? (
 					<ul className="space-y-2">
 						{filteredLogs.map((log, index) => (
-							<li key={index} className="flex md:items-center items-start md:justify-between justify-start flex-col md:flex-row border-b border-[#333] pb-2">
+							<li key={index} className={cn('flex md:items-center items-start md:justify-between justify-start flex-col md:flex-row  border-[#333]', index != filteredLogs.length - 1 && 'border-b pb-2')}>
 								<span className="text-sm text-white">{log.message}</span>
 								<span className="text-xs text-[#666]">
 									{log.user} - {new Date(log.date).toLocaleString()}
