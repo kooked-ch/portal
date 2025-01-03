@@ -80,7 +80,7 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 		const isOnline = getAppStatus(app);
 
 		return (
-			<Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/${project.name}/${app.name}`)}>
+			<Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/${project.slug}/${app.name}`)}>
 				<CardHeader>
 					<div className="flex justify-between items-start">
 						<div>
@@ -98,7 +98,7 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 		const isOnline = getAppStatus(app);
 
 		return (
-			<Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/${project.name}/${app.name}`)}>
+			<Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => router.push(`/${project.slug}/${app.name}`)}>
 				<CardContent className="py-4">
 					<div className="flex justify-between items-center">
 						<div className="flex items-center gap-4">
