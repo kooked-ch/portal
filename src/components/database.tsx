@@ -4,8 +4,9 @@ import { DatabaseType } from '@/types/database';
 import { Database } from 'lucide-react';
 import DisplayDatabaseDialog from './forms/DisplayDatabase';
 import DeleteDatabaseDialog from './forms/DeleteDatabaseForm';
+import { AppAuthorizationsType } from '@/types/authorization';
 
-export const DatabaseItem = ({ database }: { database: AppType['databases'][0] }) => {
+export const DatabaseItem = ({ database, authorizations }: { database: AppType['databases'][0]; authorizations: AppAuthorizationsType }) => {
 	const dbStatus = database.status;
 	const color =
 		{
@@ -32,8 +33,8 @@ export const DatabaseItem = ({ database }: { database: AppType['databases'][0] }
 			<div className="flex items-center space-x-3">
 				<span className={cn('text-sm font-medium', 'text-' + color)}>{dbStatus.state === 'Pending' ? 'Starting database' : dbStatus.state}</span>
 				<div className="flex space-x-2">
-					<DisplayDatabaseDialog database={database} />
-					<DeleteDatabaseDialog databaseName={database.name} />
+					{authorizations.secrets.includes('read') && <DisplayDatabaseDialog database={database} />}
+					{authorizations.databases.includes('delete') && <DeleteDatabaseDialog databaseName={database.name} />}
 				</div>
 			</div>
 		</li>
