@@ -10,7 +10,7 @@ import { getServerSession } from 'next-auth/next';
 import { IProject, ProjectModel } from '@/models/Project';
 import { AppModel, IApp } from '@/models/App';
 import { cookies } from 'next/headers';
-import { checkTwoFactor } from './factor';
+import { checkTwoFactor, getTwoFactor } from './factor';
 import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
 
 const getProviders = () => [
@@ -25,9 +25,11 @@ const getProviders = () => [
 ];
 
 const enhanceToken = async ({ token, user }: { token: JWT; user: User }): Promise<JWT> => {
+	const { disabled } = await getTwoFactor();
+
 	if (user) {
 		token.twoFactorComplete = user.twoFactorComplete ?? false;
-		token.twoFactorDisabled = user.twoFactorDisabled ?? false;
+		token.twoFactorDisabled = disabled ?? false;
 	}
 	return token;
 };
