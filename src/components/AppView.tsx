@@ -121,7 +121,7 @@ export default function AppView({ app }: { app: AppType }) {
 					<div className="space-y-4">
 						<div className="flex justify-between items-center gap-4">
 							<h2 className="text-xl font-semibold">Domains</h2>
-							{app.authorizations.domains.includes('create') && <CreateDomainDialog disabled={app.resourcesPolicy.domains.remainingLimit === 0} containersList={app.containers.map((container) => container.name)} refetch={domainRefetch} />}
+							{app.authorizations.domains.includes('create') && <CreateDomainDialog disabled={app.resourcesPolicy.domains.remainingLimit === 0 || app.containers.length === 0} containersList={app.containers.map((container) => container.name)} refetch={domainRefetch} />}
 						</div>
 						{app.domains.length === 0 ? (
 							<div className="bg-[#1E1E20] p-4 rounded-lg text-[#666] text-sm">No domains found</div>
