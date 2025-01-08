@@ -10,6 +10,7 @@ import { Label } from '../ui/label';
 import { usePathname, useRouter } from 'next/navigation';
 import { containerSchema } from '@/types/container';
 import { Edit2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function EditContainerDialog({ container, setCustomStatus }: { container: { name: string; image: string; env: { name: string; value: string }[] }; setCustomStatus: React.Dispatch<React.SetStateAction<string>> }) {
 	const [loading, setLoading] = useState(false);
@@ -110,7 +111,7 @@ export default function EditContainerDialog({ container, setCustomStatus }: { co
 
 					<div className="mt-3 flex flex-col">
 						<Label className="mt-3 mb-2">Environment Variables</Label>
-						<div className="max-h-48 overflow-y-auto border rounded p-2">
+						<div className={cn(envVars.length > 4 && 'max-h-48 overflow-y-auto border rounded p-2')}>
 							{envVars.map((envVar, index) => (
 								<div key={index} className="flex items-center space-x-2 mb-2">
 									<Input value={envVar.name} onChange={(e) => handleEnvVarChange(index, 'name', e.target.value)} placeholder="Name" className="w-1/2" />
