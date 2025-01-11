@@ -3,4 +3,5 @@ export interface AppAuthorizationsType {
 	domains: string[];
 	databases: string[];
 	secrets: string[];
+	collaborators: string[];
 }
