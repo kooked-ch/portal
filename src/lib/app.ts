@@ -158,6 +158,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 		const resourcesPolicy = await getAppResourcesPolicy(projectName, appName);
 		const authorizations = await getAppAuthorization(projectName, appName);
 		const accreditations = await getAccreditations(2);
+		const volumes = (appData.spec?.containers || []).map((container: any) => (container.volumes || []).map((volume: any) => ({ name: volume.name, mountPath: volume.mountPath, container: container.name }))).flat();
 
 		return {
 			name: appData.metadata.name,
@@ -192,6 +193,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 				  }))
 				: [],
 			logs,
+			volumes,
 			authorizations,
 			accreditations: hasCollaboratorsAccess ? accreditations : [],
 		};
@@ -240,6 +242,7 @@ export async function createApp(userId: string, { name, description, repository,
 	const defaultContainerresourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'dcl', accessLevel: 2 }).exec();
 	const defaultDomainresourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'ddl', accessLevel: 2 }).exec();
 	const defaultDatabaseresourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'ddb', accessLevel: 2 }).exec();
+	const defaultVolumeresourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'dvl', accessLevel: 2 }).exec();
 
 	if (!defaultContainerresourcesPolicy || !defaultDomainresourcesPolicy || !defaultDatabaseresourcesPolicy) {
 		throw new Error('Default resource policy not found');
@@ -253,6 +256,7 @@ export async function createApp(userId: string, { name, description, repository,
 			container: defaultContainerresourcesPolicy._id,
 			domain: defaultDomainresourcesPolicy._id,
 			database: defaultDatabaseresourcesPolicy._id,
+			volume: defaultVolumeresourcesPolicy._id,
 		},
 		collaborators: [{ userId, accreditation: defaultAccreditation._id }],
 	});
