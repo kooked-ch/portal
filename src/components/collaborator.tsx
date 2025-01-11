@@ -21,7 +21,7 @@ export default function CollaboratorsTab({ collaborators, accreditations }: { co
 									<span className="text-white font-medium">{collaborator.username}</span>
 								</div>
 							</div>
-							<div className="flex items-center space-x-3">
+							<div className="flex items-center space-x-3 text-gray-500">
 								{collaborator.accreditation.authorizations.containers.length === 4 && <Container className="w-5 h-5" />}
 								{collaborator.accreditation.authorizations.databases.length === 4 && <Database className="w-5 h-5" />}
 								{collaborator.accreditation.authorizations.domains.length === 4 && <Globe className="w-5 h-5" />}
