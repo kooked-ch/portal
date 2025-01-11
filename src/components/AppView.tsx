@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowUpRight, GitBranch, Globe } from 'lucide-react';
+import { ArrowUpRight, GitBranch, Globe, HardDrive, FileJson, Bell, Plus, Container, Info, UserRound, Text } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { AppType } from '@/types/app';
 import Link from 'next/link';
@@ -16,13 +18,74 @@ import CreateDomainDialog from './forms/CreateDomainForm';
 import LogViewer from './log';
 import CreateDatabaseDialog from './forms/CreateDatabaseForm';
 import { DatabaseItem } from './database';
+import CollaboratorsTab from './collaborator';
+import InviteCollaboratorsDialog from './forms/InviteCollaboratorsDialog';
 
-type Tab = 'Containers' | 'Domains' | 'Logs' | 'Info';
+type Tab = 'Containers' | 'Domains' | 'Logs' | 'Info' | 'Volumes' | 'Configuration' | 'Notifications' | 'Collaborators';
+
+type ConfigMap = {
+	name: string;
+	data: Record<string, string>;
+	createdAt: string;
+	lastModified: string;
+};
 
 const TabButton = ({ tab, selectedTab, onClick, className = '' }: { tab: Tab; selectedTab: Tab; onClick: () => void; className?: string }) => (
-	<button className={cn('px-3 py-2 text-sm whitespace-nowrap', selectedTab === tab ? 'border-b-2 border-purple-500 text-white' : 'text-[#666] hover:text-white', className)} onClick={onClick}>
+	<button className={cn('px-3 py-2 text-sm whitespace-nowrap flex items-center gap-2', selectedTab === tab ? 'border-b-2 border-purple-500 text-white' : 'text-[#666] hover:text-white', className)} onClick={onClick}>
+		{tab === 'Containers' && <Container className="w-4 h-4" />}
+		{tab === 'Domains' && <Globe className="w-4 h-4" />}
+		{tab === 'Volumes' && <HardDrive className="w-4 h-4" />}
+		{tab === 'Configuration' && <FileJson className="w-4 h-4" />}
+		{tab === 'Notifications' && <Bell className="w-4 h-4" />}
+		{tab === 'Logs' && <Text className="w-4 h-4" />}
+		{tab === 'Info' && <Info className="w-4 h-4" />}
+		{tab === 'Collaborators' && <UserRound className="w-4 h-4" />}
 		{tab}
 	</button>
+);
+
+const ConfigMapCard = ({ configMap }: { configMap: ConfigMap }) => (
+	<Card className="bg-gradient-to-br from-[#1E1E20] to-[#1A1A1C] border-none p-6 space-y-6 hover:shadow-lg transition-all duration-200">
+		<div className="flex justify-between items-start">
+			<div className="space-y-1">
+				<div className="flex items-center gap-2">
+					<FileJson className="w-5 h-5 text-purple-400" />
+					<h3 className="font-medium text-lg">{configMap.name}</h3>
+				</div>
+				<div className="flex items-center gap-2 text-sm text-[#666]">
+					<p>Created: {new Date(configMap.createdAt).toLocaleDateString()}</p>
+					<span className="text-[#444]">•</span>
+					<p>Modified: {new Date(configMap.lastModified).toLocaleDateString()}</p>
+				</div>
+			</div>
+			<div className="flex gap-2">
+				<Button variant="outline" size="sm" className="hover:bg-purple-500/10 hover:text-purple-400 transition-colors">
+					Edit
+				</Button>
+				<Button variant="outline" size="sm" className="hover:bg-red-500/10 hover:text-red-400 transition-colors">
+					Delete
+				</Button>
+			</div>
+		</div>
+		<div className="space-y-3">
+			{Object.entries(configMap.data).map(([key, value]) => (
+				<div key={key} className="bg-black/20 backdrop-blur-sm p-4 rounded-lg border border-[#2A2A2C]/50 hover:border-purple-500/30 transition-colors">
+					<div className="flex items-center gap-2 mb-2">
+						<div className="h-2 w-2 rounded-full bg-purple-400" />
+						<div className="text-sm font-medium text-purple-400">{key}</div>
+					</div>
+					<div className="text-sm font-mono mt-1 break-all text-[#AAA] bg-black/20 p-2 rounded">{value}</div>
+				</div>
+			))}
+		</div>
+	</Card>
+);
+
+const CreateConfigMapButton = () => (
+	<Button className="flex items-center gap-2">
+		<Plus className="w-4 h-4" />
+		Create ConfigMap
+	</Button>
 );
 
 export default function AppView({ app }: { app: AppType }) {
@@ -30,12 +93,137 @@ export default function AppView({ app }: { app: AppType }) {
 	const pathname = usePathname();
 	const { data: domainsDetails, loading: domainsLoading, error: domainsError, refetch: domainRefetch } = useFetch(`/api/project${pathname}/domains`);
 
-	const mainTabs: Tab[] = ['Containers', 'Domains', ...(app.logs.length > 0 ? (['Logs'] as Tab[]) : [])];
+	const configMaps: ConfigMap[] = [
+		{
+			name: 'app-config',
+			data: {
+				DATABASE_URL: 'postgresql://user:pass@host:5432/db',
+				REDIS_HOST: 'redis.internal:6379',
+				API_KEY: 'sk_test_123456789',
+			},
+			createdAt: '2024-01-01T00:00:00Z',
+			lastModified: '2024-01-02T00:00:00Z',
+		},
+		{
+			name: 'nginx-config',
+			data: {
+				'nginx.conf': `server {
+	  listen 80;
+	  server_name example.com;
+	  location / {
+		proxy_pass http://backend:3000;
+	  }
+	}`,
+				'proxy-settings': 'client_max_body_size 10M;',
+			},
+			createdAt: '2024-01-01T00:00:00Z',
+			lastModified: '2024-01-02T00:00:00Z',
+		},
+	];
+
+	const VolumeCard = ({ name, used, total }: { name: string; used: number; total: number }) => {
+		const percentage = (used / total) * 100;
+		const isHighUsage = percentage > 80;
+
+		return (
+			<Card className="p-6 bg-gradient-to-br from-[#1E1E20] to-[#1A1A1C] border-none hover:shadow-lg transition-all duration-200">
+				<div className="flex justify-between items-center mb-4">
+					<div className="flex items-center gap-2">
+						<HardDrive className="w-5 h-5 text-purple-400" />
+						<h3 className="font-medium">{name}</h3>
+					</div>
+					<span className={cn('text-sm font-medium px-3 py-1 rounded-full', isHighUsage ? 'bg-red-500/20 text-red-400' : 'bg-purple-500/20 text-purple-400')}>
+						{used}GB / {total}GB
+					</span>
+				</div>
+				<div className="space-y-2">
+					<Progress value={percentage} className={cn('h-2 transition-all duration-500', isHighUsage ? 'bg-red-500/20' : 'bg-purple-500/20')} />
+					<p className="text-xs text-[#666] text-right">{percentage.toFixed(1)}% used</p>
+				</div>
+			</Card>
+		);
+	};
+
+	const NotificationSettings = () => (
+		<div className="space-y-6">
+			<Card className="bg-gradient-to-br from-[#1E1E20] to-[#1A1A1C] border-none p-6 space-y-4">
+				<div className="flex items-center gap-3 mb-2">
+					<div className="p-2 rounded-lg bg-purple-500/20">
+						<Bell className="w-5 h-5 text-purple-400" />
+					</div>
+					<h3 className="font-medium text-lg">Telegram Notifications</h3>
+				</div>
+				<div className="grid sm:grid-cols-2 gap-4">
+					<div className="space-y-2">
+						<label className="text-sm text-[#666]">Bot Token</label>
+						<input type="text" placeholder="Enter bot token" className="w-full bg-black/20 border border-[#2A2A2C]/50 rounded-lg p-3 text-sm placeholder:text-[#666] focus:border-purple-500/50 focus:outline-none transition-colors" />
+					</div>
+					<div className="space-y-2">
+						<label className="text-sm text-[#666]">Chat ID</label>
+						<input type="text" placeholder="Enter chat ID" className="w-full bg-black/20 border border-[#2A2A2C]/50 rounded-lg p-3 text-sm placeholder:text-[#666] focus:border-purple-500/50 focus:outline-none transition-colors" />
+					</div>
+				</div>
+			</Card>
+
+			<Card className="bg-gradient-to-br from-[#1E1E20] to-[#1A1A1C] border-none p-6 space-y-4">
+				<div className="flex items-center gap-3 mb-2">
+					<div className="p-2 rounded-lg bg-purple-500/20">
+						<Bell className="w-5 h-5 text-purple-400" />
+					</div>
+					<h3 className="font-medium text-lg">Email Notifications</h3>
+				</div>
+				<div className="space-y-4">
+					{['Deployment Status', 'Resource Usage', 'Security Alerts'].map((setting) => (
+						<label key={setting} className="flex items-center gap-3 p-3 bg-black/20 rounded-lg border border-[#2A2A2C]/50 hover:border-purple-500/30 transition-colors">
+							<input type="checkbox" className="rounded bg-[#2A2A2C] border-none text-purple-500 focus:ring-purple-500/50 focus:ring-offset-0" />
+							<span className="text-sm">{setting}</span>
+						</label>
+					))}
+				</div>
+			</Card>
+		</div>
+	);
+
+	const mainTabs: Tab[] = ['Containers', 'Domains', 'Volumes', 'Configuration', 'Notifications', ...(app.logs.length > 0 ? (['Logs'] as Tab[]) : []), ...(app.collaborators.length > 0 ? (['Collaborators'] as Tab[]) : [])];
 	const asideTabs: Tab[] = ['Info'];
 	const allTabs = [...mainTabs, ...asideTabs];
 
 	const renderContent = () => {
 		switch (selectedTab) {
+			case 'Volumes':
+				return (
+					<div className="space-y-4">
+						<div className="flex justify-between items-center gap-4">
+							<h2 className="text-xl font-semibold">Storage Volumes</h2>
+						</div>
+						<div className="grid gap-4 sm:grid-cols-2">
+							<VolumeCard name="Primary Storage" used={150} total={500} />
+							<VolumeCard name="Backup Storage" used={75} total={200} />
+						</div>
+					</div>
+				);
+			case 'Notifications':
+				return (
+					<div className="space-y-4">
+						<h2 className="text-xl font-semibold">Notification Settings</h2>
+						<NotificationSettings />
+					</div>
+				);
+			case 'Configuration':
+				return (
+					<div className="space-y-6">
+						<div className="flex justify-between items-center">
+							<h2 className="text-xl font-semibold">ConfigMaps</h2>
+							<CreateConfigMapButton />
+						</div>
+						<div className="grid gap-4">
+							{configMaps.map((configMap) => (
+								<ConfigMapCard key={configMap.name} configMap={configMap} />
+							))}
+						</div>
+					</div>
+				);
+
 			case 'Info':
 				return (
 					<div className="space-y-6">
@@ -140,6 +328,16 @@ export default function AppView({ app }: { app: AppType }) {
 					<div className="space-y-4">
 						<h2 className="text-xl font-semibold">Logs</h2>
 						<LogViewer logs={app.logs} collaborators={app.collaborators} />
+					</div>
+				);
+			case 'Collaborators':
+				return (
+					<div className="space-y-4">
+						<div className="flex justify-between items-center gap-4">
+							<h2 className="text-xl font-semibold">Collaborators</h2>
+							{app.authorizations.collaborators.includes('invite') && <InviteCollaboratorsDialog />}
+						</div>
+						<CollaboratorsTab collaborators={app.collaborators} accreditations={app.accreditations} />
 					</div>
 				);
 		}
