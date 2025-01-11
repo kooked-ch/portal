@@ -1,19 +1,28 @@
 'use client';
+
 import { User } from 'next-auth';
-import * as React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Container } from 'lucide-react';
 import { UserDropdown } from './userDropdown';
 import { ProjectsType } from '@/types/project';
+import { useEffect, useState } from 'react';
 
 export function Header({ user, projects }: { user: User; projects: ProjectsType[] | null }) {
 	const router = useRouter();
 	const pathname = usePathname();
+	const [project, setProject] = useState<string | null>(null);
 
-	const onProjectChange = (project: string) => {
-		router.push(`/${project}`);
+	const onProjectChange = (selectedProject: string) => {
+		setProject(selectedProject);
+		router.push(`/${selectedProject}`);
 	};
+
+	useEffect(() => {
+		if (!projects || !pathname) return;
+		const currentProject = projects.find((project) => pathname.includes(`/${project.slug}`));
+		setProject(currentProject?.slug || null);
+	}, [projects, pathname]);
 
 	return (
 		<header className="border-b p-4">
@@ -24,14 +33,15 @@ export function Header({ user, projects }: { user: User; projects: ProjectsType[
 				</div>
 				{projects && (
 					<div className="flex items-center gap-3">
-						<Select onValueChange={onProjectChange} defaultValue={projects.find((project) => pathname.includes(`/${project.slug}`))?.slug}>
+						<Select onValueChange={onProjectChange} value={project || undefined}>
 							<SelectTrigger className="md:w-[180px] w-32">
 								<SelectValue placeholder="Select a project" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectGroup>
-									{projects.map((project, index) => (
-										<SelectItem key={index} value={project.slug}>
+									<SelectLabel>Projects</SelectLabel>
+									{projects.map((project) => (
+										<SelectItem key={project.slug} value={project.slug}>
 											{project.name}
 										</SelectItem>
 									))}
