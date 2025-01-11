@@ -6,6 +6,13 @@ import { customObjectsApi } from './api';
 import { getServerSession } from 'next-auth';
 import { UserModel } from '@/models/User';
 
+const blankApp = {
+	containers: { name: '', description: '', totalLimit: 0, remainingLimit: 0 },
+	domains: { name: '', description: '', totalLimit: 0, remainingLimit: 0 },
+	databases: { name: '', description: '', totalLimit: 0, remainingLimit: 0 },
+	volumes: { name: '', description: '', totalLimit: 0, remainingLimit: 0 },
+};
+
 export async function getProjectResourcesPolicy(projectName: string): Promise<ProjectResourcesPolicy> {
 	const project = await ProjectModel.findOne({ slug: projectName }).populate('resourcesPolicy');
 	if (!project) return { name: '', description: '', totalLimit: 0, remainingLimit: 0 };
@@ -40,21 +47,13 @@ export async function getProjectsResourcesPolicy(): Promise<ProjectsResourcesPol
 export async function getAppResourcesPolicy(projectName: string, appName: string): Promise<AppResourcesPolicy> {
 	const project = await ProjectModel.findOne({ slug: projectName }).exec();
 	if (!project) {
-		return {
-			containers: { name: '', description: '', totalLimit: 0, remainingLimit: 0 },
-			domains: { name: '', description: '', totalLimit: 0, remainingLimit: 0 },
-			databases: { name: '', description: '', totalLimit: 0, remainingLimit: 0 },
-		};
+		return blankApp;
 	}
 
 	const appData = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
 	const app = await AppModel.findOne({ name: appName, projectId: project._id }).exec();
 	if (!appData) {
-		return {
-			containers: { name: '', description: '', totalLimit: 0, remainingLimit: 0 },
-			domains: { name: '', description: '', totalLimit: 0, remainingLimit: 0 },
-			databases: { name: '', description: '', totalLimit: 0, remainingLimit: 0 },
-		};
+		return blankApp;
 	}
 
 	const resourcesPolicy = await Promise.all([ResourcesPolicyModel.findOne({ _id: app.resourcesPolicy.container }).exec(), ResourcesPolicyModel.findOne({ _id: app.resourcesPolicy.domain }).exec(), ResourcesPolicyModel.findOne({ _id: app.resourcesPolicy.database }).exec()]);
