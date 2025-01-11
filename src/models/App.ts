@@ -9,6 +9,7 @@ export interface IApp extends Document {
 		container: string;
 		database: string;
 		domain: string;
+		volume: string;
 	};
 	collaborators: {
 		userId: string;
@@ -24,6 +25,7 @@ const appSchema = new mongoose.Schema<IApp>({
 		container: { type: mongoose.Schema.Types.ObjectId, ref: 'ResourcesPolicy' },
 		database: { type: mongoose.Schema.Types.ObjectId, ref: 'ResourcesPolicy' },
 		domain: { type: mongoose.Schema.Types.ObjectId, ref: 'ResourcesPolicy' },
+		volume: { type: mongoose.Schema.Types.ObjectId, ref: 'ResourcesPolicy' },
 	},
 	collaborators: [{ userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, accreditation: { type: mongoose.Schema.Types.ObjectId, ref: 'Accreditation' } }],
 });
