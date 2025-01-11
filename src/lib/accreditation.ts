@@ -5,5 +5,10 @@ export async function getAccreditations(level: number): Promise<AccreditationTyp
 	const accreditations = await AccreditationModel.find({ accessLevel: level }, { _id: 0 }).exec();
 	if (!accreditations) return [];
 
-	return accreditations;
+	return accreditations.map((accreditation) => ({
+		name: accreditation.name,
+		description: accreditation.description,
+		slug: accreditation.slug,
+		accessLevel: accreditation.accessLevel,
+	}));
 }
