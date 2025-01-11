@@ -97,6 +97,12 @@ export interface AppType {
 	collaborators: {
 		username: string;
 		image: string;
+		accreditation: {
+			name: string;
+			description: string;
+			slug: string;
+			authorizations: { [key: string]: string[] };
+		};
 	}[];
 	logs: logType[];
 	resourcesPolicy: AppResourcesPolicy;
