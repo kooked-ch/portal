@@ -56,7 +56,7 @@ export async function getAppResourcesPolicy(projectName: string, appName: string
 		return blankApp;
 	}
 
-	const resourcesPolicy = await Promise.all([ResourcesPolicyModel.findOne({ _id: app.resourcesPolicy.container }).exec(), ResourcesPolicyModel.findOne({ _id: app.resourcesPolicy.domain }).exec(), ResourcesPolicyModel.findOne({ _id: app.resourcesPolicy.database }).exec()]);
+	const resourcesPolicy = await Promise.all([ResourcesPolicyModel.findOne({ _id: app.resourcesPolicy.container }).exec(), ResourcesPolicyModel.findOne({ _id: app.resourcesPolicy.domain }).exec(), ResourcesPolicyModel.findOne({ _id: app.resourcesPolicy.database }).exec(), ResourcesPolicyModel.findOne({ _id: app.resourcesPolicy.volume }).exec()]);
 
 	return {
 		containers: {
@@ -76,6 +76,12 @@ export async function getAppResourcesPolicy(projectName: string, appName: string
 			description: resourcesPolicy[2]?.description || '',
 			totalLimit: resourcesPolicy[2]?.limitation.databases || 0,
 			remainingLimit: resourcesPolicy[2]?.limitation.databases - (appData.spec.databases ? appData.spec.databases.length : 0),
+		},
+		volumes: {
+			name: resourcesPolicy[3]?.name || '',
+			description: resourcesPolicy[3]?.description || '',
+			totalLimit: resourcesPolicy[3]?.limitation.volumes || 0,
+			remainingLimit: resourcesPolicy[3]?.limitation.volumes - (appData.spec.containers ? appData.spec.containers.map((container: any) => (container.volumes || []).flat()).length : 0),
 		},
 	};
 }
@@ -107,6 +113,11 @@ export async function checkResourcesPolicy(action: string, projectName?: string,
 			if (!appName || !projectName) return false;
 			resourcesPolicy = await getAppResourcesPolicy(projectName, appName);
 			return resourcesPolicy.databases.totalLimit === -1 || resourcesPolicy.databases.remainingLimit > 0;
+
+		case 'volumes':
+			if (!appName || !projectName) return false;
+			resourcesPolicy = await getAppResourcesPolicy(projectName, appName);
+			return resourcesPolicy.volumes.totalLimit === -1 || resourcesPolicy.volumes.remainingLimit > 0;
 
 		case 'apps':
 			if (!projectName) return false;
