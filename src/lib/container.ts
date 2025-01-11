@@ -22,7 +22,6 @@ export async function createContainer({ projectName, appName, name, image, versi
 		}
 
 		const containers = app?.spec?.containers || [];
-
 		const existingContainer = containers.find((container: any) => container.name === name);
 
 		if (existingContainer) {
@@ -81,7 +80,6 @@ export async function updateContainer({ projectName, appName, containerName, dat
 		}
 
 		const container = app.spec.containers[containerIndex];
-
 		const canUpdateEnv = await checkAccreditation('env:2:update', `${projectName}/${appName}`);
 
 		const patch = [
@@ -106,8 +104,6 @@ export async function updateContainer({ projectName, appName, containerName, dat
 				})),
 			});
 		}
-
-		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
 
 		await customObjectsApi.patchNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName, body: patch });
 		await log(`Updated ${containerName} container`, 'info', projectName, appName);
@@ -145,8 +141,6 @@ export async function deleteContainer({ projectName, appName, containerName }: {
 				path: `/spec/containers/${containerIndex}`,
 			},
 		];
-
-		const options = { headers: { 'Content-type': 'application/json-patch+json' } };
 
 		await customObjectsApi.patchNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName, body: patch });
 		await log(`Deleted ${containerName} container`, 'info', projectName, appName);
