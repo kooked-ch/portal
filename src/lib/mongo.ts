@@ -29,6 +29,16 @@ async function connect() {
 
 	cached.conn = await cached.promise;
 
+	init();
+
+	return cached.conn;
+}
+
+async function disconnect() {
+	await mongoose.disconnect();
+}
+
+async function init() {
 	const accreditations = [
 		{
 			name: 'Super Administrator',
@@ -393,12 +403,6 @@ async function connect() {
 	resourcesPolicy.forEach(async (policy) => {
 		await ResourcesPolicyModel.findOneAndReplace({ name: policy.name, accessLevel: policy.accessLevel }, policy, { upsert: true, new: true });
 	});
-
-	return cached.conn;
-}
-
-async function disconnect() {
-	await mongoose.disconnect();
 }
 
 const db = { connect, disconnect };
