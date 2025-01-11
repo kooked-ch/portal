@@ -4,12 +4,13 @@ import { checkAccreditation } from './auth';
 import { ErrorType } from '@/types/error';
 import { AppModel, IApp } from '@/models/App';
 import { ProjectModel } from '@/models/Project';
-import { AccreditationModel } from '@/models/Accreditation';
+import { AccreditationModel, IAccreditation } from '@/models/Accreditation';
 import { IUser } from '@/models/User';
 import { getLogs, log } from './log';
 import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
 import { getAppResourcesPolicy } from './resourcesPolicy';
 import { getAppAuthorization } from './authorization';
+import { getAccreditations } from './accreditation';
 
 export async function getApp(projectName: string, appName: string): Promise<AppType | null> {
 	const hasAccess = await checkAccreditation('apps:2:read', `${projectName}/${appName}`);
@@ -18,9 +19,9 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 	const hasSecretsAccess = await checkAccreditation('secrets:2:read', `${projectName}/${appName}`);
 
 	const app = await AppModel.findOne<IApp>({ name: appName })
-		.populate<{ collaborators: Array<{ userId: IUser }> }>({
-			path: 'collaborators.userId',
-			select: 'username image',
+		.populate<{ collaborators: Array<{ userId: IUser; accreditation: IAccreditation }> }>({
+			path: 'collaborators.userId collaborators.accreditation',
+			select: 'username image id name description slug authorizations',
 		})
 		.exec();
 
@@ -155,6 +156,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 		const logs = await getLogs(projectName, appName);
 		const resourcesPolicy = await getAppResourcesPolicy(projectName, appName);
 		const authorizations = await getAppAuthorization(projectName, appName);
+		const accreditations = await getAccreditations(2);
 
 		return {
 			name: appData.metadata.name,
@@ -179,9 +181,16 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 			collaborators: app.collaborators.map((collaborator) => ({
 				username: collaborator.userId.username || '',
 				image: collaborator.userId.image || '',
+				accreditation: {
+					name: collaborator.accreditation.name,
+					description: collaborator.accreditation.description,
+					slug: collaborator.accreditation.slug,
+					authorizations: collaborator.accreditation.authorizations,
+				},
 			})),
 			logs,
 			authorizations,
+			accreditations,
 		};
 	} catch (error) {
 		console.error('Error fetching app:', error);
