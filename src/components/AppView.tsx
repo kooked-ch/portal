@@ -20,6 +20,8 @@ import CreateDatabaseDialog from './forms/CreateDatabaseForm';
 import { DatabaseItem } from './database';
 import CollaboratorsTab from './collaborator';
 import InviteCollaboratorsDialog from './forms/InviteCollaboratorsDialog';
+import CreateVolumeDialog from './forms/CreateVolumeDialog';
+import VolumeTab from './volume';
 
 type Tab = 'Containers' | 'Domains' | 'Logs' | 'Info' | 'Volumes' | 'Notifications' | 'Collaborators';
 
@@ -115,11 +117,9 @@ export default function AppView({ app }: { app: AppType }) {
 					<div className="space-y-4">
 						<div className="flex justify-between items-center gap-4">
 							<h2 className="text-xl font-semibold">Storage Volumes</h2>
+							{app.authorizations.volumes.includes('create') && <CreateVolumeDialog containersList={app.containers.map((container) => container.name)} disabled={app.resourcesPolicy.volumes.remainingLimit === 0 || app.containers.length === 0} />}
 						</div>
-						<div className="grid gap-4 sm:grid-cols-2">
-							<VolumeCard name="Primary Storage" used={150} total={500} />
-							<VolumeCard name="Backup Storage" used={75} total={200} />
-						</div>
+						<VolumeTab volumes={app.volumes} authorizations={app.authorizations} />
 					</div>
 				);
 			case 'Notifications':
