@@ -4,6 +4,7 @@ import { logType } from './log';
 import { AppResourcesPolicy } from './resourcesPolicy';
 import { AppAuthorizationsType } from './authorization';
 import { AccreditationType } from './accreditations';
+import { VolumeType } from './volume';
 
 export interface AppsType {
 	name: string;
@@ -105,6 +106,7 @@ export interface AppType {
 		};
 	}[];
 	logs: logType[];
+	volumes: VolumeType[];
 	resourcesPolicy: AppResourcesPolicy;
 	authorizations: AppAuthorizationsType;
 	accreditations: AccreditationType[];
