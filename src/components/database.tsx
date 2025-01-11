@@ -22,7 +22,7 @@ export const DatabaseItem = ({ database, authorizations }: { database: AppType['
 	};
 
 	return (
-		<li className={cn('flex justify-between bg-[#1E1E20] px-4 py-3 rounded-lg items-center border-l-4', 'border-' + color)}>
+		<li className={cn('flex justify-between bg-[#1E1E20] px-4 py-3 rounded-lg items-center h-[68px] border-l-4', 'border-' + color)}>
 			<div className="flex items-center space-x-3">
 				<Database className={cn('w-5 h-5', 'text-' + color)} />
 				<div className="flex flex-col">
