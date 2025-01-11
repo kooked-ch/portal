@@ -133,6 +133,7 @@ async function connect() {
 				domains: ['read', 'update', 'delete', 'create'],
 				databases: ['read', 'update', 'delete', 'create'],
 				logs: ['read'],
+				collaborators: ['invite', 'read', 'update', 'delete'],
 			},
 		},
 		{
@@ -148,6 +149,7 @@ async function connect() {
 				domains: ['read', 'update', 'delete', 'create'],
 				databases: ['read', 'update', 'delete', 'create'],
 				logs: ['read'],
+				collaborators: ['invite', 'read', 'update', 'delete'],
 			},
 		},
 		{
@@ -163,6 +165,7 @@ async function connect() {
 				domains: ['read', 'update', 'create'],
 				databases: ['read', 'update', 'create'],
 				logs: ['read'],
+				collaborators: ['read'],
 			},
 		},
 		{
