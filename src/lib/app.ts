@@ -17,6 +17,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 	if (!hasAccess) return null;
 
 	const hasSecretsAccess = await checkAccreditation('secrets:2:read', `${projectName}/${appName}`);
+	const hasCollaboratorsAccess = await checkAccreditation('collaborators:2:read', `${projectName}/${appName}`);
 
 	const app = await AppModel.findOne<IApp>({ name: appName })
 		.populate<{ collaborators: Array<{ userId: IUser; accreditation: IAccreditation }> }>({
@@ -178,19 +179,21 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 			databases: databaseStatuses,
 			containers,
 			resourcesPolicy: resourcesPolicy,
-			collaborators: app.collaborators.map((collaborator) => ({
-				username: collaborator.userId.username || '',
-				image: collaborator.userId.image || '',
-				accreditation: {
-					name: collaborator.accreditation.name,
-					description: collaborator.accreditation.description,
-					slug: collaborator.accreditation.slug,
-					authorizations: collaborator.accreditation.authorizations,
-				},
-			})),
+			collaborators: hasCollaboratorsAccess
+				? app.collaborators.map((collaborator) => ({
+						username: collaborator.userId.username || '',
+						image: collaborator.userId.image || '',
+						accreditation: {
+							name: collaborator.accreditation.name,
+							description: collaborator.accreditation.description,
+							slug: collaborator.accreditation.slug,
+							authorizations: collaborator.accreditation.authorizations,
+						},
+				  }))
+				: [],
 			logs,
 			authorizations,
-			accreditations,
+			accreditations: hasCollaboratorsAccess ? accreditations : [],
 		};
 	} catch (error) {
 		console.error('Error fetching app:', error);
