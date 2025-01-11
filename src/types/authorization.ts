@@ -4,4 +4,5 @@ export interface AppAuthorizationsType {
 	databases: string[];
 	secrets: string[];
 	collaborators: string[];
+	volumes: string[];
 }
