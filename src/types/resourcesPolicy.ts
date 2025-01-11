@@ -31,4 +31,10 @@ export interface AppResourcesPolicy {
 		totalLimit: number;
 		remainingLimit: number;
 	};
+	volumes: {
+		name: string;
+		description: string;
+		totalLimit: number;
+		remainingLimit: number;
+	};
 }
