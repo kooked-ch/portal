@@ -142,6 +142,7 @@ async function init() {
 				containers: ['read', 'update', 'delete', 'create'],
 				domains: ['read', 'update', 'delete', 'create'],
 				databases: ['read', 'update', 'delete', 'create'],
+				volumes: ['read', 'update', 'delete', 'create'],
 				logs: ['read'],
 				collaborators: ['invite', 'read', 'update', 'delete'],
 			},
@@ -158,6 +159,7 @@ async function init() {
 				containers: ['read', 'update', 'delete', 'create'],
 				domains: ['read', 'update', 'delete', 'create'],
 				databases: ['read', 'update', 'delete', 'create'],
+				volumes: ['read', 'update', 'delete', 'create'],
 				logs: ['read'],
 				collaborators: ['invite', 'read', 'update', 'delete'],
 			},
@@ -174,6 +176,7 @@ async function init() {
 				containers: ['read', 'update', 'delete', 'create'],
 				domains: ['read', 'update', 'create'],
 				databases: ['read', 'update', 'create'],
+				volumes: ['read', 'update', 'create'],
 				logs: ['read'],
 				collaborators: ['read'],
 			},
@@ -189,6 +192,7 @@ async function init() {
 				containers: ['read'],
 				domains: ['read'],
 				databases: ['read'],
+				volumes: ['read'],
 			},
 		},
 	];
@@ -398,6 +402,46 @@ async function init() {
 				databases: 0,
 			},
 		},
+		{
+			name: 'No Volume limit',
+			description: 'No limit on the number of volume that can be created.',
+			slug: 'nvl',
+			accessLevel: 2,
+			limitation: {
+				level: 0,
+				volumes: -1,
+			},
+		},
+		{
+			name: 'Default Volume limit',
+			description: 'Default limit of 1 volume that can be created.',
+			slug: 'dvl',
+			accessLevel: 2,
+			limitation: {
+				level: 1,
+				volumes: 1,
+			},
+		},
+		{
+			name: 'Max Volume limit',
+			description: 'Maximum limit of 5 volumes that can be created.',
+			slug: 'mvl',
+			accessLevel: 2,
+			limitation: {
+				level: 2,
+				volumes: 5,
+			},
+		},
+		{
+			name: 'Denied Volume creation',
+			description: 'No permission to create any volume.',
+			slug: 'dvc',
+			accessLevel: 2,
+			limitation: {
+				level: 3,
+				volumes: 0,
+			},
+		},
 	];
 
 	resourcesPolicy.forEach(async (policy) => {
@@ -407,3 +451,9 @@ async function init() {
 
 const db = { connect, disconnect };
 export default db;
+
+// {
+// 	$set: {
+// 		"resourcesPolicy.volume": ObjectId("678284c33d8fafafe4ad672c")
+// 	},
+// }
