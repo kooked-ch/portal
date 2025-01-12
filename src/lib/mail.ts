@@ -30,7 +30,7 @@ function getTemplateContent(templatePath: string, data: any): string {
 		'{url}': data.url,
 		'{app_name}': data.appName,
 		'{current_time}': data.time,
-		'{portal_url}': `${process.env.NEXTAUTH_URL}${data.projectName}/${data.appName}`,
+		'{portal_url}': `${process.env.NEXTAUTH_URL}/${data.projectName}/${data.appName}`,
 		'{username}': data.username,
 	};
 
