@@ -114,7 +114,7 @@ export async function getMonitor(url: string): Promise<DomainMonitorType | null>
 			id: beat.id,
 			time: new Date(new Date(beat.time).toLocaleString('en-US', { timeZone: 'Europe/Paris' })).toISOString(),
 			value: beat.ping,
-			status: beat.status === 2 ? 0 : beat.status,
+			status: beat.status === 2 ? false : beat.status === 1 ? true : false,
 		}));
 
 		const latestBeat = beats[beats.length - 1];
@@ -139,7 +139,7 @@ export async function getMonitor(url: string): Promise<DomainMonitorType | null>
 
 export async function createMonitor(url: string): Promise<ErrorType> {
 	try {
-		const data = await apiRequest('/monitors', {
+		await apiRequest('/monitors', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
