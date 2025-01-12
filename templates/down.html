@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,7 @@
             --muted: rgb(39, 39, 45);
             --muted-foreground: rgb(161, 161, 170);
             --destructive: rgb(243, 50, 50);
-            --border: rgb(39, 39, 45);
+            --border: rgb(54, 54, 66);
         }
 
         body {
@@ -21,15 +21,24 @@
             color: var(--foreground);
             margin: 0;
             line-height: 1.5;
+            background-color: rgba(39, 39, 45, 0.95);
         }
 
         .container {
             max-width: 600px;
-            margin: 0 auto;
-            background-color: rgba(39, 39, 45, 0.95);
+            margin: 20px auto;
             border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            background-color: var(--destructive);
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
         }
 
         .icon-container {
@@ -69,58 +78,76 @@
 
         .details-box h2 {
             font-size: 16px;
-            margin: 0 0 8px 0;
+            margin: 0 0 12px 0;
             color: var(--foreground);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .details-list {
-            list-style-type: disc;
-            margin: 0;
-            padding-left: 20px;
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
         }
 
-        .details-list li {
-            margin-bottom: 4px;
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
 
-        .portal-link-box {
-            background-color: rgba(167, 29, 254, 0.1);
-            padding: 16px;
-            border-radius: 8px;
-            margin: 16px 0;
+        .detail-label {
+            color: var(--muted-foreground);
+            font-size: 14px;
         }
 
-        .portal-link {
-            color: var(--primary);
-            text-decoration: none;
+        .detail-value {
+            color: var(--foreground);
+            font-weight: 500;
+        }
+
+        .button {
             display: inline-flex;
             align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 6px;
+            background-color: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 16px;
+            transition: all 0.2s;
         }
 
-        .portal-link:hover {
-            text-decoration: underline;
+        .button:hover {
+            opacity: 0.9;
+            color: #ebebeb;
+            transform: translateY(-1px);
         }
 
-        .arrow-icon {
-            margin-left: 8px;
-            width: 16px;
-            height: 16px;
+        a p {
+            color: #fff;
+            margin: 0;
         }
 
         .footer {
             margin-top: 24px;
-            padding-top: 6px;
+            padding-top: 16px;
             border-top: 2px solid var(--border);
             font-size: 12px;
             color: var(--muted-foreground);
         }
 
         .footer p {
-            margin: 0;
+            margin: 4px 0;
         }
 
         @media (max-width: 640px) {
             .container {
+                margin: 0;
+                border-radius: 0;
                 padding: 16px;
             }
         }
@@ -129,59 +156,66 @@
 
 <body>
     <div class="container">
-        <div class="icon-container">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                class="alert-icon">
-                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
-                <path d="M12 9v4" />
-                <path d="M12 17h.01" />
-            </svg>
-        </div>
-
-        <h1>Alert: <strong>{website_name}</strong> is Currently Down</h1>
+        <h1>Monitoring Alert: {url} is Down</h1>
 
         <div class="content">
-            <p>Hello {username},</p>
+            <p>
+                <span class="status-badge">Down</span>
+            </p>
 
-            <p>We detected that {website_name} in project <strong>{project_name}</strong> is currently experiencing
-                downtime. The
-                <strong>{app_name}</strong> application is affected by this outage.
+            <p>Hi {username},</p>
+
+            <p>Our monitoring system has detected that the website <strong>{url}</strong> in project
+                <strong>{project_name}</strong> is currently unavailable. The <strong>{app_name}</strong> application is
+                affected by this outage.
             </p>
 
             <div class="details-box">
-                <h2>Incident Details:</h2>
-                <ul class="details-list">
-                    <li>Project: <strong>{project_name}</strong></li>
-                    <li>Application: <strong>{app_name}</strong></li>
-                    <li>Website: <strong>{url}</strong></li>
-                    <li>Status: <strong>Down</strong></li>
-                    <li>Detected at: <strong>{current_time}</strong></li>
-                </ul>
-            </div>
-
-            <p>Your team has been automatically informed, and you can follow the status and the through Portal :</p>
-
-            <div class="portal-link-box">
-                <a href="{portal_url}" class="portal-link">
-                    View Incident Details
-                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                        <polyline points="12 5 19 12 12 19" />
+                <h2>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 8v4" />
+                        <path d="M12 16h.01" />
                     </svg>
-                </a>
+                    Monitoring Details
+                </h2>
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Project</span>
+                        <span class="detail-value">{project_name}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Application</span>
+                        <span class="detail-value">{app_name}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Website</span>
+                        <span class="detail-value">{url}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Status</span>
+                        <span class="detail-value">Down</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Detected At</span>
+                        <span class="detail-value">{current_time}</span>
+                    </div>
+                </div>
             </div>
 
-            <p>We apologize for any inconvenience this may cause.</p>
+            <p>You will receive another notification once the website becomes available again.</p>
 
-            <div style="margin-top: 16px;">
-                <p>Best regards,</p>
-                <p>The Support Team</p>
-            </div>
+            <a href="{portal_url}" class="button">
+                <p>View Monitoring Details</p>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                </svg>
+            </a>
         </div>
 
         <div class="footer">
-            <p>This is an automated message. Please do not reply to this email.</p>
+            <p>This is an automated monitoring alert. Please do not reply to this email.</p>
             <p>To update your notification preferences, visit your account settings.</p>
         </div>
     </div>
