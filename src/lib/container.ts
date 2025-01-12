@@ -90,6 +90,7 @@ export async function updateContainer({ projectName, appName, containerName, dat
 					name: data.name,
 					image: `${data.image}:${data.version}`,
 					env: canUpdateEnv ? (data.env.some((envVar) => envVar.name.trim() === '') ? undefined : data.env) : container.env,
+					...container,
 				},
 			},
 		];
