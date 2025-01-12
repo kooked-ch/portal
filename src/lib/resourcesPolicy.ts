@@ -81,7 +81,7 @@ export async function getAppResourcesPolicy(projectName: string, appName: string
 			name: resourcesPolicy[3]?.name || '',
 			description: resourcesPolicy[3]?.description || '',
 			totalLimit: resourcesPolicy[3]?.limitation.volumes || 0,
-			remainingLimit: resourcesPolicy[3]?.limitation.volumes - (appData.spec.containers ? appData.spec.containers.map((container: any) => (container.volumes || []).flat()).length : 0),
+			remainingLimit: resourcesPolicy[3]?.limitation.volumes - (appData.spec.containers ? appData.spec.containers.map((container: any) => container.volumes || []).reduce((acc: any[], volumes: any[]) => acc.concat(volumes), []).length : 0),
 		},
 	};
 }
