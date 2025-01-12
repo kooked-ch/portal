@@ -451,9 +451,3 @@ async function init() {
 
 const db = { connect, disconnect };
 export default db;
-
-// {
-// 	$set: {
-// 		"resourcesPolicy.volume": ObjectId("678284c33d8fafafe4ad672c")
-// 	},
-// }
