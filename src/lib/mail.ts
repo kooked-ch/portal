@@ -3,69 +3,66 @@ import nodemailer, { Transporter, SendMailOptions } from 'nodemailer';
 import path from 'path';
 
 export async function sendEmail(email: string, type: string, data: any): Promise<void> {
-	let htmlContent;
+	let htmlContent: string | undefined;
+
 	switch (type) {
-		case 'welcome':
-			break;
 		case 'down':
-			htmlContent = readFileSync(path.resolve('./templates/down.html'), 'utf8');
-			htmlContent = htmlContent.replaceAll('{website_name}', `${data.url} website`);
-			htmlContent = htmlContent.replaceAll('{project_name}', data.projectName);
-			htmlContent = htmlContent.replaceAll('{url}', data.url);
-			htmlContent = htmlContent.replaceAll('{app_name}', data.appName);
-			htmlContent = htmlContent.replaceAll('{current_time}', data.time);
-			htmlContent = htmlContent.replaceAll('{portal_url}', `${process.env.NEXTAUTH_URL}${data.project_name}/${data.app_name}`);
-			htmlContent = htmlContent.replaceAll('{username}', data.username);
-			send(email, `${data.url} is DOWN`, htmlContent);
+			htmlContent = getTemplateContent('./templates/down.html', data);
+			await send(email, `${data.url} is DOWN`, htmlContent);
 			break;
+
 		case 'up':
-			htmlContent = readFileSync(path.resolve('./templates/up.html'), 'utf8');
-			htmlContent = htmlContent.replaceAll('{website_name}', `${data.url} website`);
-			htmlContent = htmlContent.replaceAll('{project_name}', data.projectName);
-			htmlContent = htmlContent.replaceAll('{url}', data.url);
-			htmlContent = htmlContent.replaceAll('{app_name}', data.appName);
-			htmlContent = htmlContent.replaceAll('{current_time}', data.time);
-			htmlContent = htmlContent.replaceAll('{portal_url}', `${process.env.NEXTAUTH_URL}${data.project_name}/${data.app_name}`);
-			htmlContent = htmlContent.replaceAll('{username}', data.username);
-			send(email, `${data.url} is UP`, htmlContent);
+			htmlContent = getTemplateContent('./templates/up.html', data);
+			await send(email, `${data.url} is UP`, htmlContent);
 			break;
+
 		default:
+			console.warn(`Unknown email type: ${type}`);
 			break;
 	}
 }
 
-async function send(email: string, subject: string, htmlContent: string): Promise<void> {
-	const from = 'Kooked Portal support';
-
-	const secret = {
-		user: process.env.MAIL_USER || '',
-		pass: process.env.MAIL_PASSWORD || '',
-		from: from,
-		subject: subject,
+function getTemplateContent(templatePath: string, data: any): string {
+	let htmlContent = readFileSync(path.resolve(templatePath), 'utf8');
+	const placeholders = {
+		'{website_name}': `${data.url} website`,
+		'{project_name}': data.projectName,
+		'{url}': data.url,
+		'{app_name}': data.appName,
+		'{current_time}': data.time,
+		'{portal_url}': `${process.env.NEXTAUTH_URL}${data.project_name}/${data.app_name}`,
+		'{username}': data.username,
 	};
 
+	for (const [placeholder, value] of Object.entries(placeholders)) {
+		htmlContent = htmlContent.replaceAll(placeholder, value);
+	}
+
+	return htmlContent;
+}
+
+async function send(email: string, subject: string, htmlContent: string): Promise<void> {
 	const transporter: Transporter = nodemailer.createTransport({
 		host: 'mail.infomaniak.com',
 		port: 465,
 		secure: true,
 		auth: {
-			user: secret.user,
-			pass: secret.pass,
+			user: process.env.MAIL_USER || '',
+			pass: process.env.MAIL_PASSWORD || '',
 		},
 	});
 
 	const mailOptions: SendMailOptions = {
-		from: secret.user,
+		from: `"Kooked Portal" <${process.env.MAIL_USER || ''}>`,
 		to: email,
-		subject: secret.subject,
+		subject,
 		html: htmlContent,
 	};
 
-	transporter.sendMail(mailOptions, (error: Error | null, info) => {
-		if (error) {
-			console.error('Error sending email:', error);
-		} else {
-			console.log('E-mail sent:', info.response);
-		}
-	});
+	try {
+		const info = await transporter.sendMail(mailOptions);
+		console.log('E-mail sent:', info.response);
+	} catch (error) {
+		console.error('Error sending email:', error);
+	}
 }
