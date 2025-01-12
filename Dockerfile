@@ -27,6 +27,7 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+COPY templates templates
 
 RUN mkdir -p /etc/k3s && cp default.yaml /etc/k3s/default.yaml
 
