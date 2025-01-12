@@ -87,10 +87,10 @@ export async function updateContainer({ projectName, appName, containerName, dat
 				op: 'replace',
 				path: `/spec/containers/${containerIndex}`,
 				value: {
+					...container,
 					name: data.name,
 					image: `${data.image}:${data.version}`,
 					env: canUpdateEnv ? (data.env.some((envVar) => envVar.name.trim() === '') ? undefined : data.env) : container.env,
-					...container,
 				},
 			},
 		];
