@@ -80,7 +80,7 @@ export async function updateContainer({ projectName, appName, containerName, dat
 		}
 
 		const container = app.spec.containers[containerIndex];
-		const canUpdateEnv = await checkAccreditation('env:2:update', `${projectName}/${appName}`);
+		const canUpdateEnv = await checkAccreditation('secrets:2:update', `${projectName}/${appName}`);
 
 		const patch = [
 			{
