@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --background: rgb(9, 9, 11);
+            --foreground: rgb(250, 250, 250);
+            --primary: rgb(167, 29, 254);
+            --primary-foreground: rgb(255, 255, 255);
+            --muted: rgb(39, 39, 45);
+            --muted-foreground: rgb(161, 161, 170);
+            --destructive: rgb(243, 50, 50);
+            --border: rgb(39, 39, 45);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--foreground);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: rgba(39, 39, 45, 0.95);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .icon-container {
+            width: 48px;
+            height: 48px;
+            background-color: rgba(243, 50, 50, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .alert-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--destructive);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 24px 0;
+            color: var(--foreground);
+        }
+
+        .content {
+            color: var(--muted-foreground);
+        }
+
+        .details-box {
+            background-color: rgba(39, 39, 45, 0.5);
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        .details-box h2 {
+            font-size: 16px;
+            margin: 0 0 8px 0;
+            color: var(--foreground);
+        }
+
+        .details-list {
+            list-style-type: disc;
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .details-list li {
+            margin-bottom: 4px;
+        }
+
+        .portal-link-box {
+            background-color: rgba(167, 29, 254, 0.1);
+            padding: 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+        }
+
+        .portal-link {
+            color: var(--primary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .portal-link:hover {
+            text-decoration: underline;
+        }
+
+        .arrow-icon {
+            margin-left: 8px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .footer {
+            margin-top: 24px;
+            padding-top: 6px;
+            border-top: 2px solid var(--border);
+            font-size: 12px;
+            color: var(--muted-foreground);
+        }
+
+        .footer p {
+            margin: 0;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="icon-container">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="alert-icon">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+                <path d="M12 9v4" />
+                <path d="M12 17h.01" />
+            </svg>
+        </div>
+
+        <h1>Alert: <strong>{website_name}</strong> is Currently Down</h1>
+
+        <div class="content">
+            <p>Hello {username},</p>
+
+            <p>We detected that {website_name} in project <strong>{project_name}</strong> is currently experiencing
+                downtime. The
+                <strong>{app_name}</strong> application is affected by this outage.
+            </p>
+
+            <div class="details-box">
+                <h2>Incident Details:</h2>
+                <ul class="details-list">
+                    <li>Project: <strong>{project_name}</strong></li>
+                    <li>Application: <strong>{app_name}</strong></li>
+                    <li>Website: <strong>{url}</strong></li>
+                    <li>Status: <strong>Down</strong></li>
+                    <li>Detected at: <strong>{current_time}</strong></li>
+                </ul>
+            </div>
+
+            <p>Your team has been automatically informed, and you can follow the status and the through Portal :</p>
+
+            <div class="portal-link-box">
+                <a href="{portal_url}" class="portal-link">
+                    View Incident Details
+                    <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                    </svg>
+                </a>
+            </div>
+
+            <p>We apologize for any inconvenience this may cause.</p>
+
+            <div style="margin-top: 16px;">
+                <p>Best regards,</p>
+                <p>The Support Team</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>This is an automated message. Please do not reply to this email.</p>
+            <p>To update your notification preferences, visit your account settings.</p>
+        </div>
+    </div>
+</body>
+
+</html>
