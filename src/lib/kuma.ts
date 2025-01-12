@@ -1,5 +1,10 @@
 import { DomainMonitorType } from '@/types/domain';
 import { ErrorType } from '@/types/error';
+import { customObjectsApi } from './api';
+import { AppModel, IApp } from '@/models/App';
+import { IUser } from '@/models/User';
+import { ProjectModel } from '@/models/Project';
+import { sendEmail } from './mail';
 
 let cachedToken: string | null = null;
 
@@ -192,5 +197,42 @@ export async function deleteMonitor(url: string): Promise<ErrorType> {
 			message: 'An unexpected error occurred',
 			status: 500,
 		};
+	}
+}
+
+export async function alert(body: any) {
+	try {
+		const url = body.monitor.pathName;
+
+		const apps = await customObjectsApi.listClusterCustomObject({ group: 'kooked.ch', version: 'v1', plural: 'kookedapps' });
+		const appData = apps.items.find((app: any) => app.spec?.domains?.find((domain: any) => domain.url === url));
+
+		const app = await AppModel.findOne<IApp>({ name: appData.metadata.name })
+			.populate<{ collaborators: Array<{ userId: IUser }> }>({
+				path: 'collaborators.userId',
+				select: 'username image email id',
+			})
+			.exec();
+
+		if (!app) {
+			console.warn(`App not found for URL: ${url}`);
+			return;
+		}
+
+		const project = await ProjectModel.findOne({ _id: app.projectId }).exec();
+		const collaborators = app.collaborators;
+
+		const data = {
+			url,
+			projectName: project.name,
+			appName: app.name,
+			time: body.heartbeat.localDateTime,
+		};
+
+		collaborators.forEach(async (collaborator) => {
+			sendEmail(collaborator.userId.email, body.heartbeat.status === 1 ? 'up' : 'down', { ...data, username: collaborator.userId.username });
+		});
+	} catch (error) {
+		console.error(`Error alerting:`, error);
 	}
 }
