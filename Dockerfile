@@ -27,7 +27,6 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-COPY templates templates
 
 RUN mkdir -p /etc/k3s && cp default.yaml /etc/k3s/default.yaml
 
@@ -55,6 +54,8 @@ RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
+COPY templates /app/templates
+COPY bad-words /app/bad-words
 
 # Set the correct permission for prerender cache
 RUN mkdir .next
