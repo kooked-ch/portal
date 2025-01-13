@@ -16,6 +16,11 @@ export async function sendEmail(email: string, type: string, data: any): Promise
 			await send(email, `${data.url} is UP`, htmlContent);
 			break;
 
+		case 'invitation':
+			htmlContent = getTemplateContent('./templates/invitation.html', data);
+			await send(email, `Invitation to ${data.projectName} on Kooked Portal`, htmlContent);
+			break;
+
 		default:
 			console.warn(`Unknown email type: ${type}`);
 			break;
@@ -25,13 +30,14 @@ export async function sendEmail(email: string, type: string, data: any): Promise
 function getTemplateContent(templatePath: string, data: any): string {
 	let htmlContent = readFileSync(path.resolve(templatePath), 'utf8');
 	const placeholders = {
-		'{website_name}': `${data.url} website`,
-		'{project_name}': data.projectName,
-		'{url}': data.url,
-		'{app_name}': data.appName,
-		'{current_time}': data.time,
-		'{portal_url}': `${process.env.NEXTAUTH_URL}/${data.projectName}/${data.appName}`,
-		'{username}': data.username,
+		'{website_name}': `${data?.url} website`,
+		'{project_name}': data?.projectName,
+		'{url}': data?.url,
+		'{app_name}': data?.appName,
+		'{current_time}': data?.time,
+		'{portal_url}': `${process.env.NEXTAUTH_URL}/${data?.projectName}/${data?.appName}`,
+		'{username}': data?.username,
+		'{invitation_link}': `${process.env.NEXTAUTH_URL}/accept-invitation?token=${data?.token}`,
 	};
 
 	for (const [placeholder, value] of Object.entries(placeholders)) {
