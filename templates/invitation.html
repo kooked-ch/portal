@@ -25,7 +25,7 @@
 
         .container {
             max-width: 600px;
-            margin: 20px auto;
+            height: 100%;
             border-radius: 12px;
             padding: 24px;
         }
@@ -33,7 +33,7 @@
         h1 {
             font-size: 24px;
             font-weight: bold;
-            margin-bottom: 24px;
+            margin: 0 0 24px 0;
             color: var(--foreground);
         }
 
@@ -58,12 +58,21 @@
             transform: translateY(-1px);
         }
 
+        a p {
+            margin: 0;
+            color: #fff;
+        }
+
         .footer {
             margin-top: 24px;
             padding-top: 16px;
             border-top: 2px solid var(--border);
             font-size: 12px;
             color: var(--muted-foreground);
+        }
+
+        .footer p {
+            margin: 4px 0;
         }
     </style>
 </head>
@@ -75,7 +84,9 @@
         <p>You are cordially invited to join this exceptional endeavor. Your participation will be invaluable to our
             shared success.</p>
 
-        <a href="{invitation_link}" class="button">Accept Invitation</a>
+        <a href="{invitation_link}" class="button">
+            <p>Accept Invitation</p>
+        </a>
 
         <div class="footer">
             <p>This is an automated email. Please do not reply to this address.</p>
