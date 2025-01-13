@@ -1,11 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowUpRight, GitBranch, Globe, HardDrive, FileJson, Bell, Plus, Container, Info, UserRound, Text } from 'lucide-react';
+import { ArrowUpRight, GitBranch, Globe, HardDrive, Container, Info, UserRound, Text } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { AppType } from '@/types/app';
 import Link from 'next/link';
@@ -23,14 +21,13 @@ import InviteCollaboratorsDialog from './forms/InviteCollaboratorsDialog';
 import CreateVolumeDialog from './forms/CreateVolumeDialog';
 import VolumeTab from './volume';
 
-type Tab = 'Containers' | 'Domains' | 'Logs' | 'Info' | 'Volumes' | 'Notifications' | 'Collaborators';
+type Tab = 'Containers' | 'Domains' | 'Logs' | 'Info' | 'Volumes' | 'Collaborators';
 
 const TabButton = ({ tab, selectedTab, onClick, className = '' }: { tab: Tab; selectedTab: Tab; onClick: () => void; className?: string }) => (
 	<button className={cn('px-3 py-2 text-sm whitespace-nowrap flex items-center gap-2', selectedTab === tab ? 'border-b-2 border-purple-500 text-white' : 'text-[#666] hover:text-white', className)} onClick={onClick}>
 		{tab === 'Containers' && <Container className="w-4 h-4" />}
 		{tab === 'Domains' && <Globe className="w-4 h-4" />}
 		{tab === 'Volumes' && <HardDrive className="w-4 h-4" />}
-		{tab === 'Notifications' && <Bell className="w-4 h-4" />}
 		{tab === 'Logs' && <Text className="w-4 h-4" />}
 		{tab === 'Info' && <Info className="w-4 h-4" />}
 		{tab === 'Collaborators' && <UserRound className="w-4 h-4" />}
@@ -43,70 +40,7 @@ export default function AppView({ app }: { app: AppType }) {
 	const pathname = usePathname();
 	const { data: domainsDetails, loading: domainsLoading, error: domainsError, refetch: domainRefetch } = useFetch(`/api/project${pathname}/domains`);
 
-	const VolumeCard = ({ name, used, total }: { name: string; used: number; total: number }) => {
-		const percentage = (used / total) * 100;
-		const isHighUsage = percentage > 80;
-
-		return (
-			<Card className="p-6 bg-gradient-to-br from-[#1E1E20] to-[#1A1A1C] border-none hover:shadow-lg transition-all duration-200">
-				<div className="flex justify-between items-center mb-4">
-					<div className="flex items-center gap-2">
-						<HardDrive className="w-5 h-5 text-purple-400" />
-						<h3 className="font-medium">{name}</h3>
-					</div>
-					<span className={cn('text-sm font-medium px-3 py-1 rounded-full', isHighUsage ? 'bg-red-500/20 text-red-400' : 'bg-purple-500/20 text-purple-400')}>
-						{used}GB / {total}GB
-					</span>
-				</div>
-				<div className="space-y-2">
-					<Progress value={percentage} className={cn('h-2 transition-all duration-500', isHighUsage ? 'bg-red-500/20' : 'bg-purple-500/20')} />
-					<p className="text-xs text-[#666] text-right">{percentage.toFixed(1)}% used</p>
-				</div>
-			</Card>
-		);
-	};
-
-	const NotificationSettings = () => (
-		<div className="space-y-6">
-			<Card className="bg-gradient-to-br from-[#1E1E20] to-[#1A1A1C] border-none p-6 space-y-4">
-				<div className="flex items-center gap-3 mb-2">
-					<div className="p-2 rounded-lg bg-purple-500/20">
-						<Bell className="w-5 h-5 text-purple-400" />
-					</div>
-					<h3 className="font-medium text-lg">Telegram Notifications</h3>
-				</div>
-				<div className="grid sm:grid-cols-2 gap-4">
-					<div className="space-y-2">
-						<label className="text-sm text-[#666]">Bot Token</label>
-						<input type="text" placeholder="Enter bot token" className="w-full bg-black/20 border border-[#2A2A2C]/50 rounded-lg p-3 text-sm placeholder:text-[#666] focus:border-purple-500/50 focus:outline-none transition-colors" />
-					</div>
-					<div className="space-y-2">
-						<label className="text-sm text-[#666]">Chat ID</label>
-						<input type="text" placeholder="Enter chat ID" className="w-full bg-black/20 border border-[#2A2A2C]/50 rounded-lg p-3 text-sm placeholder:text-[#666] focus:border-purple-500/50 focus:outline-none transition-colors" />
-					</div>
-				</div>
-			</Card>
-
-			<Card className="bg-gradient-to-br from-[#1E1E20] to-[#1A1A1C] border-none p-6 space-y-4">
-				<div className="flex items-center gap-3 mb-2">
-					<div className="p-2 rounded-lg bg-purple-500/20">
-						<Bell className="w-5 h-5 text-purple-400" />
-					</div>
-					<h3 className="font-medium text-lg">Email Notifications</h3>
-				</div>
-				<div className="space-y-4">
-					{['Deployment Status', 'Resource Usage', 'Security Alerts'].map((setting) => (
-						<label key={setting} className="flex items-center gap-3 p-3 bg-black/20 rounded-lg border border-[#2A2A2C]/50 hover:border-purple-500/30 transition-colors">
-							<input type="checkbox" className="rounded bg-[#2A2A2C] border-none text-purple-500 focus:ring-purple-500/50 focus:ring-offset-0" />
-							<span className="text-sm">{setting}</span>
-						</label>
-					))}
-				</div>
-			</Card>
-		</div>
-	);
-
-	const mainTabs: Tab[] = ['Containers', 'Domains', 'Volumes', 'Notifications', ...(app.logs.length > 0 ? (['Logs'] as Tab[]) : []), ...(app.collaborators.length > 0 ? (['Collaborators'] as Tab[]) : [])];
+	const mainTabs: Tab[] = ['Containers', 'Domains', 'Volumes', ...(app.logs.length > 0 ? (['Logs'] as Tab[]) : []), ...(app.collaborators.length > 0 ? (['Collaborators'] as Tab[]) : [])];
 	const asideTabs: Tab[] = ['Info'];
 	const allTabs = [...mainTabs, ...asideTabs];
 
@@ -122,14 +56,6 @@ export default function AppView({ app }: { app: AppType }) {
 						<VolumeTab volumes={app.volumes} authorizations={app.authorizations} />
 					</div>
 				);
-			case 'Notifications':
-				return (
-					<div className="space-y-4">
-						<h2 className="text-xl font-semibold">Notification Settings</h2>
-						<NotificationSettings />
-					</div>
-				);
-
 			case 'Info':
 				return (
 					<div className="space-y-6">
