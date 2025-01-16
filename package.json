@@ -27,7 +27,7 @@
     "clsx": "^2.1.1",
     "input-otp": "^1.4.1",
     "lucide-react": "^0.466.0",
-    "mongoose": "^8.8.3",
+    "mongoose": "^8.9.5",
     "next": "14.2.23",
     "next-auth": "^4.24.10",
     "nodemailer": "^6.9.16",
