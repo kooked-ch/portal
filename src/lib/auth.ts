@@ -12,6 +12,7 @@ import { AppModel, IApp } from '@/models/App';
 import { cookies } from 'next/headers';
 import { checkTwoFactor, getTwoFactor } from './factor';
 import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
+import { sendEmail } from './mail';
 
 const getProviders = () => [
 	GitHubProvider({
@@ -68,6 +69,7 @@ const handleSignIn = async ({ user, account, profile }: { user: User; account: a
 				accreditation: defaultAccreditation._id,
 				resourcesPolicy: defaultResourcesPolicy._id,
 			});
+			sendEmail(email, 'welcome');
 		}
 
 		return true;
