@@ -8,7 +8,7 @@ export default async function VerifyPage({ params, searchParams }: { params: { s
 	const redirectPath = Array.isArray(searchParams?.callbackUrl) ? searchParams.callbackUrl[0] : searchParams?.callbackUrl || '/';
 
 	if (disabled) {
-		redirect('/');
+		redirect('/factor/skip');
 	}
 
 	if (!disabled && !enabled) {
