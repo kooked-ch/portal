@@ -46,7 +46,7 @@ const ContainerLogsDialog: React.FC<{ container: ContainerType }> = ({ container
 
 					<div className="bg-secondary/50 rounded-md">
 						<ScrollArea className="h-96 rounded-md">
-							<pre className="p-4 text-xs font-mono text-slate-50">{currentLogs.join('\n')}</pre>
+							<pre className="p-4 text-xs font-mono text-slate-50 whitespace-pre-wrap break-words">{currentLogs.join('\n')}</pre>
 						</ScrollArea>
 					</div>
 				</div>
