@@ -72,3 +72,38 @@ export async function getInvitation(token: string): Promise<InvitationType | nul
 	};
 }
 
+export async function acceptAppInvitation(token: string, userId: string): Promise<ErrorType> {
+	try {
+		const emailData = await EmailModel.findOne({ token, type: 'invitation' }).exec();
+		if (!emailData) {
+			return { message: 'Invitation not found', status: 404 };
+		}
+
+		const { projectId, appId, accreditationId } = emailData.data;
+		if (!projectId || !appId || !accreditationId) {
+			return { message: 'Invalid invitation data', status: 400 };
+		}
+
+		const collaborators = await AppModel.findById<IApp>(appId).select('collaborators').exec();
+		if (collaborators?.collaborators.find((collaborator) => collaborator.userId.toString() === userId.toString())) {
+			return { message: 'Already a collaborator', status: 400 };
+		}
+
+		AppModel.updateOne(
+			{ _id: appId },
+			{
+				$push: {
+					collaborators: {
+						userId,
+						accreditation: accreditationId,
+					},
+				},
+			}
+		).exec();
+
+		return { message: 'Invitation accepted', status: 200 };
+	} catch (error) {
+		console.error('Error accepting invitation:', error);
+		return { message: 'Internal server error', status: 500 };
+	}
+}
