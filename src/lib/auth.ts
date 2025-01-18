@@ -11,19 +11,27 @@ import { IProject, ProjectModel } from '@/models/Project';
 import { AppModel, IApp } from '@/models/App';
 import { cookies } from 'next/headers';
 import { checkTwoFactor, getTwoFactor } from './factor';
-import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
+import { IResourcesPolicy, ResourcesPolicyModel } from '@/models/ResourcesPolicy';
 import { sendEmail } from './mail';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcryt from 'bcrypt';
+import rateLimit from './rate-limit';
+
+const limiter = rateLimit({
+	interval: 60 * 1000,
+	uniqueTokenPerInterval: 500,
+});
 
 const getProviders = () => [
 	GitHubProvider({
-		clientId: process.env.GITHUB_ID || '',
-		clientSecret: process.env.GITHUB_SECRET || '',
+		clientId: process.env.GITHUB_ID!,
+		clientSecret: process.env.GITHUB_SECRET!,
+		allowDangerousEmailAccountLinking: true,
 	}),
 	GoogleProvider({
-		clientId: process.env.GOOGLE_ID || '',
-		clientSecret: process.env.GOOGLE_SECRET || '',
+		clientId: process.env.GOOGLE_ID!,
+		clientSecret: process.env.GOOGLE_SECRET!,
+		allowDangerousEmailAccountLinking: true,
 	}),
 	CredentialsProvider({
 		name: 'Credentials',
@@ -31,46 +39,63 @@ const getProviders = () => [
 			email: { label: 'Email', type: 'email' },
 			password: { label: 'Password', type: 'password' },
 		},
-		async authorize(credentials) {
+		async authorize(credentials, req) {
 			try {
 				if (!credentials) return null;
+
+				const ip = req?.headers?.['x-forwarded-for'] || '127.0.0.1';
+				const { isRateLimited } = limiter.check(5, `login_${ip}`);
+				if (isRateLimited) {
+					throw new Error('Too many login attempts. Please try again later.');
+				}
+
 				await db.connect();
 
-				const user = await UserModel.findOne({ email: credentials.email }, 'email password verified username name _id').exec();
-				if (!user) return null;
+				const user = await UserModel.findOne<IUser>({ email: credentials.email }, 'email password verified username name _id').lean();
 
-				if (!user.verified) return null;
+				if (!user || !user.verified) {
+					await new Promise((r) => setTimeout(r, 1000));
+					return null;
+				}
 
-				const passwordValid = bcryt.compareSync(credentials.password, user.password);
-				if (!passwordValid) return null;
+				const isValid = await bcryt.compare(credentials.password, user.password);
+				if (!isValid) {
+					await new Promise((r) => setTimeout(r, 1000));
+					return null;
+				}
 
 				return {
+					id: user.id,
 					email: user.email,
 					username: user.username,
 					name: user.name,
-					id: user._id.toString(),
 				};
 			} catch (error) {
-				console.error('Error during credentials authorization:', error);
-				return null;
+				console.error('Auth error:', error);
+				throw error;
 			}
 		},
 	}),
 ];
 
-const enhanceToken = async ({ token, user }: { token: JWT; user: User }): Promise<JWT> => {
-	const { disabled } = await getTwoFactor();
+export const enhanceToken = async ({ token, user }: { token: JWT; user: User }): Promise<JWT> => {
+	try {
+		const { disabled } = await getTwoFactor();
 
-	if (user) {
-		token.twoFactorComplete = user.twoFactorComplete ?? false;
+		if (user) {
+			token.twoFactorComplete = user.twoFactorComplete ?? false;
+		}
+
+		token.twoFactorDisabled = disabled;
+		return token;
+	} catch (error) {
+		console.error('Token enhancement error:', error);
+		token.twoFactorComplete = false;
+		return token;
 	}
-
-	token.twoFactorDisabled = disabled;
-
-	return token;
 };
 
-const handleSignIn = async ({ user, account, profile }: { user: User; account: any; profile?: any }): Promise<boolean> => {
+export const handleSignIn = async ({ user, account, profile }: { user: User; account: any; profile?: any }): Promise<boolean> => {
 	try {
 		await db.connect();
 		const email = user.email;
@@ -78,22 +103,22 @@ const handleSignIn = async ({ user, account, profile }: { user: User; account: a
 
 		const provider = account?.provider ?? 'credentials';
 
-		const defaultAccreditation = await AccreditationModel.findOne({ slug: 'std', accessLevel: 0 }).exec();
-		if (!defaultAccreditation) return false;
+		const [defaultAccreditation, defaultResourcesPolicy] = await Promise.all([AccreditationModel.findOne<IAccreditation>({ slug: 'std', accessLevel: 0 }).lean(), ResourcesPolicyModel.findOne<IResourcesPolicy>({ slug: 'dpl', accessLevel: 0 }).lean()]);
 
-		const defaultResourcesPolicy = await ResourcesPolicyModel.findOne({ slug: 'dpl', accessLevel: 0 }).exec();
-		if (!defaultResourcesPolicy) return false;
+		if (!defaultAccreditation || !defaultResourcesPolicy) return false;
 
 		const existingUser = await UserModel.findOne({ email }).exec();
 
 		if (existingUser) {
-			existingUser.username = profile?.name ?? profile?.login ?? existingUser.username;
-			existingUser.image = user.image ?? profile?.image ?? existingUser.image;
-			existingUser.name = profile?.name ?? user.name ?? profile?.login ?? existingUser.name;
+			const updates = {
+				username: profile?.name ?? profile?.login ?? existingUser.username,
+				image: user.image ?? profile?.image ?? existingUser.image,
+				name: profile?.name ?? user.name ?? profile?.login ?? existingUser.name,
+			};
 
-			await existingUser.save();
+			await UserModel.updateOne({ _id: existingUser._id }, updates);
 		} else {
-			await UserModel.create({
+			const newUser = await UserModel.create({
 				email,
 				id: uuid().replace(/-/g, ''),
 				username: profile?.name ?? profile?.login ?? null,
@@ -104,12 +129,13 @@ const handleSignIn = async ({ user, account, profile }: { user: User; account: a
 				accreditation: defaultAccreditation._id,
 				resourcesPolicy: defaultResourcesPolicy._id,
 			});
-			sendEmail(email, 'welcome');
+
+			await sendEmail(email, 'welcome');
 		}
 
 		return true;
 	} catch (error) {
-		console.error('Error during sign-in:', error);
+		console.error('Sign-in error:', error);
 		return false;
 	}
 };
@@ -204,15 +230,22 @@ export const authOptions: NextAuthOptions = {
 	pages: {
 		signIn: '/login',
 		verifyRequest: '/login',
+		error: '/login',
 	},
 	providers: getProviders(),
 	session: {
 		strategy: 'jwt',
-		maxAge: 7 * 24 * 60 * 60, // 7 Days
+		maxAge: 7 * 24 * 60 * 60, // 7 days
 	},
 	callbacks: {
 		jwt: enhanceToken,
 		signIn: handleSignIn,
+	},
+	events: {
+		signIn: async ({ user, account }) => {
+			await db.connect();
+			await UserModel.updateOne({ email: user.email }, { lastLogin: new Date() });
+		},
 	},
 };
 
