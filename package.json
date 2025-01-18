@@ -27,6 +27,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "input-otp": "^1.4.1",
+    "lru-cache": "^11.0.2",
     "lucide-react": "^0.466.0",
     "mongoose": "^8.9.5",
     "next": "14.2.23",
