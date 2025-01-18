@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --background: rgb(9, 9, 11);
+            --foreground: rgb(250, 250, 250);
+            --primary: rgb(167, 29, 254);
+            --primary-foreground: rgb(255, 255, 255);
+            --muted: rgb(39, 39, 45);
+            --muted-foreground: rgb(161, 161, 170);
+            --border: rgb(54, 54, 66);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: var(--foreground);
+            margin: 0;
+            line-height: 1.5;
+            background-color: rgba(39, 39, 45, 0.95);
+        }
+
+        .container {
+            max-width: 600px;
+            height: 100%;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 24px 0;
+            color: var(--foreground);
+        }
+
+        p {
+            color: var(--muted-foreground);
+            margin-bottom: 24px;
+        }
+
+        .verification-code {
+            text-align: center;
+            font-size: 32px;
+            letter-spacing: 4px;
+            font-family: monospace;
+            background-color: var(--muted);
+            padding: 16px;
+            border-radius: 6px;
+            margin: 24px 0;
+            color: var(--primary-foreground);
+        }
+
+        .footer {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 2px solid var(--border);
+            font-size: 12px;
+            color: var(--muted-foreground);
+        }
+
+        .footer p {
+            margin: 4px 0;
+        }
+
+        .expiry {
+            font-size: 14px;
+            color: var(--muted-foreground);
+            margin-top: 16px;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Verify your email address</h1>
+        <p>Thank you for signing up for <strong>Kooked Portal</strong>. To complete your registration and ensure the
+            security of your
+            account, please use the verification code below:</p>
+        <div class="verification-code">
+            {verification_code}
+        </div>
+        <p class="expiry">This verification code will expire in 24 hours.</p>
+        <div class="footer">
+            <p>This is an automated email. Please do not reply to this address.</p>
+            <p>If you did not create an account, you can safely ignore this email.</p>
+        </div>
+    </div>
+</body>
+
+</html>
