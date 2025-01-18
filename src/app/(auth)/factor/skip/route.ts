@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 	const { disabled } = await getTwoFactor();
 
 	if (token) {
-		token.disabled = disabled;
+		token.twoFactorDisabled = disabled;
 
 		const encodedToken = await encode({
 			token,
