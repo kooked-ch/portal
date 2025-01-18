@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import nodemailer, { Transporter, SendMailOptions } from 'nodemailer';
 import path from 'path';
 
-export async function sendEmail(email: string, type: string, data: any): Promise<void> {
+export async function sendEmail(email: string, type: string, data?: any): Promise<void> {
 	let htmlContent: string | undefined;
 
 	switch (type) {
@@ -21,13 +21,28 @@ export async function sendEmail(email: string, type: string, data: any): Promise
 			await send(email, `Invitation to ${data.projectName} on Kooked Portal`, htmlContent);
 			break;
 
+		case 'welcome':
+			htmlContent = getTemplateContent('./templates/welcome.html', data);
+			await send(email, 'Welcome to Kooked Portal', htmlContent);
+			break;
+
+		case 'password_reset':
+			htmlContent = getTemplateContent('./templates/password_reset.html', data);
+			await send(email, 'Password reset request', htmlContent);
+			break;
+
+		case 'verify':
+			htmlContent = getTemplateContent('./templates/verify.html', data);
+			await send(email, 'Verify your email address', htmlContent);
+			break;
+
 		default:
 			console.warn(`Unknown email type: ${type}`);
 			break;
 	}
 }
 
-function getTemplateContent(templatePath: string, data: any): string {
+function getTemplateContent(templatePath: string, data?: any): string {
 	let htmlContent = readFileSync(path.resolve(templatePath), 'utf8');
 	const placeholders = {
 		'{website_name}': `${data?.url} website`,
@@ -38,6 +53,8 @@ function getTemplateContent(templatePath: string, data: any): string {
 		'{portal_url}': `${process.env.NEXTAUTH_URL}/${data?.projectName}/${data?.appName}`,
 		'{username}': data?.username,
 		'{invitation_link}': `${process.env.NEXTAUTH_URL}/accept-invitation?token=${data?.token}`,
+		'{portal_link}': `${process.env.NEXTAUTH_URL}/`,
+		'{verification_code}': data?.token,
 	};
 
 	for (const [placeholder, value] of Object.entries(placeholders)) {
@@ -67,7 +84,7 @@ async function send(email: string, subject: string, htmlContent: string): Promis
 
 	try {
 		const info = await transporter.sendMail(mailOptions);
-		console.log('E-mail sent:', info.response);
+		console.info('E-mail sent:', info.response);
 	} catch (error) {
 		console.error('Error sending email:', error);
 	}
