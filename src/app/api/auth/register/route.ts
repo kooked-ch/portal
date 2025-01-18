@@ -38,8 +38,6 @@ export async function POST(req: Request, res: Response) {
 			resourcesPolicy: defaultResourcesPolicy._id,
 		});
 
-		const userCreated = await UserModel.findOne({ email }).exec();
-
 		const token = generateRandomString(6);
 
 		await EmailModel.create({
