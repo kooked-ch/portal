@@ -7,7 +7,7 @@ import { InvitationType } from '@/types/collaborator';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from './ui/alert';
 
-const InvitationAccept = ({ invitation }: { invitation: InvitationType }) => {
+const AcceptInvitation = ({ invitation }: { invitation: InvitationType }) => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [accepted, setAccepted] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -82,4 +82,4 @@ const InvitationAccept = ({ invitation }: { invitation: InvitationType }) => {
 	);
 };
 
-export default InvitationAccept;
+export default AcceptInvitation;
