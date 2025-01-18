@@ -167,7 +167,7 @@ export default function AppView({ app }: { app: AppType }) {
 					<div className="space-y-4">
 						<div className="flex justify-between items-center gap-4">
 							<h2 className="text-xl font-semibold">Collaborators</h2>
-							{app.authorizations.collaborators.includes('invite') && <InviteCollaboratorsDialog />}
+							{app.authorizations.collaborators.includes('invite') && <InviteCollaboratorsDialog accreditations={app.accreditations} />}
 						</div>
 						<CollaboratorsTab collaborators={app.collaborators} accreditations={app.accreditations} />
 					</div>
