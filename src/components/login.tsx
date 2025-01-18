@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
+import { Alert, AlertDescription } from './ui/alert';
 
 const formSchema = z.object({
 	email: z.string().email('Invalid email address'),
@@ -20,6 +21,7 @@ const formSchema = z.object({
 export default function LoginComponent() {
 	const [isLoading, setIsLoading] = useState(false);
 	const searchParams = useSearchParams();
+	const error = searchParams.get('error');
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -31,9 +33,11 @@ export default function LoginComponent() {
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		setIsLoading(true);
-		await new Promise((resolve) => setTimeout(resolve, 1000));
-		setIsLoading(false);
-		console.log(values);
+		await signIn('credentials', {
+			email: values.email,
+			password: values.password,
+			callbackUrl: searchParams.get('callbackUrl') || '/',
+		});
 	}
 
 	return (
@@ -46,6 +50,12 @@ export default function LoginComponent() {
 					<h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">Welcome back</h1>
 					<p className="text-sm text-muted-foreground max-w-sm mx-auto">Enter your credentials to access your account</p>
 				</div>
+
+				{error && (
+					<Alert variant="destructive">
+						<AlertDescription>{error === 'CredentialsSignin' ? 'Invalid username or password' : error}</AlertDescription>
+					</Alert>
+				)}
 
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 					<div>
@@ -68,12 +78,12 @@ export default function LoginComponent() {
 
 					<div className="flex items-center justify-between text-sm">
 						<button type="button" className="text-primary hover:no-underline px-0">
-							Forgot password?
+							<a href="/forgot-password">Forgot password?</a>
 						</button>
 					</div>
 
-					<button type="submit" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-2 rounded-md" disabled={isLoading}>
-						{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+					<button type="submit" className="w-full flex items-center gap-2 justify-center bg-primary hover:bg-primary/90 text-primary-foreground py-2 rounded-md" disabled={isLoading}>
+						{isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
 						Sign In
 					</button>
 
@@ -91,7 +101,7 @@ export default function LoginComponent() {
 				<div className="text-center text-sm">
 					<p className="text-muted-foreground">
 						Don&apos;t have an account?{' '}
-						<a href="/register" className="text-primary hover:underline">
+						<a href={'/register' + (searchParams.get('callbackUrl') ? '?callbackUrl=' + searchParams.get('callbackUrl') : '')} className="text-primary hover:underline">
 							Sign up
 						</a>
 					</p>
