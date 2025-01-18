@@ -13,6 +13,8 @@ import { cookies } from 'next/headers';
 import { checkTwoFactor, getTwoFactor } from './factor';
 import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
 import { sendEmail } from './mail';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import bcryt from 'bcrypt';
 
 const getProviders = () => [
 	GitHubProvider({
@@ -23,6 +25,37 @@ const getProviders = () => [
 		clientId: process.env.GOOGLE_ID || '',
 		clientSecret: process.env.GOOGLE_SECRET || '',
 	}),
+	CredentialsProvider({
+		name: 'Credentials',
+		credentials: {
+			email: { label: 'Email', type: 'email' },
+			password: { label: 'Password', type: 'password' },
+		},
+		async authorize(credentials) {
+			try {
+				if (!credentials) return null;
+				await db.connect();
+
+				const user = await UserModel.findOne({ email: credentials.email }, 'email password verified username name _id').exec();
+				if (!user) return null;
+
+				if (!user.verified) return null;
+
+				const passwordValid = bcryt.compareSync(credentials.password, user.password);
+				if (!passwordValid) return null;
+
+				return {
+					email: user.email,
+					username: user.username,
+					name: user.name,
+					id: user._id.toString(),
+				};
+			} catch (error) {
+				console.error('Error during credentials authorization:', error);
+				return null;
+			}
+		},
+	}),
 ];
 
 const enhanceToken = async ({ token, user }: { token: JWT; user: User }): Promise<JWT> => {
@@ -30,8 +63,10 @@ const enhanceToken = async ({ token, user }: { token: JWT; user: User }): Promis
 
 	if (user) {
 		token.twoFactorComplete = user.twoFactorComplete ?? false;
-		token.twoFactorDisabled = disabled ?? false;
 	}
+
+	token.twoFactorDisabled = disabled;
+
 	return token;
 };
 
