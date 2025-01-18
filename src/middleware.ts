@@ -27,8 +27,8 @@ export async function middleware(req: NextRequest) {
 			return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(sanitizeRedirectUrl(url.pathname))}`, req.url));
 		}
 
-		if (!token.sub || !token.iat) {
-			console.error('Invalid token', { userId: token.sub });
+		if (!token.iat) {
+			console.error('Invalid token');
 			return NextResponse.redirect(new URL('/login', req.url));
 		}
 
