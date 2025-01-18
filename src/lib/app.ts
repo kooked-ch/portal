@@ -29,7 +29,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 	if (!app) return null;
 
 	try {
-		const [podsResponse, appData] = await Promise.all([coreV1Api.listNamespacedPod({ namespace: projectName, labelSelector: `app=${appName}` }), customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName })]);
+		const [podsResponse, appData]: [any, any] = await Promise.all([coreV1Api.listNamespacedPod({ namespace: projectName, labelSelector: `app=${appName}` }), customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName })]);
 
 		let deploymentData: any = {};
 		try {
@@ -64,7 +64,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 			(appData.spec?.databases || []).map(async (db: any) => {
 				try {
 					const statefulSet = await appsApi.readNamespacedStatefulSet({ name: `${appName}-${db.provider}`, namespace: projectName });
-					const databasePod = podsResponse.items.find((pod) => pod.metadata?.labels?.type === db.provider);
+					const databasePod = podsResponse.items.find((pod: any) => pod.metadata?.labels?.type === db.provider);
 
 					return {
 						name: db.name,
@@ -96,11 +96,11 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 		const containers = await Promise.all(
 			(appData.spec?.containers || []).map(async (container: any) => {
 				const status = podsResponse.items
-					.filter((pod) => pod.metadata?.labels?.type === 'container' && !pod.metadata?.deletionTimestamp)
-					.flatMap((pod) =>
+					.filter((pod: any) => pod.metadata?.labels?.type === 'container' && !pod.metadata?.deletionTimestamp)
+					.flatMap((pod: any) =>
 						(pod.status?.containerStatuses || [])
-							.filter((containerStatus) => containerStatus.name === container.name)
-							.map((status) => {
+							.filter((containerStatus: any) => containerStatus.name === container.name)
+							.map((status: any) => {
 								const state = status?.state?.waiting?.reason || status?.state?.terminated?.reason || (pod.status?.phase === 'Running' ? 'Running' : 'Unknown');
 
 								if (!state || (pod.status?.phase === 'Pending' && !status.state?.waiting)) {
@@ -131,7 +131,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 				const logs = await Promise.all(
 					status.map(async (status: any, index: number) => {
 						try {
-							if (podsResponse.items.find((pod) => pod.metadata?.name === status.podName)?.status?.phase === 'Pending') return { podName: `container-${index + 1}`, logs: ['The container is starting'] };
+							if (podsResponse.items.find((pod: any) => pod.metadata?.name === status.podName)?.status?.phase === 'Pending') return { podName: `container-${index + 1}`, logs: ['The container is starting'] };
 							const podLogs = await coreV1Api.readNamespacedPodLog({ name: status.podName, namespace: projectName, container: container.name });
 							return {
 								podName: `container-${index + 1}`,

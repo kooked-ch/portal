@@ -20,8 +20,6 @@ export async function POST(req: NextRequest, { params }: { params: { projectName
 
 		const { name, mountPath, container, size } = await req.json();
 
-		console.log('Creating volume:', { name, mountPath, container, size });
-
 		const validationResult = volumeSchema.safeParse({ name, mountPath, container, size });
 		if (!validationResult.success) {
 			return NextResponse.json({ message: 'Invalid request', details: validationResult.error.errors }, { status: 400 });
