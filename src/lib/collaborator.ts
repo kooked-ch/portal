@@ -48,3 +48,27 @@ export async function inviteCollaborator(projectName: string, appName: string, d
 	};
 }
 
+export async function getInvitation(token: string): Promise<InvitationType | null> {
+	const emailData = await EmailModel.findOne({ token, type: 'invitation' }).exec();
+	if (!emailData) {
+		return null;
+	}
+
+	const project = await ProjectModel.findById(emailData.data.projectId).exec();
+	const app = await AppModel.findById(emailData.data.appId).exec();
+
+	const appData = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: project.slug, plural: 'kookedapps', name: app.name });
+
+	return {
+		project: {
+			name: project.name,
+			description: project.description,
+		},
+		app: {
+			name: app.name,
+			description: appData.metadata.annotations.description,
+		},
+		token,
+	};
+}
+
