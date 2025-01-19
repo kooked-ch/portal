@@ -18,7 +18,7 @@ import bcryt from 'bcrypt';
 import rateLimit from './rate-limit';
 
 const limiter = rateLimit({
-	interval: 60 * 1000,
+	interval: 120 * 1000,
 	uniqueTokenPerInterval: 500,
 });
 
@@ -72,7 +72,7 @@ const getProviders = () => [
 				};
 			} catch (error) {
 				console.error('Auth error:', error);
-				throw error;
+				throw new Error('An error occurred');
 			}
 		},
 	}),
