@@ -7,6 +7,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { decode, encode, getToken } from 'next-auth/jwt';
 import { RequestCookie } from 'next/dist/compiled/@edge-runtime/cookies';
 import { getServerSession } from 'next-auth';
+import rateLimit from './rate-limit';
+
+const limiter = rateLimit({
+	interval: 120 * 1000,
+	uniqueTokenPerInterval: 500,
+});
 
 export async function getTwoFactor() {
 	const session = await getServerSession();
@@ -95,6 +101,12 @@ export async function verifyTwoFactor(otp: string, req: NextRequest) {
 	const { enabled, disabled } = await getTwoFactor();
 	if (!enabled || disabled) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+	const ip = req.headers.get('x-forwarded-for');
+	const { isRateLimited } = limiter.check(5, `verify_${ip}`);
+	if (isRateLimited) {
+		return NextResponse.json({ error: 'Too many attempts. Please try again later' }, { status: 429 });
+	}
+
 	const user = await UserModel.findOne<IUser>({ email: session.user.email }).exec();
 	if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 	if (!user.twoFactorSecret) return NextResponse.json({ error: 'Unexpected error' }, { status: 401 });
@@ -103,6 +115,7 @@ export async function verifyTwoFactor(otp: string, req: NextRequest) {
 	const isValidToken = authenticator.check(otp, secret);
 
 	if (!isValidToken) {
+		await new Promise((r) => setTimeout(r, 1000));
 		return NextResponse.json({ error: 'The submitted code is invalid' }, { status: 401 });
 	}
 
