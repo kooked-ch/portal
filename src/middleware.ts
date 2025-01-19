@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(req: NextRequest) {
 	try {
+		const forwardedFor = req.headers.get('x-forwarded-for');
+		const clientIp = forwardedFor ? forwardedFor.split(',')[0].trim() : req.ip;
+
 		const token = await getToken({
 			req,
 			secret: process.env.NEXTAUTH_SECRET,
@@ -14,26 +17,37 @@ export async function middleware(req: NextRequest) {
 			if (!path.startsWith('/')) {
 				return '/';
 			}
-
 			const blockedPaths = ['/api', '/_next', '/admin'];
 			if (blockedPaths.some((blocked) => path.startsWith(blocked))) {
 				return '/';
 			}
-
 			return path.replace(/[^\w\-\/\?\&\=]/g, '');
 		};
 
+		const createResponseWithHeaders = (response: NextResponse) => {
+			response.headers.set('x-forwarded-for', clientIp || '127.0.0.1');
+			return response;
+		};
+
+		if (['factor', 'factor/skip', '/login', '/register'].includes(url.pathname)) {
+			const response = NextResponse.next();
+			return createResponseWithHeaders(response);
+		}
+
 		if (!token) {
-			return NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(sanitizeRedirectUrl(url.pathname))}`, req.url));
+			const response = NextResponse.redirect(new URL(`/login?callbackUrl=${encodeURIComponent(sanitizeRedirectUrl(url.pathname))}`, req.url));
+			return createResponseWithHeaders(response);
 		}
 
 		if (!token.iat) {
 			console.error('Invalid token');
-			return NextResponse.redirect(new URL('/login', req.url));
+			const response = NextResponse.redirect(new URL('/login', req.url));
+			return createResponseWithHeaders(response);
 		}
 
 		if (token.twoFactorDisabled && url.pathname !== '/enable') {
-			return NextResponse.next();
+			const response = NextResponse.next();
+			return createResponseWithHeaders(response);
 		}
 
 		if (token.twoFactorComplete && token.twoFactorExpiration) {
@@ -50,7 +64,6 @@ export async function middleware(req: NextRequest) {
 				});
 
 				const response = NextResponse.redirect(new URL('/', req.url));
-
 				response.cookies.set({
 					name: process.env.NODE_ENV === 'production' ? '__Secure-next-auth.session-token' : 'next-auth.session-token',
 					value: encodedToken,
@@ -60,15 +73,18 @@ export async function middleware(req: NextRequest) {
 					path: '/',
 					maxAge: 60 * 60 * 24 * 7,
 				});
-				return response;
+
+				return createResponseWithHeaders(response);
 			}
 		}
 
 		if (!token.twoFactorComplete && url.pathname !== '/factor' && url.pathname !== '/enable') {
-			return NextResponse.redirect(new URL(`/factor?callbackUrl=${encodeURIComponent(sanitizeRedirectUrl(url.pathname))}`, req.url));
+			const response = NextResponse.redirect(new URL(`/factor?callbackUrl=${encodeURIComponent(sanitizeRedirectUrl(url.pathname))}`, req.url));
+			return createResponseWithHeaders(response);
 		}
 
-		return NextResponse.next();
+		const response = NextResponse.next();
+		return createResponseWithHeaders(response);
 	} catch (error) {
 		console.error('Middleware error', { error });
 		return NextResponse.redirect(new URL('/login', req.url));
@@ -76,5 +92,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-	matcher: ['/((?!api|_next/static|_next/image|factor|factor/skip|login|register|error|favicon.ico|image).*)'],
+	matcher: ['/((?!api|_next/static|_next/image|error|favicon.ico|image).*)'],
 };
