@@ -196,6 +196,16 @@ async function init() {
 				volumes: ['read'],
 			},
 		},
+		{
+			name: 'Denied',
+			description: 'No permission to access the app.',
+			slug: 'den',
+			accessLevel: 2,
+			authorizations: {
+				level: 4,
+				apps: [],
+			},
+		},
 	];
 
 	accreditations.forEach(async (accreditation) => {
