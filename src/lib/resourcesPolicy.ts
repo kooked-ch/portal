@@ -1,10 +1,13 @@
 import { AppModel } from '@/models/App';
 import { ProjectModel } from '@/models/Project';
 import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
-import { AppResourcesPolicy, ProjectResourcesPolicy, ProjectsResourcesPolicy } from '@/types/resourcesPolicy';
+import { AllProjectResourcesPolicy, AppResourcesPolicy, ProjectResourcesPolicy, ProjectsResourcesPolicy, ResourcesPolicyList } from '@/types/resourcesPolicy';
 import { customObjectsApi } from './api';
 import { getServerSession } from 'next-auth';
 import { UserModel } from '@/models/User';
+import { getProject, getProjects } from './project';
+import { checkAccreditation, getUser } from './auth';
+import { ErrorType } from '@/types/error';
 
 const blankApp = {
 	containers: { name: '', description: '', totalLimit: 0, remainingLimit: 0 },
@@ -86,6 +89,46 @@ export async function getAppResourcesPolicy(projectName: string, appName: string
 	};
 }
 
+export async function getResourcesPolicyList(accessLevel: number): Promise<ResourcesPolicyList[] | null> {
+	const resourcesPolicyList = await ResourcesPolicyModel.find({ accessLevel: accessLevel }).exec();
+	if (!resourcesPolicyList) return null;
+
+	return resourcesPolicyList.map((resourcesPolicy) => ({
+		name: resourcesPolicy.name,
+		description: resourcesPolicy.description,
+		slug: resourcesPolicy.slug,
+		accessLevel: resourcesPolicy.limitation.level,
+		limitation: resourcesPolicy.limitation,
+	}));
+}
+
+export async function getAllProjectResourcesPolicy(projectName: string): Promise<AllProjectResourcesPolicy | null> {
+	if (!(await checkAccreditation('resourcesPolicy:0:read'))) return null;
+
+	const project = await getProject(projectName);
+	if (!project) return null;
+
+	const apps = await Promise.all(
+		project.apps.map(async (app) => {
+			const resourcesPolicy = await getAppResourcesPolicy(project.slug, app.name);
+			return {
+				name: app.name,
+				policy: resourcesPolicy,
+			};
+		})
+	);
+
+	const allProjectResourcesPolicy: AllProjectResourcesPolicy = {
+		name: project.name,
+		slug: project.slug,
+		description: project.description,
+		apps,
+		resourcesPolicyList: (await getResourcesPolicyList(2)) || [],
+	};
+
+	return allProjectResourcesPolicy;
+}
+
 export async function checkResourcesPolicy(action: string, projectName?: string, appName?: string): Promise<boolean> {
 	const project = await ProjectModel.findOne({ slug: projectName }).exec();
 	if (!project && projectName) return false;
@@ -130,5 +173,34 @@ export async function checkResourcesPolicy(action: string, projectName?: string,
 
 		default:
 			return false;
+	}
+}
+
+export async function updateResourcesPolicy(projectName: string, appName: string, slug: string, resources: string): Promise<ErrorType> {
+	try {
+		const project = await ProjectModel.findOne({ slug: projectName }).exec();
+		if (!project) return { message: 'Project not found', status: 404 };
+
+		const app = await AppModel.findOne({ name: appName, projectId: project._id }).exec();
+		if (!app) return { message: 'App not found', status: 404 };
+
+		const resourcesPolicy = await ResourcesPolicyModel.findOne({ slug: slug }).exec();
+		if (!resourcesPolicy) return { message: 'Resources policy not found', status: 404 };
+
+		const update = await AppModel.findByIdAndUpdate(app._id, {
+			$set: {
+				resourcesPolicy: {
+					container: resources === 'containers' ? resourcesPolicy._id : app.resourcesPolicy.container,
+					domain: resources === 'domains' ? resourcesPolicy._id : app.resourcesPolicy.domain,
+					database: resources === 'databases' ? resourcesPolicy._id : app.resourcesPolicy.database,
+					volume: resources === 'volumes' ? resourcesPolicy._id : app.resourcesPolicy.volume,
+				},
+			},
+		}).exec();
+
+		return { message: 'Resources policy updated', status: 200 };
+	} catch (error) {
+		console.error('Error updating resources policy:', (error as Error).message);
+		return { message: 'Internal server error', status: 500 };
 	}
 }
