@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { projectSchema } from '@/types/project';
 import { Plus } from 'lucide-react';
 
-export default function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void }) {
+export default function CreateProjectForm({ onProjectCreated, disabled }: { onProjectCreated: () => void; disabled: boolean }) {
 	const [isDialogOpen, setDialogOpen] = useState(false);
 
 	const {
@@ -55,7 +55,7 @@ export default function CreateProjectForm({ onProjectCreated }: { onProjectCreat
 	return (
 		<Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
 			<DialogTrigger asChild>
-				<Button>
+				<Button disabled={disabled}>
 					<Plus className="h-4 w-4" /> New Project
 				</Button>
 			</DialogTrigger>

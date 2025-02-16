@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export default function ProjectsView({ projects }: { projects: ProjectsType[] | null }) {
+export default function ProjectsView({ projects, disabled }: { projects: ProjectsType[] | null; disabled: boolean }) {
 	const router = useRouter();
 
 	const handleProjectCreated = () => {
@@ -20,7 +20,7 @@ export default function ProjectsView({ projects }: { projects: ProjectsType[] | 
 			<div>
 				<div className="flex justify-between items-center mb-8">
 					<h1 className="text-3xl font-bold">Projects</h1>
-					<CreateProjectForm onProjectCreated={handleProjectCreated} />
+					<CreateProjectForm onProjectCreated={handleProjectCreated} disabled={!disabled} />
 				</div>
 				<p className="text-lg text-center text-muted-foreground mt-[calc(30vh)]">No project</p>
 			</div>
@@ -31,7 +31,7 @@ export default function ProjectsView({ projects }: { projects: ProjectsType[] | 
 		<div>
 			<div className="flex justify-between items-center mb-8">
 				<h1 className="text-3xl font-bold">Projects</h1>
-				<CreateProjectForm onProjectCreated={handleProjectCreated} />
+				<CreateProjectForm onProjectCreated={handleProjectCreated} disabled={!disabled} />
 			</div>
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 				{projects.map((project, index) => (
