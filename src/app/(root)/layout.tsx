@@ -9,7 +9,7 @@ import { redirect } from 'next/navigation';
 export default async function RootLayout({ children }: { children: ReactNode }) {
 	const user = await getUser();
 	if (!user) redirect('/login');
-	const projects: ProjectsType[] | null = await getProjects(user.id);
+	const projects: ProjectsType[] | null = await getProjects();
 
 	return (
 		<main>
