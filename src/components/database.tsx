@@ -13,7 +13,7 @@ export const DatabaseItem = ({ database, authorizations }: { database: AppType['
 			Running: 'green-500',
 			Pending: 'orange-500',
 			Error: 'red-500',
-		}[dbStatus.state] || 'red-500';
+		}[dbStatus?.state] || 'red-500';
 
 	const providerNames = {
 		mongodb: 'MongoDB',
@@ -31,7 +31,7 @@ export const DatabaseItem = ({ database, authorizations }: { database: AppType['
 				</div>
 			</div>
 			<div className="flex items-center space-x-3">
-				<span className={cn('text-sm font-medium', 'text-' + color)}>{dbStatus.state === 'Pending' ? 'Starting database' : dbStatus.state}</span>
+				<span className={cn('text-sm font-medium', 'text-' + color)}>{dbStatus?.state ? (dbStatus?.state === 'Pending' ? 'Starting database' : dbStatus?.state) : 'unknown'}</span>
 				<div className="flex space-x-2">
 					{authorizations.secrets.includes('read') && <DisplayDatabaseDialog database={database} />}
 					{authorizations.databases.includes('delete') && <DeleteDatabaseDialog databaseName={database.name} />}
