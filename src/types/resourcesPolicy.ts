@@ -38,3 +38,33 @@ export interface AppResourcesPolicy {
 		remainingLimit: number;
 	};
 }
+
+export interface ResourcesPolicyList {
+	name: string;
+	description: string;
+	slug: string;
+	accessLevel: number;
+	limitation: {
+		level: number;
+		[key: string]: number;
+	};
+}
+
+export interface AllProjectResourcesPolicy {
+	name: string;
+	slug: string;
+	description: string;
+	apps: {
+		name: string;
+		policy: AppResourcesPolicy;
+	}[];
+	resourcesPolicyList: ResourcesPolicyList[];
+}
+
+export interface AllResourcesPolicy {
+	[key: string]: {
+		name: string;
+		description: string;
+		policy: AppResourcesPolicy;
+	};
+}
