@@ -53,7 +53,7 @@ export async function getProjects(userId: string): Promise<ProjectsType[] | null
 	try {
 		const hasAccessAll = await checkAccreditation('projects:0:read');
 		const filter = hasAccessAll ? {} : { 'members.userId': userId };
-		const projects = await ProjectModel.find<IProject>(filter).populate<{ members: Array<{ userId: { image: string; username: string } }> }>('members.userId', 'username image').exec();
+		const projects = await ProjectModel.find<IProject>(filter).populate<{ members: Array<{ userId: { image: string; username: string; name: string } }> }>('members.userId', 'username image name').exec();
 
 		return projects.map((project) => ({
 			name: project.name,
@@ -61,7 +61,7 @@ export async function getProjects(userId: string): Promise<ProjectsType[] | null
 			slug: project.slug,
 			createdAt: project.createdAt,
 			members: project.members.map((member) => ({
-				username: member.userId?.username ?? 'Unknown',
+				username: member.userId?.username ?? member.userId.name ?? 'Unknown',
 				image: member.userId?.image ?? 'default-image.png',
 			})),
 		}));
