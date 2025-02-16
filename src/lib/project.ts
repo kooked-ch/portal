@@ -3,12 +3,13 @@ import { IProject, ProjectModel } from '@/models/Project';
 import { ErrorType } from '@/types/error';
 import { customObjectsApi, k3sApi } from './api';
 import { ProjectsType, ProjectType } from '@/types/project';
-import { checkAccreditation } from './auth';
+import { checkAccreditation, getUser } from './auth';
 import { getRepository } from './utils';
 import { AppModel } from '@/models/App';
 import { getApp } from './app';
 import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
 import { getProjectResourcesPolicy } from './resourcesPolicy';
+import { UserModel } from '@/models/User';
 
 export async function createProject(userId: string, project: { name: string; description: string }): Promise<ErrorType> {
 	try {
@@ -49,10 +50,13 @@ export async function createProject(userId: string, project: { name: string; des
 	}
 }
 
-export async function getProjects(userId: string): Promise<ProjectsType[] | null> {
+export async function getProjects(): Promise<ProjectsType[] | null> {
 	try {
+		const user = await getUser();
+		if (!user) return null;
+		const userData = await UserModel.findOne({ email: user.email }).exec();
 		const hasAccessAll = await checkAccreditation('projects:0:read');
-		const filter = hasAccessAll ? {} : { 'members.userId': userId };
+		const filter = hasAccessAll ? {} : { 'members.userId': userData._id };
 		const projects = await ProjectModel.find<IProject>(filter).populate<{ members: Array<{ userId: { image: string; username: string; name: string } }> }>('members.userId', 'username image name').exec();
 
 		return projects.map((project) => ({
