@@ -1,9 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { Ellipsis, LayoutGrid, List, UserRound } from 'lucide-react';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Ellipsis, UserRound } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ProjectsType } from '@/types/project';
 import CreateProjectForm from './forms/CreateProjectForm';
