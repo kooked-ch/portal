@@ -54,6 +54,7 @@ async function init() {
 				domains: ['read'],
 				databases: ['read'],
 				volumes: ['read'],
+				resourcesPolicy: ['read', 'update'],
 			},
 		},
 		{
