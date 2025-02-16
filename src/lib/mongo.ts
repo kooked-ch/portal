@@ -53,6 +53,7 @@ async function init() {
 				containers: ['read'],
 				domains: ['read'],
 				databases: ['read'],
+				volumes: ['read'],
 			},
 		},
 		{
