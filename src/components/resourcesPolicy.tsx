@@ -48,7 +48,7 @@ export default function ResourcePolicyEditor({ allProjectResourcesPolicy, projec
 
 	return (
 		<div>
-			<h1 className="text-3xl font-bold mb-4">Resources Policies</h1>
+			<h1 className="text-3xl font-bold mb-4">Resources policy</h1>
 			<Accordion type="single" collapsible>
 				{allProjectResourcesPolicy.apps.map((app) => (
 					<AccordionItem key={app.name} value={app.name}>
