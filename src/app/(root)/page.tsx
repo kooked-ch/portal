@@ -8,9 +8,7 @@ import { redirect } from 'next/navigation';
 import { checkResourcesPolicy } from '@/lib/resourcesPolicy';
 
 export default async function Home() {
-	const user = await getUser();
-	if (!user) redirect('/login');
-	const projects: ProjectsType[] | null = await getProjects(user.id);
+	const projects: ProjectsType[] | null = await getProjects();
 	const disabled = await checkResourcesPolicy('projects');
 
 	return (
