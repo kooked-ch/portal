@@ -17,7 +17,7 @@ export default async function ResourcesPolicyPage({ params }: { params: { projec
 
 	return (
 		<div className="xl:container mx-auto px-3 xl:px-28 md:py-8 py-3">
-			<ResourcesPolicyEditor allProjectResourcesPolicy={allProjectResourcesPolicy} projectName={params.projectName} />
+			<ResourcesPolicyEditor allProjectResourcesPolicy={allProjectResourcesPolicy} />
 		</div>
 	);
 }
