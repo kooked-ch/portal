@@ -15,10 +15,9 @@ export async function getAllProjectUsers(projectName: string): Promise<AllProjec
 	const userData = await UserModel.findOne({ email: user.email }).exec();
 	if (!userData) return null;
 
-	const project = await ProjectModel.findOne<IProject>({
-		slug: projectName,
-		'members.userId': userData._id,
-	})
+	const filter = (await checkAccreditation('projects:0:read')) ? { slug: projectName } : { slug: projectName, 'members.userId': userData._id };
+
+	const project = await ProjectModel.findOne<IProject>(filter)
 		.populate<{ members: Array<{ userId: IUser; accreditation: IAccreditation }> }>({
 			path: 'members.userId members.accreditation',
 			select: 'username image id name description slug authorizations',
