@@ -10,6 +10,7 @@ import { getApp } from './app';
 import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
 import { getProjectResourcesPolicy } from './resourcesPolicy';
 import { UserModel } from '@/models/User';
+import { getProjectAuthorization } from './authorization';
 
 export async function createProject(userId: string, project: { name: string; description: string }): Promise<ErrorType> {
 	try {
@@ -116,6 +117,8 @@ export async function getProject(slug: string): Promise<ProjectType | null> {
 
 		const resolvedApps = await Promise.all(filteredApps);
 
+		const authorizations = await getProjectAuthorization(slug);
+
 		return {
 			name: project.name,
 			description: project.description,
@@ -123,6 +126,7 @@ export async function getProject(slug: string): Promise<ProjectType | null> {
 			createdAt: project.createdAt,
 			apps: resolvedApps,
 			resourcesPolicy: resourcesPolicy,
+			authorizations,
 		};
 	} catch (error) {
 		console.error('Error fetching project:', (error as Error).message);
