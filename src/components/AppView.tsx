@@ -169,7 +169,7 @@ export default function AppView({ app }: { app: AppType }) {
 							<h2 className="text-xl font-semibold">Collaborators</h2>
 							{app.authorizations.collaborators.includes('invite') && <InviteCollaboratorsDialog accreditations={app.accreditations} />}
 						</div>
-						<CollaboratorsTab collaborators={app.collaborators} accreditations={app.accreditations} />
+						<CollaboratorsTab collaborators={app.collaborators} accreditations={app.accreditations} disabled={!app.authorizations.collaborators.includes('update')} />
 					</div>
 				);
 		}
