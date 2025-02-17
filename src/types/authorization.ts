@@ -6,3 +6,21 @@ export interface AppAuthorizationsType {
 	collaborators: string[];
 	volumes: string[];
 }
+
+export interface ProjectAuthorizationsType {
+	projects?: string[];
+	resourcesPolicy?: string[];
+	members?: string[];
+	apps?: string[];
+}
+
+export interface UserAuthorizationsType {
+	projects?: string[];
+	apps?: string[];
+	users?: string[];
+	containers?: string[];
+	domains?: string[];
+	databases?: string[];
+	volumes?: string[];
+	resourcesPolicy?: string[];
+}
