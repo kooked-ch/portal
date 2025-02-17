@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { AppsType } from './app';
 import { ProjectResourcesPolicy } from './resourcesPolicy';
+import { ProjectAuthorizationsType } from './authorization';
 
 export interface ProjectsType {
 	name: string;
@@ -25,4 +26,5 @@ export interface ProjectType {
 	createdAt: Date;
 	apps: AppsType[];
 	resourcesPolicy: ProjectResourcesPolicy;
+	authorizations: ProjectAuthorizationsType;
 }
