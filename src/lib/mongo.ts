@@ -214,7 +214,7 @@ async function init() {
 	];
 
 	accreditations.forEach(async (accreditation) => {
-		await AccreditationModel.findOneAndReplace({ name: accreditation.name, accessLevel: accreditation.accessLevel }, accreditation, { upsert: true, new: true });
+		await AccreditationModel.findOneAndReplace({ slug: accreditation.slug, accessLevel: accreditation.accessLevel }, accreditation, { upsert: true, new: true });
 	});
 
 	const resourcesPolicy = [
