@@ -130,7 +130,6 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 					<ProjectDropdown project={project} />
 				</div>
 			</div>
-			{JSON.stringify(project.authorizations)}
 
 			<div className="grid grid-cols-6 grid-rows-2 md:grid-rows-1 md:grid-cols-4 xl:grid-cols-5 md:gap-4 gap-2">
 				<Card className="col-span-2 md:col-span-1">
