@@ -5,11 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LayoutGrid, List, Search, ArrowUpCircle, ArrowDownCircle, Activity, Database, Globe, SortAsc, Users, Clock, ArrowUpDown, SortDesc } from 'lucide-react';
+import { LayoutGrid, List, Search, ArrowUpCircle, ArrowDownCircle, Activity, Database, Globe, SortAsc, ArrowUpDown, SortDesc } from 'lucide-react';
 import { ProjectType } from '@/types/project';
 import { CreateAppForm } from './forms/CreateAppFrom';
 import { useRouter } from 'next/navigation';
 import { AppsType } from '@/types/app';
+import { ProjectDropdown } from './projectDropdown';
 
 const getAppStatus = (app: AppsType) => {
 	const containersReady = app.containers.every((container) => container.status.every((status) => status.ready));
@@ -124,8 +125,12 @@ export default function ProjectView({ project }: { project: ProjectType }) {
 						Managing {totalApps} application{totalApps > 1 && 's'}
 					</p>
 				</div>
-				<CreateAppForm onAppCreated={handleAppCreated} disabled={project.resourcesPolicy.remainingLimit === 0} />
+				<div className="flex gap-2">
+					{project.authorizations.apps?.includes('create') && <CreateAppForm onAppCreated={handleAppCreated} disabled={project.resourcesPolicy.remainingLimit === 0} />}
+					<ProjectDropdown project={project} />
+				</div>
 			</div>
+			{JSON.stringify(project.authorizations)}
 
 			<div className="grid grid-cols-6 grid-rows-2 md:grid-rows-1 md:grid-cols-4 xl:grid-cols-5 md:gap-4 gap-2">
 				<Card className="col-span-2 md:col-span-1">
