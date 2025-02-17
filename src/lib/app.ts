@@ -3,7 +3,7 @@ import { appsApi, coreV1Api, customObjectsApi } from './api';
 import { checkAccreditation } from './auth';
 import { ErrorType } from '@/types/error';
 import { AppModel, IApp } from '@/models/App';
-import { ProjectModel } from '@/models/Project';
+import { IProject, ProjectModel } from '@/models/Project';
 import { AccreditationModel, IAccreditation } from '@/models/Accreditation';
 import { IUser } from '@/models/User';
 import { getLogs, log } from './log';
@@ -35,7 +35,6 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 		try {
 			deploymentData = await appsApi.readNamespacedDeployment({ name: appName, namespace: projectName });
 		} catch (error: any) {
-			console.warn(`Deployment not found for app ${appName}:`, error.message);
 			deploymentData = {
 				body: {
 					spec: { replicas: 0 },
@@ -182,7 +181,7 @@ export async function getApp(projectName: string, appName: string): Promise<AppT
 			resourcesPolicy: resourcesPolicy,
 			collaborators: hasCollaboratorsAccess
 				? app.collaborators.map((collaborator) => ({
-						username: collaborator.userId.username || '',
+						username: collaborator.userId.username || collaborator.userId.name || 'Unknown',
 						image: collaborator.userId.image || '',
 						accreditation: {
 							name: collaborator.accreditation.name,
@@ -233,7 +232,8 @@ export async function createApp(userId: string, { name, description, repository,
 		},
 	});
 
-	const project = await ProjectModel.findOne({ slug: projectName }).exec();
+	const project = await ProjectModel.findOne<IProject>({ slug: projectName }).exec();
+	if (!project) throw new Error('Project not found');
 	const defaultAccreditation = await AccreditationModel.findOne({ slug: 'own', accessLevel: 2 }).exec();
 	if (!defaultAccreditation) {
 		throw new Error('Default accreditation not found');
@@ -248,6 +248,15 @@ export async function createApp(userId: string, { name, description, repository,
 		throw new Error('Default resource policy not found');
 	}
 
+	const collaborators = project?.members.filter((member) => member.userId != userId);
+	const collaboratorsWithAccreditation =
+		(await Promise.all(
+			collaborators.map(async (member) => {
+				const accreditation = await AccreditationModel.findOne({ slug: (await AccreditationModel.findById(member.accreditation)).slug, accessLevel: 2 });
+				return { userId: member.userId, accreditation: accreditation?._id };
+			})
+		)) || [];
+
 	await AppModel.create({
 		name,
 		projectId: project?._id,
@@ -258,7 +267,7 @@ export async function createApp(userId: string, { name, description, repository,
 			database: defaultDatabaseresourcesPolicy._id,
 			volume: defaultVolumeresourcesPolicy._id,
 		},
-		collaborators: [{ userId, accreditation: defaultAccreditation._id }],
+		collaborators: [{ userId, accreditation: defaultAccreditation._id }, ...collaboratorsWithAccreditation],
 	});
 
 	log(`Created app`, 'info', projectName, name);
