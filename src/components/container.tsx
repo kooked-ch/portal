@@ -107,7 +107,6 @@ export const ContainerItem = ({ container, authorizations }: { container: Contai
 				<div>
 					<span className={cn('text-white font-medium w-min', errorStatus && 'text-red-500')}>{container.name}</span>
 					<p className={cn('text-sm truncate md:w-full w-[calc(100vw-310px)]', errorStatus ? 'text-red-500' : 'text-[#666]')}>{container.image}</p>
-					{errorStatus && <span className="text-xs text-red-400">{message}</span>}
 				</div>
 			</div>
 			<div className="flex items-center space-x-3">
