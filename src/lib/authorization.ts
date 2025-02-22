@@ -12,6 +12,7 @@ const blankApp = {
 	secrets: [],
 	collaborators: [],
 	volumes: [],
+	apps: [],
 };
 
 export async function getAppAuthorization(projectName: string, appName: string): Promise<AppAuthorizationsType> {
@@ -52,6 +53,7 @@ export async function getAppAuthorization(projectName: string, appName: string):
 		secrets: accreditation.authorizations.secrets || [],
 		collaborators: accreditation.authorizations.collaborators || [],
 		volumes: accreditation.authorizations.volumes || [],
+		apps: accreditation.authorizations.apps || [],
 	};
 }
 
