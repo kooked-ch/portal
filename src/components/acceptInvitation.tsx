@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Loader2, Sparkles, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { InvitationType } from '@/types/collaborator';
+import { InvitationType } from '@/types/member';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from './ui/alert';
 
@@ -25,7 +25,7 @@ const AcceptInvitation = ({ invitation }: { invitation: InvitationType }) => {
 			setError(data.message);
 			setIsLoading(false);
 		} else {
-			router.push(`${invitation.project.name}/${invitation.app.name}`);
+			router.push(`${invitation.project.slug}`);
 		}
 	};
 
@@ -46,37 +46,10 @@ const AcceptInvitation = ({ invitation }: { invitation: InvitationType }) => {
 					</Alert>
 				)}
 
-				<div className="space-y-6 px-2">
-					<div className="space-y-1.5">
-						<div className="flex items-baseline justify-between">
-							<span className="text-sm text-muted-foreground">Project</span>
-							<span className="text-sm font-medium">{invitation.project.name}</span>
-						</div>
-						<p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3">{invitation.project.description}</p>
-					</div>
-
-					<div className="space-y-1.5">
-						<div className="flex items-baseline justify-between">
-							<span className="text-sm text-muted-foreground">App</span>
-							<span className="text-sm font-medium">{invitation.app.name}</span>
-						</div>
-						<p className="text-sm text-muted-foreground border-l-2 border-primary/20 pl-3">{invitation.app.description}</p>
-					</div>
-				</div>
-
 				<Button className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleAccept} disabled={isLoading || accepted}>
 					{isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : accepted ? <Check className="mr-2 h-4 w-4" /> : null}
 					{accepted ? 'Joined' : 'Accept Invitation'}
 				</Button>
-
-				<div className="text-center text-sm">
-					<p className="text-muted-foreground">
-						Questions?{' '}
-						<a href="/help" className="text-primary hover:underline">
-							Contact us
-						</a>
-					</p>
-				</div>
 			</div>
 		</div>
 	);
