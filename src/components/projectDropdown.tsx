@@ -32,7 +32,7 @@ export const ProjectDropdown = ({ project }: { project: ProjectType }) => {
 				{project.authorizations.projects?.includes('update') && <UpdateProject name={project.name} description={project.description} />}
 
 				{project.authorizations.members?.includes('read') && (
-					<DropdownMenuItem onSelect={() => router.push(`/${project.slug}/users`)} className="cursor-pointer">
+					<DropdownMenuItem onSelect={() => router.push(`/${project.slug}/members`)} className="cursor-pointer">
 						<UsersRound className="size-4" />
 						Users
 					</DropdownMenuItem>
