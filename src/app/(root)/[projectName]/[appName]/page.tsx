@@ -25,7 +25,7 @@ export default async function AppPage({ params }: { params: { projectName: strin
 					</Link>
 				</Button>
 
-				<AppDropdown />
+				{(app.authorizations.apps?.length ?? 0) >= 2 && <AppDropdown app={app} />}
 			</div>
 			<AppView app={app} />
 		</div>
