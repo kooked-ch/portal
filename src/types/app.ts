@@ -59,6 +59,14 @@ export const appSchema = z.object({
 		.optional(),
 });
 
+export const updateAppSchema = z.object({
+	description: z.string().min(3, 'Description must contain at least 3 characters').max(255, 'Description must contain at most 255 characters'),
+	repository: z
+		.union([z.string().url({ message: 'Invalid URL' }), z.literal('')])
+		.transform((val) => (val === '' ? undefined : val))
+		.optional(),
+});
+
 export interface AppType {
 	name: string;
 	description: string;
