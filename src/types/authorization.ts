@@ -5,6 +5,7 @@ export interface AppAuthorizationsType {
 	secrets: string[];
 	collaborators: string[];
 	volumes: string[];
+	apps: string[];
 }
 
 export interface ProjectAuthorizationsType {
