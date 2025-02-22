@@ -3,9 +3,11 @@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from './ui/button';
 import { EllipsisVertical } from 'lucide-react';
-import Link from 'next/link';
+import { AppType } from '@/types/app';
+import { UpdateApp } from './forms/UpdateApp';
+import DeleteApp from './forms/DeleteApp';
 
-export function AppDropdown() {
+export function AppDropdown({ app }: { app: AppType }) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger className="outline-none" asChild>
@@ -15,20 +17,9 @@ export function AppDropdown() {
 			</DropdownMenuTrigger>
 
 			<DropdownMenuContent side="bottom" align="end" className="w-[200px] *:cursor-pointer">
-				<DropdownMenuLabel className="flex flex-col"></DropdownMenuLabel>
-
-				<DropdownMenuSeparator />
-
-				<DropdownMenuItem asChild>
-					<Link href="/me">My Profile</Link>
-				</DropdownMenuItem>
-
-				<DropdownMenuItem asChild>
-					<Link href="/settings">Settings</Link>
-				</DropdownMenuItem>
-
-				<DropdownMenuSeparator />
-				<DropdownMenuItem>Log Out</DropdownMenuItem>
+				{app.authorizations.apps?.includes('update') && <UpdateApp repository={app.repository?.url} description={app.description} />}
+				{app.authorizations.apps?.includes('delete') && <DropdownMenuSeparator />}
+				{app.authorizations.apps?.includes('delete') && <DeleteApp />}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
