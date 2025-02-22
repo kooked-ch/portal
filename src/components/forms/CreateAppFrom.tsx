@@ -27,7 +27,7 @@ export function CreateAppForm({ onAppCreated, disabled }: { onAppCreated: () => 
 
 	const addApp = async (data: { name: string; description: string; repository: string }) => {
 		try {
-			const response = await fetch(`/api/project${pathname}`, {
+			const response = await fetch(`/api/project${pathname}/app`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
