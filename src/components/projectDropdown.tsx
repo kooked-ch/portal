@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Database, EllipsisVertical, Trash2, UsersRound } from 'lucide-react';
+import { Cog, Database, EllipsisVertical, Trash2, UsersRound } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ProjectType } from '@/types/project';
+import { UpdateProject } from './forms/UpdateProject';
 
 export const ProjectDropdown = ({ project }: { project: ProjectType }) => {
 	const router = useRouter();
@@ -26,6 +27,8 @@ export const ProjectDropdown = ({ project }: { project: ProjectType }) => {
 						Resources Policy
 					</DropdownMenuItem>
 				)}
+
+				{project.authorizations.projects?.includes('update') && <UpdateProject name={project.name} description={project.description} />}
 
 				{project.authorizations.members?.includes('read') && (
 					<DropdownMenuItem onSelect={() => router.push(`/${project.slug}/users`)} className="cursor-pointer">
