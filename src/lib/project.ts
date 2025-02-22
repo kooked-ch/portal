@@ -6,7 +6,7 @@ import { ProjectsType, ProjectType } from '@/types/project';
 import { checkAccreditation, getUser } from './auth';
 import { getRepository } from './utils';
 import { AppModel } from '@/models/App';
-import { getApp } from './app';
+import { deleteApp, getApp } from './app';
 import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
 import { getProjectResourcesPolicy } from './resourcesPolicy';
 import { UserModel } from '@/models/User';
@@ -144,6 +144,36 @@ export async function updateProject(slug: string, data: { name: string; descript
 		return { message: 'Project updated successfully', status: 200 };
 	} catch (error) {
 		console.error('Error updating project:', error);
+		return { message: 'An unexpected error occurred', status: 500 };
+	}
+}
+
+export async function deleteProject(slug: string): Promise<ErrorType> {
+	try {
+		const project = await ProjectModel.findOne({
+			slug,
+		}).exec();
+		if (!project) {
+			return { message: 'Project not found', status: 404 };
+		}
+
+		const apps = await AppModel.find({ projectId: project._id }).exec();
+
+		await Promise.all(
+			apps.map(async (app) => {
+				await deleteApp(project.slug, app.name);
+			})
+		);
+
+		await ProjectModel.deleteOne({
+			slug,
+		}).exec();
+
+		await k3sApi.deleteNamespace({ name: slug });
+
+		return { message: 'Project deleted successfully', status: 200 };
+	} catch (error) {
+		console.error('Error deleting project:', error);
 		return { message: 'An unexpected error occurred', status: 500 };
 	}
 }
