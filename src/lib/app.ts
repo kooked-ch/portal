@@ -296,3 +296,46 @@ export async function deleteApp(projectName: string, appName: string): Promise<E
 
 	return { message: 'App deleted', status: 200 };
 }
+
+export async function updateApp(projectName: string, appName: string, { description, repository }: { description: string; repository: string }): Promise<ErrorType> {
+	const hasAccess = await checkAccreditation('apps:2:update', `${projectName}/${appName}`);
+	if (!hasAccess) {
+		return { message: 'Unauthorized', status: 401 };
+	}
+
+	const app = await customObjectsApi.getNamespacedCustomObject({
+		group: 'kooked.ch',
+		version: 'v1',
+		namespace: projectName,
+		plural: 'kookedapps',
+		name: appName,
+	});
+
+	if (!app) {
+		return { message: 'App not found', status: 404 };
+	}
+
+	const patchBody = [
+		{
+			op: 'replace',
+			path: '/metadata/annotations/description',
+			value: description,
+		},
+		{
+			op: 'replace',
+			path: '/metadata/annotations/repository',
+			value: repository,
+		},
+	];
+
+	await customObjectsApi.patchNamespacedCustomObject({
+		group: 'kooked.ch',
+		version: 'v1',
+		namespace: projectName,
+		plural: 'kookedapps',
+		name: appName,
+		body: patchBody,
+	});
+
+	return { message: 'App updated', status: 200 };
+}
