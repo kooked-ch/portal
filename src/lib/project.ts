@@ -133,3 +133,17 @@ export async function getProject(slug: string): Promise<ProjectType | null> {
 		return null;
 	}
 }
+
+export async function updateProject(slug: string, data: { name: string; description: string }): Promise<ErrorType> {
+	try {
+		const project = await ProjectModel.findOneAndUpdate({ slug }, data).exec();
+		if (!project) {
+			return { message: 'Project not found', status: 404 };
+		}
+
+		return { message: 'Project updated successfully', status: 200 };
+	} catch (error) {
+		console.error('Error updating project:', error);
+		return { message: 'An unexpected error occurred', status: 500 };
+	}
+}
