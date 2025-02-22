@@ -4,6 +4,7 @@ import { Cog, Database, EllipsisVertical, Trash2, UsersRound } from 'lucide-reac
 import { useRouter } from 'next/navigation';
 import { ProjectType } from '@/types/project';
 import { UpdateProject } from './forms/UpdateProject';
+import DeleteProject from './forms/DeleteProject';
 
 export const ProjectDropdown = ({ project }: { project: ProjectType }) => {
 	const router = useRouter();
@@ -37,15 +38,8 @@ export const ProjectDropdown = ({ project }: { project: ProjectType }) => {
 					</DropdownMenuItem>
 				)}
 
-				{project.authorizations.projects?.includes('delete') && (
-					<>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem className="text-red-500 hover:bg-red-500 hover:bg-opacity-10 focus:bg-red-500 focus:bg-opacity-10 focus:text-red-500 cursor-pointer">
-							<Trash2 className="size-4" />
-							Delete
-						</DropdownMenuItem>
-					</>
-				)}
+				{project.authorizations.projects?.includes('delete') && <DropdownMenuSeparator />}
+				{project.authorizations.projects?.includes('delete') && <DeleteProject />}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
