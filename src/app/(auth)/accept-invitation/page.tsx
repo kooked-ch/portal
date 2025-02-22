@@ -1,7 +1,7 @@
 'use server';
 import InvalidInvitation from '@/components/invalidInvitation';
 import AcceptInvitation from '@/components/acceptInvitation';
-import { getInvitation } from '@/lib/collaborator';
+import { getInvitation } from '@/lib/member';
 
 export default async function AcceptInvitationPage({ params, searchParams }: { params: any; searchParams?: { [key: string]: string | string[] | undefined } }) {
 	const token = searchParams?.token;

@@ -11,7 +11,7 @@ import { Label } from '../ui/label';
 import { usePathname, useRouter } from 'next/navigation';
 import { AccreditationType } from '@/types/accreditations';
 
-export default function InviteCollaboratorsDialog({ accreditations }: { accreditations: AccreditationType[] }) {
+export default function InviteMemberDialog({ accreditations }: { accreditations: AccreditationType[] }) {
 	const [loading, setLoading] = useState(false);
 	const [open, setOpen] = useState(false);
 	const [globalError, setGlobalError] = useState<string | null>(null);
@@ -33,7 +33,7 @@ export default function InviteCollaboratorsDialog({ accreditations }: { accredit
 		setLoading(true);
 
 		try {
-			const response = await fetch(`/api/project${pathname}/collaborators`, {
+			const response = await fetch(`/api/project${pathname}`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(data),
@@ -58,19 +58,19 @@ export default function InviteCollaboratorsDialog({ accreditations }: { accredit
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button variant="outline" size="sm">
-					<Plus className="w-4 h-4" /> Invite Collaborator
+				<Button size="sm">
+					<Plus className="w-4 h-4" /> Invite Member
 				</Button>
 			</DialogTrigger>
 			<DialogContent tabIndex={undefined}>
 				<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
 					<DialogHeader className="mb-5">
-						<DialogTitle>Invite a Collaborator</DialogTitle>
-						<DialogDescription>Provide the collaborator's email and their level of access.</DialogDescription>
+						<DialogTitle>Invite a Member</DialogTitle>
+						<DialogDescription>Provide the member's email and their level of access.</DialogDescription>
 					</DialogHeader>
 
 					<Label htmlFor="email" className="mb-2">
-						Collaborator Email
+						Member Email
 					</Label>
 					<Input id="email" type="email" {...register('email', { required: 'Email is required' })} placeholder="example@domain.com" />
 					{errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
