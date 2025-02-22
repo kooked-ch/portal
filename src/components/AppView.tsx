@@ -17,7 +17,6 @@ import LogViewer from './log';
 import CreateDatabaseDialog from './forms/CreateDatabaseForm';
 import { DatabaseItem } from './database';
 import CollaboratorsTab from './collaborator';
-import InviteCollaboratorsDialog from './forms/InviteCollaboratorsDialog';
 import CreateVolumeDialog from './forms/CreateVolumeDialog';
 import VolumeTab from './volume';
 
@@ -167,7 +166,6 @@ export default function AppView({ app }: { app: AppType }) {
 					<div className="space-y-4">
 						<div className="flex justify-between items-center gap-4">
 							<h2 className="text-xl font-semibold">Collaborators</h2>
-							{app.authorizations.collaborators.includes('invite') && <InviteCollaboratorsDialog accreditations={app.accreditations} />}
 						</div>
 						<CollaboratorsTab collaborators={app.collaborators} accreditations={app.accreditations} disabled={!app.authorizations.collaborators.includes('update')} />
 					</div>
