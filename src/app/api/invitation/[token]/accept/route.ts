@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUser } from '@/lib/auth';
-import { acceptAppInvitation } from '@/lib/collaborator';
+import { acceptInvitation } from '@/lib/member';
 
 export async function POST(req: NextRequest, { params }: { params: { token: string } }) {
 	try {
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest, { params }: { params: { token: stri
 			return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 		}
 
-		const accept = await acceptAppInvitation(params.token, user.id);
+		const accept = await acceptInvitation(params.token, user.id);
 
 		return NextResponse.json({ message: accept.message }, { status: accept.status });
 	} catch (error) {
