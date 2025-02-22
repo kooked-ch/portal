@@ -11,6 +11,7 @@ import { ResourcesPolicyModel } from '@/models/ResourcesPolicy';
 import { getAppResourcesPolicy } from './resourcesPolicy';
 import { getAppAuthorization } from './authorization';
 import { getAccreditations } from './accreditation';
+import { deleteMonitor } from './kuma';
 
 export async function getApp(projectName: string, appName: string): Promise<AppType | null> {
 	const hasAccess = await checkAccreditation('apps:2:read', `${projectName}/${appName}`);
@@ -276,4 +277,22 @@ export async function createApp(userId: string, { name, description, repository,
 		message: 'App created',
 		status: 200,
 	};
+}
+
+export async function deleteApp(projectName: string, appName: string): Promise<ErrorType> {
+	const hasAccess = await checkAccreditation('apps:2:delete', `${projectName}/${appName}`);
+	if (!hasAccess) return { message: 'Unauthorized', status: 401 };
+
+	const app = await customObjectsApi.getNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
+	if (!app) return { message: 'App not found', status: 404 };
+
+	if (app.spec.domains) {
+		await Promise.all(app.spec.domains.map(async (domain: any) => await deleteMonitor(domain.url)));
+	}
+
+	await customObjectsApi.deleteNamespacedCustomObject({ group: 'kooked.ch', version: 'v1', namespace: projectName, plural: 'kookedapps', name: appName });
+
+	await AppModel.deleteOne({ name: appName });
+
+	return { message: 'App deleted', status: 200 };
 }
