@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search } from 'lucide-react';
 import { AllProjectUsers } from '@/types/user';
 import { usePathname, useRouter } from 'next/navigation';
+import InviteMemberDialog from './forms/InviteMemberDialog';
 
 export default function UsersEditor({ allProjectUsers }: { allProjectUsers: AllProjectUsers }) {
 	const [selectedAccreditations, setSelectedAccreditations] = useState<{ [userId: string]: string }>({});
@@ -49,9 +50,12 @@ export default function UsersEditor({ allProjectUsers }: { allProjectUsers: AllP
 		<div className="space-y-6">
 			<div className="flex items-center justify-between mt-3 sm:mt-0">
 				<h1 className="text-3xl font-bold">Project Users</h1>
-				<div className="sm:flex relative hidden">
-					<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-					<Input placeholder="Search users..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-8" />
+				<div className="flex gap-2">
+					<div className="sm:flex relative hidden">
+						<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+						<Input placeholder="Search users..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-8" />
+					</div>
+					<InviteMemberDialog accreditations={allProjectUsers.accreditationsList} />
 				</div>
 			</div>
 
